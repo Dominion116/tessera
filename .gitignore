@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Production build
+/build
+/dist
+
+# Environment — never commit real values
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Testing and coverage
+/coverage
+/.nyc_output
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+
+# Caches
+.eslintcache
+.turbo
+*.tsbuildinfo
+.cache/
+.swc/
+
+# Deployment
+.vercel
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Foundry artifacts, if the vendored contracts are ever compiled locally.
+# contracts/ carries its own .gitignore from upstream; these are a safety net.
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# Local scratch space — never committed
+/tmp/
+/scratch/
+*.local

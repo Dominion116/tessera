@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "forge-std/Script.sol";
+import "../src/Poap.sol";
+
+contract DeployScript is Script {
+
+    string public constant SVG_IMAGE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1e3c72"/><stop offset="100%" style="stop-color:#2a5298"/></linearGradient></defs><rect width="512" height="512" fill="url(#bg)"/><circle cx="256" cy="256" r="190" fill="none" stroke="#00e5ff" stroke-width="4" opacity="0.8"/><circle cx="256" cy="256" r="180" fill="none" stroke="#00bfff" stroke-width="2" opacity="0.6"/><text x="256" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="#ffd700">FIRST</text><text x="256" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#ffd700">ONCHAIN</text><text x="256" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="#ffd700">POAP</text></svg>';
+ 
+    function run() external {
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+        
+        OnchainPOAPs poap = new OnchainPOAPs(SVG_IMAGE);
+        
+        console.log("OnchainPOAPs deployed at:", address(poap));
+        
+        vm.stopBroadcast();
+    }
+}
