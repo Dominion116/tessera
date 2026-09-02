@@ -71,6 +71,13 @@ These are hard rules from the project owner. They override convenience.
 
     Write the shortest version a competent reader would find complete. If a
     sentence can be deleted without losing meaning, delete it.
+12. **Never run a build or a dev server on the owner's machine.** `next build`,
+    `next dev`, `next start`, and any watch or preview process are off limits,
+    because they slow the machine down. Verify with static checks instead, which
+    are cheap: `npx tsc --noEmit` for types and import resolution, and the
+    linter. A real build gets exercised on the deployment host. If something
+    genuinely cannot be verified without a build, say so plainly and let the
+    owner decide, rather than running one anyway.
 
 ---
 
@@ -740,7 +747,9 @@ organiser holding a list of attendee addresses. Ship it.
 
 - Read before writing. The contract in `contracts/src/Poap.sol` is the authority
   on behaviour; this document summarises it, but the source wins.
-- After any code change, run the build. Fix what breaks before reporting done.
+- After any code change, run the static checks: `npx tsc --noEmit` and the
+  linter. Fix what breaks before reporting done. Do not run a build or dev server
+  locally, per instruction 12.
 - Test the things that are easy to get silently wrong: Merkle leaf and root
   construction against the contract's exact scheme, the signature digest, byte
   length validation, JSON-unsafe character rejection, and every deadline
@@ -755,8 +764,9 @@ organiser holding a list of attendee addresses. Ship it.
 
 ### Definition of done
 
-A change is complete when the build passes, the affected screens work against
-the real Base Sepolia contract, loading and empty and error states all exist,
-disabled controls explain themselves, motion respects `prefers-reduced-motion`,
-keyboard navigation and focus order are correct, the layout survives 320 px
-width, both themes look right, and nothing anywhere mentions a development phase.
+A change is complete when types and lint are clean, the affected screens work
+against the real Base Sepolia contract, loading and empty and error states all
+exist, disabled controls explain themselves, motion respects
+`prefers-reduced-motion`, keyboard navigation and focus order are correct, the
+layout survives 320 px width, both themes look right, and nothing anywhere
+mentions a development phase.

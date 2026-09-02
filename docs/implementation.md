@@ -64,9 +64,9 @@ Scaffold the application and the design system before any feature exists.
   `.env.local` ignored.
 - MIT `LICENSE` at the root.
 
-**Exit criteria.** `npm run build` passes. Every shell renders at 320 px and at
-desktop width, in both themes. A button press feels right. Reduced-motion is
-honoured. No feature code yet.
+**Exit criteria.** `npx tsc --noEmit` and the linter are clean. Every shell
+renders at 320 px and at desktop width, in both themes. A button press feels
+right. Reduced-motion is honoured. No feature code yet.
 
 ---
 
