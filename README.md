@@ -152,7 +152,8 @@ tessera/
 Built with Next.js, TypeScript, Tailwind, shadcn/ui, wagmi and viem. Dependency
 versions are pinned in [`docs/agent.md`](./docs/agent.md), which also documents
 the contract's behaviour in detail and the conventions this codebase follows.
-Read it before contributing.
+Read it before contributing, along with
+[`docs/progress.md`](./docs/progress.md) for the current state of the build.
 
 ## Contributing
 

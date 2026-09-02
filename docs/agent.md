@@ -43,8 +43,8 @@ These are hard rules from the project owner. They override convenience.
    product. Base Sepolia is the development network.
 8. **Emil Kowalski's design system patterns are mandatory**, not aspirational.
    Section 6 encodes them as checkable rules.
-9. **File naming:** `agent.md` and `implementation.md` are lowercase, and live in
-   `docs/`.
+9. **File naming:** `agent.md`, `implementation.md`, and `progress.md` are
+   lowercase, and live in `docs/`.
 10. **No em dashes in anything written for this repository.** Not in code,
     comments, commit messages, UI copy, documentation, or these files. Use a
     comma, a colon, parentheses, or two sentences. The same applies to en dashes
@@ -78,6 +78,9 @@ These are hard rules from the project owner. They override convenience.
     linter. A real build gets exercised on the deployment host. If something
     genuinely cannot be verified without a build, say so plainly and let the
     owner decide, rather than running one anyway.
+13. **Update `docs/progress.md` at the end of every task**, before reporting
+    back. It is the handover note between sessions, so record decisions and their
+    reasons rather than only file lists, and log corrections to earlier work.
 
 ---
 
@@ -578,7 +581,8 @@ Node 22.11+ is required by the Farcaster SDK.
 tessera/
 ├── docs/
 │   ├── agent.md              this file
-│   └── implementation.md     build ordering
+│   ├── implementation.md     build ordering
+│   └── progress.md           running record of what is built and why
 ├── contracts/                vendored upstream reference, READ ONLY
 │   ├── src/Poap.sol
 │   ├── src/SSTORE2.sol
@@ -589,12 +593,13 @@ tessera/
 │   ├── input/Poap.json       upstream standard-json compiler input
 │   ├── foundry.toml, foundry.lock, remappings.txt, .gitmodules
 │   └── .env.example, .gitignore, README.md
+├── app/, components/, lib/, public/    the Next.js application
 ├── README.md
 └── .gitignore
 ```
 
-The application source arrives later at the repository root as a standard
-Next.js project (`app/`, `components/`, `lib/`, `content/`, `public/`).
+`docs/progress.md` is the first thing to read when picking up work cold. It
+records the current state, the decisions already settled, and the known gaps.
 
 `contracts/` carries upstream's own `.gitignore`, `.env.example` and `README.md`
 unchanged, because they are part of the vendored snapshot.

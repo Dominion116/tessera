@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Tessera",
   description:
     "Create onchain POAPs, hand them out at real events, and collect them. Artwork and metadata live entirely onchain.",
+  icons: {
+    icon: [{ url: "/tessera-mark.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

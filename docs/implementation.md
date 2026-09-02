@@ -308,14 +308,15 @@ stranger can clone, configure and deploy from the README alone.
 
 ## Progress
 
-Update as work completes. Keep it factual.
+Detailed state lives in `docs/progress.md`, which is updated after every task.
+This table is the summary.
 
 | Phase | State |
 |---|---|
 | Contract reference vendored and verified | done, 25 files byte-identical to upstream `c313c856` |
 | ABI extracted | done, `contracts/abi/OnchainPOAPs.json` |
-| 0 Foundation | not started |
-| 1 Landing page | blocked on hero block |
+| 0 Foundation | scaffold, theme tokens, and theme switching done; motion primitives and layout shells outstanding |
+| 1 Landing page | hero done, remaining sections outstanding |
 | 2 Dashboard surface | blocked on dashboard block |
 | 3 Documentation | not started |
 | 4 Chain layer | not started |
