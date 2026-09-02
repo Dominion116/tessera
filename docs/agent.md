@@ -1,4 +1,4 @@
-# agent.md — Tessera
+# agent.md: Tessera
 
 Operating manual for any AI agent or contributor working in this repository.
 Read this file completely before writing code.
@@ -16,14 +16,14 @@ These are hard rules from the project owner. They override convenience.
 1. **Never modify the smart contract.** `contracts/` is a verbatim vendored copy
    of the upstream repository, present for reference only. Every file in it is
    byte-identical to upstream and must stay that way. If a contract behaviour is
-   inconvenient, the frontend adapts — the contract does not.
+   inconvenient, the frontend adapts, and the contract does not.
 2. **No development-phase language anywhere except `docs/implementation.md`.**
    Not in code, comments, commit messages, UI copy, README, or the docs site. No
    "Phase 1", "MVP", "step 3 of the plan", "coming in a later phase". The product
    reads as finished at every point in time. Features that do not exist yet are
    simply absent, not labelled as pending.
-3. **Frontend first.** Build the complete visual surface — landing page,
-   dashboard, docs — before wiring contract calls. Static UI with realistic
+3. **Frontend first.** Build the complete visual surface (landing page,
+   dashboard, docs) before wiring contract calls. Static UI with realistic
    placeholder data comes first; live reads and writes replace that data later.
    `docs/implementation.md` holds the ordering.
 4. **The hero block sets the theme.** The project owner supplies a
@@ -45,6 +45,32 @@ These are hard rules from the project owner. They override convenience.
    Section 6 encodes them as checkable rules.
 9. **File naming:** `agent.md` and `implementation.md` are lowercase, and live in
    `docs/`.
+10. **No em dashes in anything written for this repository.** Not in code,
+    comments, commit messages, UI copy, documentation, or these files. Use a
+    comma, a colon, parentheses, or two sentences. The same applies to en dashes
+    used as punctuation and to `·` as a decorative separator; en dashes stay
+    correct inside numeric ranges such as 150–250 ms. The one exception is text
+    quoted verbatim from outside this project, meaning the bounty brief in §2 and
+    every file under `contracts/`, where changing a character would make the
+    quote inaccurate.
+11. **No slop.** Every sentence carries information the reader does not already
+    have. None of the following ship:
+    - Padding openers and closers: "In today's fast-paced world", "It is
+      important to note that", "At the end of the day".
+    - Inflated stakes: "revolutionary", "seamless", "game-changing",
+      "cutting-edge", "unlock the power of", "take your events to the next
+      level".
+    - The "not just X, but Y" construction. Lists of three assembled for rhythm
+      rather than because there are exactly three things.
+    - Restating a heading in the first sentence beneath it.
+    - Closing paragraphs that summarise what was just said.
+    - Emoji as decoration, in UI copy, headings, or commit messages.
+    - Hedging that dodges a decision: "you may want to consider possibly".
+    - Comments narrating syntax: `// increment the counter`.
+    - Placeholder prose standing in for content nobody has written yet.
+
+    Write the shortest version a competent reader would find complete. If a
+    sentence can be deleted without losing meaning, delete it.
 
 ---
 
@@ -308,7 +334,7 @@ detail when consulting this section.
 
 ## 3. Contract reference
 
-`OnchainPOAPs` — ERC1155, fully onchain SVG metadata via SSTORE2.
+`OnchainPOAPs`, an ERC1155 with fully onchain SVG metadata via SSTORE2.
 
 | | |
 |---|---|
@@ -405,7 +431,7 @@ Every one of these must map to a specific, human sentence in the UI. Decode
 ### Deadline matrix
 
 All windows are measured from `events(id).createdAt`, which is the block
-timestamp of registration — not `eventDate`.
+timestamp of registration, not `eventDate`.
 
 | Action | Window | Extra conditions |
 |---|---|---|
@@ -438,14 +464,14 @@ constraint, not a guess.
    `MerkleProof.verify`, which hashes sibling pairs in sorted order. This is
    **not** the `StandardMerkleTree` double-hash. Use `SimpleMerkleTree` from
    `@openzeppelin/merkle-tree` with pre-hashed leaves, or the proofs will be
-   rejected onchain. This is the single easiest way to ship a broken allowlist —
-   cover it with a test that reproduces the contract's leaf and root exactly.
+   rejected onchain. This is the single easiest way to ship a broken allowlist,
+   so cover it with a test that reproduces the contract's leaf and root exactly.
 3. **Metadata strings are interpolated into JSON with no escaping.** `name`,
    `description`, `location` and `externalUrl` are concatenated straight into the
    metadata document. One `"` or `\` permanently corrupts that token's JSON for
    every consumer, forever, with no way to fix it. Reject those characters at the
    input, and explain why. Control characters and newlines are equally unsafe.
-   The SVG is exempt — it is base64-encoded before storage.
+   The SVG is exempt, since it is base64-encoded before storage.
 4. **Length limits are byte lengths, not character counts.** `bytes(x).length` on
    UTF-8. An emoji costs 4 bytes, most accented Latin costs 2. Count bytes with
    `TextEncoder` and show byte counters, or non-ASCII names will revert at the
@@ -524,7 +550,7 @@ Versions are pinned deliberately. Do not bump without checking peer ranges.
 | Theme | next-themes | 0.4.6 |
 | Docs | MDX via @next/mdx + shiki | 16.3.4 / 4.4.x |
 | QR | qrcode | 1.5.4 |
-| Hosting | Vercel | — |
+| Hosting | Vercel | n/a |
 
 **wagmi stays on 2.x.** wagmi 3 exists but RainbowKit 2.2.11 peer-requires
 `wagmi ^2.9.0` and `@farcaster/miniapp-wagmi-connector` 2.0.0 peer-requires
@@ -546,7 +572,7 @@ tessera/
 ├── docs/
 │   ├── agent.md              this file
 │   └── implementation.md     build ordering
-├── contracts/                vendored upstream reference — READ ONLY
+├── contracts/                vendored upstream reference, READ ONLY
 │   ├── src/Poap.sol
 │   ├── src/SSTORE2.sol
 │   ├── abi/OnchainPOAPs.json extracted from the verified deployment
@@ -595,7 +621,7 @@ Emil Kowalski's patterns, written as rules that can be checked in review.
 - Animate `transform` and `opacity` only. Never `width`, `height`, `top`,
   `left`, `margin`, or anything that triggers layout.
 - `ease-out` for entrances, `ease-in` for exits. Never `ease-in-out` on an
-  entrance — it reads sluggish.
+  entrance, which reads sluggish.
 - 150–250 ms for interface transitions. Never exceed 400 ms.
 - Anchor `transform-origin` to whatever triggered the element. A menu grows from
   its button.
@@ -621,8 +647,8 @@ Emil Kowalski's patterns, written as rules that can be checked in review.
   scaling with size. Body text keeps default tracking.
 - `text-wrap: balance` on headings, `text-wrap: pretty` on body copy.
 - `font-variant-numeric: tabular-nums` on every number that changes in place:
-  countdowns, byte counters, collector counts, token IDs. Non-negotiable — the
-  37-day countdown must not jitter.
+  countdowns, byte counters, collector counts, token IDs. Non-negotiable, because
+  the 37-day countdown must not jitter.
 - A restrained type scale. Fewer sizes, used consistently.
 
 ### Surfaces and colour
@@ -630,7 +656,7 @@ Emil Kowalski's patterns, written as rules that can be checked in review.
 - Hairline borders as alpha colours in `oklch`, never opaque grey.
 - Several small stacked shadows read better than one large blur.
 - `inset 0 1px 0 rgb(255 255 255 / 6%)` as a top highlight on raised surfaces.
-- Exactly three foreground weights — primary, secondary, tertiary — as tokens.
+- Exactly three foreground weights as tokens: primary, secondary, tertiary.
   No ad-hoc greys anywhere.
 - One 4 px-based spacing scale. One radius scale. No magic numbers.
 - Both light and dark themes are first-class.
@@ -648,8 +674,8 @@ Emil Kowalski's patterns, written as rules that can be checked in review.
 ### Progressive disclosure
 
 This is the education strategy, not a nicety. The default path never says
-"Merkle", "root", "ECDSA", or "calldata". Plain language leads — "only these
-addresses can mint" — with the mechanism available behind an "Advanced" toggle,
+"Merkle", "root", "ECDSA", or "calldata". Plain language leads, as in "only these
+addresses can mint", with the mechanism available behind an "Advanced" toggle,
 an inline explainer, or a link to the docs. Depth on demand, never up front.
 
 ---
@@ -686,7 +712,7 @@ organiser holding a list of attendee addresses. Ship it.
 - Manifest at `/.well-known/farcaster.json`, containing `accountAssociation`
   (signed via Farcaster developer tools for the exact production domain) and the
   `miniapp` object: `version: "1"`, `name`, `iconUrl`, `homeUrl`,
-  `splashImageUrl`, `splashBackgroundColor`, plus discovery fields —
+  `splashImageUrl`, `splashBackgroundColor`, plus the discovery fields
   `subtitle`, `description`, `primaryCategory`, `tags`, `heroImageUrl`,
   `tagline`, `ogTitle`, `ogDescription`, `ogImageUrl`, `screenshotUrls`.
 - **`sdk.actions.ready()` must be called once the interface is genuinely ready.**
@@ -704,7 +730,7 @@ organiser holding a list of attendee addresses. Ship it.
   heuristics for lazy-loading, never as proof of context.
 - Use `composeCast` so a fresh mint or a new POAP can be shared straight back
   into the feed. Respect Farcaster's back-navigation and safe-area insets.
-- Domain choice is permanent — a Mini App is identified by its domain, and
+- Domain choice is permanent, because a Mini App is identified by its domain and
   `www.` counts as a different app. Pick once, then use it identically in the
   manifest, the `accountAssociation`, and every embed URL.
 

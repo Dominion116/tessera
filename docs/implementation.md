@@ -1,4 +1,4 @@
-# implementation.md — Tessera
+# implementation.md: Tessera
 
 Build ordering for the Tessera frontend.
 
@@ -15,19 +15,20 @@ design system rules that every phase must satisfy.
 
 ## Ordering principle
 
-Frontend first, by explicit instruction. The full visual surface — landing page,
-dashboard, documentation — is built and reviewable before any contract call is
-wired. Phases 0–3 produce a complete, navigable, well-designed application driven
-by realistic placeholder data. Phases 4–9 replace that data with live contract
-reads and writes, one capability at a time. Phases 10–11 harden and ship.
+Frontend first, by explicit instruction. The full visual surface (landing page,
+dashboard, documentation) is built and reviewable before any contract call is
+wired. Phases 0 to 3 produce a complete, navigable, well-designed application
+driven by realistic placeholder data. Phases 4 to 9 replace that data with live
+contract reads and writes, one capability at a time. Phases 10 and 11 harden and
+ship.
 
 Two consequences worth stating plainly:
 
-- Placeholder data is shaped exactly like real contract data — same field names,
+- Placeholder data is shaped exactly like real contract data: same field names,
   same types, same edge cases (empty description, missing event date, 128-byte
   name, expired deadline). Swapping in live reads should be a change of source,
   not a change of component.
-- Every screen is designed once. Phases 4–9 add no new layouts.
+- Every screen is designed once. Phases 4 to 9 add no new layouts.
 
 ### Blocking inputs
 
@@ -42,7 +43,7 @@ Phases 0 and 3 have no blocking inputs and can proceed immediately.
 
 ---
 
-## Phase 0 — Foundation
+## Phase 0: Foundation
 
 Scaffold the application and the design system before any feature exists.
 
@@ -69,7 +70,7 @@ honoured. No feature code yet.
 
 ---
 
-## Phase 1 — Landing page
+## Phase 1: Landing page
 
 Blocked on the hero block.
 
@@ -81,7 +82,7 @@ Blocked on the hero block.
   lifecycle timeline, Farcaster availability, and a closing call to action.
 - Every word is about POAPs, events and collections. No stock block copy, no
   lorem ipsum.
-- The lifecycle timeline visual — registration, day 30, day 37 — is introduced
+- The lifecycle timeline visual (registration, day 30, day 37) is introduced
   here and reused in the dashboard. Build it once, properly.
 - Scroll-triggered reveals: opacity and small translate only, `ease-out`, under
   250 ms, disabled under reduced motion.
@@ -93,7 +94,7 @@ clean. No layout shift on load.
 
 ---
 
-## Phase 2 — Dashboard surface
+## Phase 2: Dashboard surface
 
 Blocked on the dashboard block.
 
@@ -113,7 +114,7 @@ real contract responses.
 - Explore grid and the public POAP page with its mint panel.
 - The claim page in each of its states.
 - Every loading skeleton, every empty state, every error state, every disabled
-  control with its reason. This is where they get designed — not retrofitted
+  control with its reason. This is where they get designed, not retrofitted
   later.
 
 **Exit criteria.** Every route in `docs/agent.md` §7 renders completely. A
@@ -123,17 +124,17 @@ maximum-length name, deadline passed, already claimed, soulbound.
 
 ---
 
-## Phase 3 — Documentation
+## Phase 3: Documentation
 
-No blocking inputs. Can run in parallel with Phases 1–2.
+No blocking inputs. Can run in parallel with Phases 1 and 2.
 
 MDX docs with shiki highlighting, sidebar navigation, per-page table of contents,
 and search. Every topic the bounty requires:
 
-creating a POAP · POAP metadata · SVG requirements and optimization · soulbound
-POAPs · public minting · allowlists · generating allowlist proofs · signature
-minting · QR-code distribution · creator permissions · minting deadlines ·
-contract restrictions · verifying minted POAPs.
+creating a POAP, POAP metadata, SVG requirements and optimization, soulbound
+POAPs, public minting, allowlists, generating allowlist proofs, signature
+minting, QR-code distribution, creator permissions, minting deadlines,
+contract restrictions, and verifying minted POAPs.
 
 Plus what a real organiser needs: choosing a distribution method for a given
 event shape, the complete deadline reference, the irreversible decisions and when
@@ -143,9 +144,9 @@ Two topics need unusual care because the honest answer is not the obvious one:
 
 - **Signature minting.** Signatures are bound to a single recipient address. A
   poster QR cannot carry one signature that everybody reuses. Explain the real
-  options — pre-signed per-attendee codes, a creator-run signing endpoint, or
-  public minting with a time window — and when each fits. Do not imply a shared
-  signature works.
+  options, which are pre-signed per-attendee codes, a creator-run signing
+  endpoint, or public minting with a time window, and when each fits. Do not
+  imply a shared signature works.
 - **Allowlists.** The leaf format here is not OpenZeppelin's default. Document
   the exact scheme for developers, while keeping the creator-facing path free of
   the word "Merkle".
@@ -156,7 +157,7 @@ Every deadline number matches the contract.
 
 ---
 
-## Phase 4 — Chain layer
+## Phase 4: Chain layer
 
 The first live data. No new UI.
 
@@ -180,7 +181,7 @@ Nothing regressed visually.
 
 ---
 
-## Phase 5 — Registration
+## Phase 5: Registration
 
 - SVG pipeline: parse, optimize via `svgo/browser`, before/after byte counts,
   projected onchain size after base64 inflation, and a warning as it approaches
@@ -199,12 +200,12 @@ caught client-side before it costs gas.
 
 ---
 
-## Phase 6 — Minting
+## Phase 6: Minting
 
 - Public mint, allowlist mint, signature mint, each with clear eligibility
   reasoning and the relevant time restriction.
 - Method availability computed from `isPublic`, `allowlistRoot`, `hasClaimed`,
-  and the 37-day window — with the reason shown when a method is unavailable.
+  and the 37-day window, with the reason shown when a method is unavailable.
 - Pre-mint confirmation showing the exact artwork and metadata.
 - Post-mint verification: BaseScan transaction and token links, OpenSea where
   supported, and the onchain balance re-read as proof.
@@ -216,7 +217,7 @@ explains itself.
 
 ---
 
-## Phase 7 — Creator controls
+## Phase 7: Creator controls
 
 - Allowlist builder: paste or upload addresses, deduplicate, validate,
   checksum, resolve ENS where possible, build the tree with the contract's exact
@@ -231,12 +232,12 @@ explains itself.
 - Lifecycle timeline wired to real timestamps.
 
 **Exit criteria.** An allowlist configured through the UI produces proofs that
-mint successfully — verified end to end on Base Sepolia. Signature claim links
+mint successfully, verified end to end on Base Sepolia. Signature claim links
 work. A batch drop reports accurately when some recipients already held the POAP.
 
 ---
 
-## Phase 8 — Collection
+## Phase 8: Collection
 
 - Collection built from `balanceOfBatch` across registered IDs.
 - Grid that reads as a collection of objects, not a table of transactions.
@@ -250,7 +251,7 @@ Ownership is verifiable onchain from the UI.
 
 ---
 
-## Phase 9 — Farcaster Mini App
+## Phase 9: Farcaster Mini App
 
 Blocked on the production domain.
 
@@ -270,7 +271,7 @@ the embed debugger. The same build still works as a plain website.
 
 ---
 
-## Phase 10 — Polish
+## Phase 10: Polish
 
 - Accessibility: keyboard paths, focus order and visibility, labels, live regions
   for transaction status, contrast, screen-reader passes on the wizard and mint
@@ -286,7 +287,7 @@ repository outside this file references a development phase.
 
 ---
 
-## Phase 11 — Ship
+## Phase 11: Ship
 
 - Full manual pass on Base Sepolia: register soulbound and transferable, public
   and private, allowlist at registration and later, all three mint methods, batch
@@ -311,8 +312,8 @@ Update as work completes. Keep it factual.
 
 | Phase | State |
 |---|---|
-| Contract reference vendored and verified | done — 24 files byte-identical to upstream `c313c856` |
-| ABI extracted | done — `contracts/abi/OnchainPOAPs.json` |
+| Contract reference vendored and verified | done, 25 files byte-identical to upstream `c313c856` |
+| ABI extracted | done, `contracts/abi/OnchainPOAPs.json` |
 | 0 Foundation | not started |
 | 1 Landing page | blocked on hero block |
 | 2 Dashboard surface | blocked on dashboard block |

@@ -17,7 +17,7 @@ next-env.d.ts
 /build
 /dist
 
-# Environment — never commit real values
+# Environment. Never commit real values.
 .env
 .env.local
 .env.development.local
@@ -75,7 +75,7 @@ contracts/cache/
 contracts/broadcast/
 contracts/lib/
 
-# Local scratch space — never committed
+# Local scratch space. Never committed.
 /tmp/
 /scratch/
 *.local

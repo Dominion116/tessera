@@ -1,7 +1,7 @@
 # Tessera
 
-An open-source frontend for [Onchain POAPs](https://github.com/jvaleskadevs/onchain-poaps)
-— create proof-of-attendance tokens, hand them out at real events, and collect
+An open-source frontend for [Onchain POAPs](https://github.com/jvaleskadevs/onchain-poaps).
+Create proof-of-attendance tokens, hand them out at real events, and collect
 them. Runs as a website and as a Farcaster Mini App from the same codebase.
 
 A *tessera* was the small token that admitted you to an event in Rome. It is also
@@ -46,7 +46,7 @@ Two things are worth knowing up front, because they are easy to get wrong:
 - **Signatures are tied to one wallet.** A signature authorises a specific
   address to mint. One signature on a poster cannot be shared by a crowd. The
   workable approaches are per-attendee codes, a signing station you run at the
-  event, or plain public minting — all three are documented, with the tradeoffs.
+  event, or plain public minting. All three are documented, with the tradeoffs.
 - **Some choices are permanent.** Public minting can only be toggled for 30 days,
   and whatever it is at that moment is what it stays. An allowlist can only be
   set once. The interface warns you before those doors close.
@@ -61,7 +61,7 @@ Two things are worth knowing up front, because they are easy to get wrong:
 | Upstream | [jvaleskadevs/onchain-poaps](https://github.com/jvaleskadevs/onchain-poaps) |
 
 The contract is not part of this project and is not modified by it. A verbatim
-copy lives in [`contracts/`](./contracts) for reference — every file is
+copy lives in [`contracts/`](./contracts) for reference. Every file is
 byte-identical to upstream commit `c313c856`, verified by comparing git blob
 hashes. The ABI in [`contracts/abi/OnchainPOAPs.json`](./contracts/abi) was
 extracted from the verified deployment.
@@ -137,7 +137,7 @@ manifest at `/.well-known/farcaster.json` containing an account association
 signed for your exact domain. Generate that signature with the
 [Farcaster manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest).
 
-Pick your domain carefully — a Mini App is identified by its domain permanently,
+Pick your domain carefully. A Mini App is identified by its domain permanently,
 and `www.example.com` counts as a different app from `example.com`.
 
 ## Project structure
@@ -157,7 +157,7 @@ Read it before contributing.
 ## Contributing
 
 Issues and pull requests are welcome. Please read
-[`docs/agent.md`](./docs/agent.md) first — it covers the contract's constraints
+[`docs/agent.md`](./docs/agent.md) first. It covers the contract's constraints
 and the design rules, both of which matter more here than usual. A few in
 particular:
 
