@@ -315,8 +315,8 @@ This table is the summary.
 |---|---|
 | Contract reference vendored and verified | done, 25 files byte-identical to upstream `c313c856` |
 | ABI extracted | done, `contracts/abi/OnchainPOAPs.json` |
-| 0 Foundation | scaffold, theme tokens, and theme switching done; motion primitives and layout shells outstanding |
-| 1 Landing page | hero done, remaining sections outstanding |
+| 0 Foundation | scaffold, theme tokens, theme switching, three-weight foreground tokens, shared reveal primitive and reduced-motion handling done; dashboard and docs shells outstanding |
+| 1 Landing page | done, all sections built; static OG route pending a production domain |
 | 2 Dashboard surface | blocked on dashboard block |
 | 3 Documentation | not started |
 | 4 Chain layer | not started |

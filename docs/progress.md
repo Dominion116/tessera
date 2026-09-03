@@ -17,16 +17,17 @@ contract reference, and `docs/implementation.md` for the build ordering.
 
 ## Current state
 
-The contract reference is vendored and verified. The application is scaffolded
-and the hero section is live, with a working theme toggle and an Open App
-button. No chain code exists yet.
+The contract reference is vendored and verified. The landing page is complete:
+hero, a facts strip, and twelve sections down to the footer, all in the hero's
+visual language. No chain code exists yet.
 
 Nothing has been committed since the documentation commit `5649145`. Every
 application file listed below is untracked.
 
 ### What runs
 
-`/` and `/hero-03` both render the hero. There is no other route. Light and dark
+`/` renders the full landing page. `/hero-03` still renders the hero on its own,
+at the path the block prompt specified. There is no other route. Light and dark
 themes both work and the toggle switches them.
 
 ### Verification standard
@@ -43,16 +44,38 @@ docs/agent.md                 rules, bounty text, contract reference
 docs/implementation.md        build ordering
 docs/progress.md              this file
 contracts/                    vendored upstream snapshot, read only
-app/layout.tsx                ThemeProvider, metadata, favicon
-app/page.tsx                  root, renders the hero
-app/hero-03/page.tsx          block path from the supplied prompt
-app/globals.css               Tailwind v4 theme, shadcn neutral tokens
+app/layout.tsx                ThemeProvider, metadata, favicon, OG and Twitter tags
+app/page.tsx                  root, renders the landing page
+app/opengraph-image.tsx       1200x800 share image, drawn from the theme tokens
+app/hero-03/page.tsx          block path from the supplied prompt, hero only
+app/globals.css               Tailwind v4 theme, shadcn neutral tokens, base layer
 components/shadcn-space/blocks/hero-03/{index,hero,navbar,navlink}.tsx
-components/shadcn-space/button/button-01.tsx    Open App button
-components/ui/{button,dropdown-menu}.tsx        shadcn registry, unmodified
+components/shadcn-space/button/button-01.tsx    Open App button, links to /app
+components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
+components/landing/landing-page.tsx             navbar, section order, footer
+components/landing/{section,section-heading,reveal,wordmark}.tsx   primitives
+components/landing/facts-strip.tsx              five contract facts under the hero
+components/landing/what-it-is-section.tsx       bento, onchain storage argument
+components/landing/create-section.tsx           four registration steps
+components/landing/distribution-section.tsx     the three ways to hand a badge out
+components/landing/soulbound-section.tsx        bound versus transferable
+components/landing/lifecycle-section.tsx        day 0, day 30, day 37 timeline
+components/landing/gallery-section.tsx          bento gallery, See the full gallery
+components/landing/use-cases-section.tsx        four real event setups
+components/landing/verify-section.tsx           metadata sample, how to check a mint
+components/landing/integrations-section.tsx     Farcaster, wallets, explorers, scripts
+components/landing/farcaster-section.tsx        Mini App availability
+components/landing/faq-section.tsx              ten questions, two accordions
+components/landing/cta-section.tsx              teal closing panel
+components/landing/site-footer.tsx              three link columns, contract details
+components/ui/{button,dropdown-menu,card,badge,accordion}.tsx  shadcn registry
+                              badge carries one added variant, accent
 components/theme-provider.tsx
 components/theme-toggle.tsx
 lib/utils.ts                  cn
+lib/motion.ts                 shared easing, duration, distance, stagger
+lib/format.ts                 UTC date, thousands, short address, SVG data URL
+lib/poap-data.ts              placeholder events shaped like `events(uint256)`
 public/tessera-mark.svg       four-tile mosaic, favicon and spinning nav mark
 public/tessera-wordmark.svg   nav logo
 package.json, package-lock.json, tsconfig.json, components.json
@@ -66,9 +89,13 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   real footage or a different treatment before this ships. Content decision.
 - In light mode the dropdown panel goes light while the nav still sits over dark
   video. Not yet reconciled.
-- The Open App button does not navigate anywhere. There is no dashboard yet.
-- Nav links are all `href="#"`.
-- No landing page sections beyond the hero.
+- Every internal link points at a route that does not exist yet: `/app`,
+  `/app/create`, `/app/collection`, `/app/created`, `/poaps`, `/docs`. They 404
+  until those phases land. The hrefs are correct for the surface in
+  `docs/agent.md` §7, so nothing needs rewiring later.
+- Gallery tiles are placeholder events from `lib/poap-data.ts`, not chain reads.
+- `app/opengraph-image.tsx` renders through `next/og`, which was never executed
+  here because builds are not run locally. Worth eyeballing once deployed.
 - Vendored contracts cannot be compiled here: Foundry is not installed, and
   `contracts/lib/` is absent because upstream tracks its dependencies as git
   submodules. Not a problem, since the source is byte-identical to a deployment
@@ -101,11 +128,131 @@ markup are identical.
 **Supplied blocks are treated as fixed.** Structure, class names, animation
 values, and comments stay exactly as delivered. Only content and import paths
 change. Two consequences: the block's `<img>` tags stay as `<img>`, and its
-`no-img-element` warnings are accepted.
+`no-img-element` warnings are accepted. Two later exceptions, both forced:
+`href` values became real routes, and internal anchors became `next/link`,
+because `no-html-link-for-pages` is a lint error.
+
+**Landing sections live outside the block directory.** `components/landing/`
+holds everything below the hero, and `components/landing/landing-page.tsx`
+composes the page. The block's own `index.tsx` keeps rendering the hero alone so
+`/hero-03` still shows the block as it was delivered.
 
 ---
 
 ## Log
+
+### Badge, applied globally
+
+Added `components/shadcn-space/badge/badge-01.tsx` at the path the block prompt
+specified, importing `@/components/ui/badge` per `components.json`. The
+registry `badge` was already present from the landing page work, so no new
+dependency was needed: `class-variance-authority` and `radix-ui` were both
+already installed.
+
+Made `Badge` the single source for every pill in the interface, replacing the
+hand-rolled spans that had accumulated:
+
+- Section eyebrows in `section-heading.tsx`.
+- The mint window pill in `distribution-section.tsx`.
+- The Bound overlay on gallery artwork, and the status and location tags beneath
+  it.
+- Integration tags and event-setup tags.
+- The eyebrow on the closing panel.
+
+One deliberate deviation from the registry file: a sixth variant, `accent`,
+carrying `border-teal-400/30 bg-teal-400/10 text-teal-700 dark:text-teal-300`.
+That combination appeared in three places as inline classes, and the teal pill is
+the project's own accent treatment rather than a shadcn default. Everything else
+in `components/ui/badge.tsx` is the registry file unchanged.
+
+Dropped the `text-[11px]` overrides that several call sites carried. The
+component's own `text-xs` is correct, and the overrides were a magic number
+outside the type scale.
+
+### Landing page, everything below the hero
+
+Built the remaining landing page in the hero's language: teal accent, tight bold
+display type, the same `max-w-7xl px-4 xl:px-16` container, card surfaces with a
+hairline border and a top highlight.
+
+Section order, which is a reading argument rather than a list of features:
+
+1. **Facts strip.** Five numbers straight from the contract, immediately under
+   the hero, so the first thing after the headline is concrete.
+2. **What a POAP is.** Bento, with the onchain storage argument in the wide cell.
+3. **Creating one.** Four numbered steps, each with the constraint that bites.
+4. **Handing it out.** The three mint routes as three cards, each stating who can
+   use it, its window, what it suits, and its catch.
+5. **Bound or transferable.** Two cards, consequences rather than mechanics.
+6. **The clock.** Day 0, day 30, day 37 on one track. Built here to be reused by
+   the dashboard, per implementation step 1.
+7. **Gallery.** Bento of six placeholder POAPs, with See the full gallery
+   underneath pointing at `/app/collection`.
+8. **In practice.** Four event types with the settings each one wants.
+9. **Proof.** A real metadata document and the three steps to check a holder.
+10. **Where it works.** Farcaster, wallets, explorers, your own scripts.
+11. **In the feed.** Mini App availability.
+12. **Questions.** Ten, split across two accordions.
+13. **Closing panel.** Solid teal, inverted, the only full-bleed colour block
+    besides the hero.
+14. **Footer.** Three link columns, contract address, network, licence.
+
+Decisions worth recording:
+
+- **Copy leads with consequences, never mechanism.** "Invitation list", not
+  "Merkle root". "Codes at the door", not "signature minting". "Bound to the
+  wallet", not "soulbound ERC-1155". Every mechanism claim traces to
+  `contracts/src/Poap.sol`: the 30 and 37 day windows, the 101-recipient batch
+  cap, one claim per wallet across all routes, the permanent freeze of the public
+  flag, and the single allowlist update. The metadata sample in the proof section
+  matches the contract's actual key order and its `display_type` on the date.
+- **Three foreground weights became tokens.** `--fg-primary`, `--fg-secondary`,
+  `--fg-tertiary` in both themes, exposed as `text-fg`, `text-fg-secondary`,
+  `text-fg-tertiary`. Sections use those instead of `text-muted-foreground`, so
+  there is one place to tune body contrast. The shadcn tokens stay untouched
+  because the registry components depend on them.
+- **One reveal primitive.** `components/landing/reveal.tsx`, opacity plus a 16 px
+  translate, 240 ms, `ease-out`, once, with `useReducedMotion` returning a plain
+  `div` so reduced motion gets no transform at all. Values live in
+  `lib/motion.ts`. Sections pass `index` for stagger rather than inventing their
+  own delays.
+- **Placeholder data is contract-shaped.** `lib/poap-data.ts` mirrors
+  `events(uint256)` field for field, including `bigint` for the numerics and
+  `svgImage` as an SSTORE2 pointer address that is never rendered. Artwork comes
+  from a separate `artwork` field standing in for `uri()`. The set covers the
+  awkward cases on purpose: empty description, `eventDate` of 0, empty location,
+  a 56-byte name that has to wrap, a non-zero allowlist root, and event 0 for
+  genesis.
+- **`<img>` for gallery artwork, deliberately.** The source is an inline SVG data
+  URL, which `next/image` cannot optimize, so `no-img-element` is disabled on
+  that one line with the reason in a comment.
+- **`next/link` everywhere internal.** ESLint's `no-html-link-for-pages` is an
+  error, not a warning, so the nav wordmark, nav links, Open App button, gallery
+  tiles, CTA buttons and footer links all use `Link`. The Open App button keeps
+  its exact styling through `asChild`.
+
+Also added: a `press` utility for links styled as buttons, since the global
+`scale(0.98)` rule only matched real buttons; `scroll-padding-top: 6rem` on
+`html` so anchor jumps clear the sticky 80 px header; `text-wrap: balance` on
+headings and `pretty` on paragraphs; a `prefers-reduced-motion` block that also
+cancels the press transform. `app/opengraph-image.tsx` draws a 1200x800 share
+image from the same tokens, and `metadataBase` now reads `NEXT_PUBLIC_APP_URL`
+rather than a hardcoded domain that does not exist yet.
+
+Four shadcn registry components pulled in unmodified: `card`, `badge`,
+`accordion`, plus the existing `button` and `dropdown-menu`.
+
+`app/page.tsx` now renders `components/landing/landing-page.tsx` instead of the
+block's `index.tsx`. The block file went back to hero-only, because
+`/hero-03` exists to show the block as delivered and stuffing the whole page into
+it would break that. Nav hrefs across the block moved from `#` to their real
+routes.
+
+One correction: the first `Reveal` took an `as` prop to render `li` or `section`
+elements. `motion[as]` does not type-check against a `HTMLDivElement` ref, and
+list semantics are better served by keeping the `li` outside the animated
+wrapper. Dropped the prop and made `create-section` and `facts-strip` put the
+list element on the outside.
 
 ### Favicon, and this file
 
@@ -231,6 +378,11 @@ function had already been exercised on Base Sepolia.
 
 Ordering lives in `docs/implementation.md`. Immediately actionable:
 
-- Landing page sections below the hero, in the hero's visual language.
 - Documentation section. No blocking inputs, can run in parallel.
-- Dashboard surface, once the dashboard block arrives.
+- Dashboard surface, once the dashboard block arrives. The lifecycle timeline in
+  `components/landing/lifecycle-section.tsx` is the one to reuse there.
+- Chain layer, which retires `lib/poap-data.ts` in favour of real
+  `totalEvents()` and `events(id)` reads through Multicall3. The placeholder
+  types already match, so the gallery should only need its data source swapped.
+- Hero background video. Still a content decision, still pointing at another
+  project's CDN.

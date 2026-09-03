@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export type NavLinkItem = {
@@ -32,12 +33,12 @@ const NavLink: React.FC<NavLinkProps> = ({ item, }) => {
           className="animate-spin"
         />
       </div>
-      <a
+      <Link
         href={href}
         className="text-foreground text-2xl sm:text-4xl sm:leading-10 leading-8 font-semibold"
       >
         {title}
-      </a>
+      </Link>
     </li>
   );
 };

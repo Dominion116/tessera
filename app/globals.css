@@ -7,6 +7,9 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --fg-primary: oklch(0.145 0 0);
+  --fg-secondary: oklch(0.44 0 0);
+  --fg-tertiary: oklch(0.62 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -41,6 +44,9 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+  --fg-primary: oklch(0.985 0 0);
+  --fg-secondary: oklch(0.755 0 0);
+  --fg-tertiary: oklch(0.6 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -79,6 +85,9 @@
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-fg: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-tertiary: var(--fg-tertiary);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -115,7 +124,85 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    scroll-behavior: smooth;
+    /* Clears the sticky 80 px header when jumping to a section anchor. */
+    scroll-padding-top: 6rem;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  /* Negative tracking on display sizes only. Smaller headings keep default. */
+  h1,
+  h2 {
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:active,
+  [role="button"]:active,
+  a[data-slot="button"]:active {
+    transform: scale(0.98);
+  }
+
+  button,
+  [role="button"],
+  a[data-slot="button"] {
+    transition: transform 100ms ease-out;
+    user-select: none;
+  }
 }
+
+/* Press feedback for links styled as buttons. */
+@utility press {
+  transition: transform 100ms ease-out;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Top highlight plus two short shadows, the mosaic grout line between cells. */
+@utility tile-grout {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 6%),
+    0 1px 2px oklch(0 0 0 / 4%),
+    0 2px 8px oklch(0 0 0 / 3%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:active,
+  [role="button"]:active,
+  a[data-slot="button"]:active,
+  .press:active {
+    transform: none;
+  }
+}
+

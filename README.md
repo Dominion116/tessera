@@ -119,7 +119,7 @@ npm run dev        # development server
 npm run build      # production build
 npm run start      # serve the production build
 npm run lint       # lint
-npm run test       # tests
+npm run typecheck  # types
 ```
 
 ## Deploying your own
