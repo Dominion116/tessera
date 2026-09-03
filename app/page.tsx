@@ -1,7 +1,8 @@
-import HeroPage from "@/components/shadcn-space/blocks/hero-03/index";
+import LandingPage from "@/components/landing/landing-page";
 
 const Page = () => {
-  return <HeroPage />;
+  return <LandingPage />;
 };
 
 export default Page;
+

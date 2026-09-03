@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import NavLink from "@/components/shadcn-space/blocks/hero-03/navlink";
 import OpenAppButton from "@/components/shadcn-space/button/button-01";
 import ThemeToggle from "@/components/theme-toggle";
@@ -56,14 +57,14 @@ const Header = ({ navigationData }: NavbarProps) => {
           "relative mx-auto max-w-7xl px-4 xl:px-16 flex item-center justify-between w-full"
         )}
       >
-        <a href="#">
+        <Link href="/">
           <img
             src="/tessera-wordmark.svg"
             alt="brand logo"
             width={147}
             height={40}
           />
-        </a>
+        </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden sm:block">
             <OpenAppButton />

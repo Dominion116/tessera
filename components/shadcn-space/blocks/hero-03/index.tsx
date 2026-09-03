@@ -4,11 +4,11 @@ import HeroSection from "@/components/shadcn-space/blocks/hero-03/hero";
 
 const HeroPage = () => {
   const navigationData: NavLinkItem[] = [
-    { title: "Home", href: "#", isActive: true },
-    { title: "Explore", href: "#", isActive: false },
-    { title: "Create", href: "#", isActive: false },
-    { title: "Collection", href: "#", isActive: false },
-    { title: "Docs", href: "#", isActive: false },
+    { title: "Home", href: "/", isActive: true },
+    { title: "Explore", href: "/poaps", isActive: false },
+    { title: "Create", href: "/app/create", isActive: false },
+    { title: "Collection", href: "/app/collection", isActive: false },
+    { title: "Docs", href: "/docs", isActive: false },
   ];
   return (
     <>
@@ -21,3 +21,4 @@ const HeroPage = () => {
 };
 
 export default HeroPage;
+
