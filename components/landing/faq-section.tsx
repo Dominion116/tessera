@@ -1,5 +1,6 @@
 import Section from "@/components/landing/section";
 import SectionHeading from "@/components/landing/section-heading";
+import SectionFooter from "@/components/landing/section-footer";
 import Reveal from "@/components/landing/reveal";
 import {
   Accordion,
@@ -66,23 +67,23 @@ const FaqSection = () => {
     <Section id="faq">
       <SectionHeading
         eyebrow="Questions"
-        title="The things creators ask before their first badge."
+        title="The things creators ask before their first badge"
         lead="Answers to what actually trips people up: what is permanent, what is not, and which deadlines matter."
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Reveal>
           <Accordion
             type="single"
             collapsible
-            className="rounded-xl border border-border/70 bg-card/60 px-5 tile-grout"
+            className="rounded-xl border border-border/70 bg-card/60 px-6 tile-grout"
           >
             {FAQS.slice(0, 5).map((faq) => (
               <AccordionItem key={faq.q} value={faq.q}>
-                <AccordionTrigger className="text-base font-medium hover:no-underline">
+                <AccordionTrigger className="py-5 text-base font-medium hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-fg-secondary">
+                <AccordionContent className="text-base leading-7 text-fg-secondary">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -93,14 +94,14 @@ const FaqSection = () => {
           <Accordion
             type="single"
             collapsible
-            className="rounded-xl border border-border/70 bg-card/60 px-5 tile-grout"
+            className="rounded-xl border border-border/70 bg-card/60 px-6 tile-grout"
           >
             {FAQS.slice(5).map((faq) => (
               <AccordionItem key={faq.q} value={faq.q}>
-                <AccordionTrigger className="text-base font-medium hover:no-underline">
+                <AccordionTrigger className="py-5 text-base font-medium hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-fg-secondary">
+                <AccordionContent className="text-base leading-7 text-fg-secondary">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -108,6 +109,11 @@ const FaqSection = () => {
           </Accordion>
         </Reveal>
       </div>
+
+      <SectionFooter
+        note="Anything not answered here is answered by the contract, which the docs quote in full"
+        action={{ label: "Read the docs", href: "/docs" }}
+      />
     </Section>
   );
 };

@@ -35,7 +35,8 @@ const FACTS = [
 
 /**
  * Contract facts, sitting directly under the hero so the first thing after the
- * headline is a concrete number rather than another claim.
+ * headline is a concrete number rather than another claim. Deliberately a thin
+ * band: no heading, no cards, half the vertical padding of a full section.
  */
 const FactsStrip = () => {
   return (
@@ -43,17 +44,17 @@ const FactsStrip = () => {
       aria-label="How Tessera works, in numbers"
       className="border-t border-border bg-background"
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 xl:px-16">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 xl:px-16">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
           {FACTS.map((fact, i) => (
             <Reveal key={fact.unit} index={i} className="flex flex-col gap-1">
               <dt className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-bold tabular-nums text-teal-600 sm:text-4xl dark:text-teal-300">
+                <span className="text-3xl font-semibold tabular-nums text-teal-600 sm:text-4xl dark:text-teal-300">
                   {fact.value}
                 </span>
-                <span className="text-sm font-medium">{fact.unit}</span>
+                <span className="text-base font-medium">{fact.unit}</span>
               </dt>
-              <dd className="text-xs leading-5 text-fg-tertiary">{fact.body}</dd>
+              <dd className="text-sm leading-6 text-fg-tertiary">{fact.body}</dd>
             </Reveal>
           ))}
         </dl>
