@@ -9,7 +9,7 @@ type Step = {
   icon: React.ReactNode;
   title: string;
   body: string;
-  note: string;
+  note?: string;
 };
 
 const STEPS: Step[] = [
@@ -18,28 +18,27 @@ const STEPS: Step[] = [
     icon: <PenLine size={18} aria-hidden="true" />,
     title: "Name the event",
     body: "Up to 128 bytes, and the one field you cannot skip. Description, date, location and an external link are all optional.",
-    note: "Quotes and backslashes are rejected at the input, because they would corrupt the badge for good.",
+    note: "Quotes and backslashes are rejected because they corrupt the badge permanently.",
   },
   {
     n: "02",
     icon: <ImageIcon size={18} aria-hidden="true" />,
     title: "Drop in the artwork",
-    body: "One SVG. It is optimized in your browser before it goes anywhere, and you see the projected onchain size as you work.",
-    note: "Stay under roughly 100 KB. Larger files still register, but the gas climbs fast.",
+    body: "One SVG, optimized in your browser before it goes onchain, with the projected size shown as you work.",
+    note: "Stay under roughly 100 KB, because gas climbs fast above it.",
   },
   {
     n: "03",
     icon: <SlidersHorizontal size={18} aria-hidden="true" />,
     title: "Choose how it behaves",
     body: "Transferable or bound to the wallet that minted it. Open to anyone or invitation only. Both choices are set here in plain language.",
-    note: "Whether the badge is open to everyone freezes permanently 30 days after registration.",
   },
   {
     n: "04",
     icon: <Send size={18} aria-hidden="true" />,
     title: "Hand it out",
-    body: "Share a link, drop it into a list of wallets yourself, or put a code on the wall at the venue and let people mint as they arrive.",
-    note: "You keep the event number the moment the transaction confirms.",
+    body: "The badge exists when the transaction confirms; how it reaches wallets is the next decision.",
+    note: "The event number is also the token number, so one number identifies the event, the badge, and the page you share.",
   },
 ];
 
@@ -72,9 +71,11 @@ const CreateSection = () => {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <p className="text-sm leading-6 text-fg-secondary">{step.body}</p>
-                  <p className="border-t border-border/70 pt-3 text-xs leading-5 text-fg-tertiary">
-                    {step.note}
-                  </p>
+                  {step.note ? (
+                    <p className="border-t border-border/70 pt-3 text-xs leading-5 text-fg-tertiary">
+                      {step.note}
+                    </p>
+                  ) : null}
                 </CardContent>
               </Card>
             </Reveal>

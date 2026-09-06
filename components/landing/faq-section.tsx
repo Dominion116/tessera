@@ -7,11 +7,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  CREATOR_MINT_BATCH_LIMIT,
-  CREATOR_TIMELOCK_DAYS,
-  SIGNATURE_WINDOW_DAYS,
-} from "@/lib/poap-data";
 
 type Faq = {
   q: string;
@@ -32,28 +27,8 @@ const FAQS: Faq[] = [
     a: "The name, description, date, location, link and artwork are permanent. Two things stay adjustable for the first 30 days: whether the badge is open to everyone, and attaching an invitation list if you registered without one.",
   },
   {
-    q: "Why is my invitation list limited to one change?",
-    a: `You can attach a list once, within ${CREATOR_TIMELOCK_DAYS} days, and only if you registered without one. Registering with a list already attached uses up that single change, so if you expect the guest list to move, register without it and attach it later.`,
-  },
-  {
-    q: "Can one code at the door serve a whole room?",
-    a: `No, and that is deliberate. Each approval is tied to one wallet, so a photographed code is worthless to anyone else. Print per-attendee codes, or run a station that approves wallets as people arrive. Approvals stop working ${SIGNATURE_WINDOW_DAYS} days after registration.`,
-  },
-  {
-    q: "Can I send badges out myself instead of asking people to mint?",
-    a: `Yes, in batches of up to ${CREATOR_MINT_BATCH_LIMIT} wallets, for the first ${CREATOR_TIMELOCK_DAYS} days. Anyone in the batch who already holds the badge is skipped rather than causing the whole batch to fail, and you get a result for each address.`,
-  },
-  {
-    q: "What happens if someone mints twice?",
-    a: "They cannot. One record of who has claimed is shared by all three routes, so a wallet that minted through a link cannot mint again through a list or a door code.",
-  },
-  {
     q: "Do I need a wallet just to look around?",
     a: "No. Browsing badges, reading event pages and checking someone's mint all work without connecting. A wallet is needed only to mint or to create.",
-  },
-  {
-    q: "Which network is this on?",
-    a: "Base. Badges live in a single public contract there, and the same contract backs both the website and the Farcaster app, so a badge minted in one is visible in the other immediately.",
   },
   {
     q: "What if Tessera disappears?",
@@ -65,49 +40,30 @@ const FaqSection = () => {
   return (
     <Section id="faq">
       <SectionHeading
+        align="center"
         eyebrow="Questions"
         title="The things creators ask before their first badge."
-        lead="Answers to what actually trips people up: what is permanent, what is not, and which deadlines matter."
+        lead="Answers to what actually trips people up: what it costs, what is permanent, and what happens if this app goes away."
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Reveal>
-          <Accordion
-            type="single"
-            collapsible
-            className="rounded-xl border border-border/70 bg-card/60 px-5 tile-grout"
-          >
-            {FAQS.slice(0, 5).map((faq) => (
-              <AccordionItem key={faq.q} value={faq.q}>
-                <AccordionTrigger className="text-base font-medium hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-fg-secondary">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </Reveal>
-        <Reveal index={1}>
-          <Accordion
-            type="single"
-            collapsible
-            className="rounded-xl border border-border/70 bg-card/60 px-5 tile-grout"
-          >
-            {FAQS.slice(5).map((faq) => (
-              <AccordionItem key={faq.q} value={faq.q}>
-                <AccordionTrigger className="text-base font-medium hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-fg-secondary">
-                  {faq.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </Reveal>
-      </div>
+      <Reveal className="mx-auto w-full max-w-3xl">
+        <Accordion
+          type="single"
+          collapsible
+          className="rounded-xl border border-border/70 bg-card/60 px-5 tile-grout"
+        >
+          {FAQS.map((faq) => (
+            <AccordionItem key={faq.q} value={faq.q}>
+              <AccordionTrigger className="text-base font-medium hover:no-underline">
+                {faq.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-sm leading-6 text-fg-secondary">
+                {faq.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </Reveal>
     </Section>
   );
 };

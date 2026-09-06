@@ -1,4 +1,4 @@
-import { Database, Fingerprint, Layers, MapPin, Ticket } from "lucide-react";
+import { Database, Fingerprint, Ticket } from "lucide-react";
 import Section from "@/components/landing/section";
 import SectionHeading from "@/components/landing/section-heading";
 import Reveal from "@/components/landing/reveal";
@@ -104,37 +104,15 @@ const WhatItIsSection = () => {
           </Reveal>
           <Reveal index={2}>
             <SmallCard
-              icon={<Layers size={18} aria-hidden="true" />}
-              title="Event number is token number"
+              icon={<Fingerprint size={18} aria-hidden="true" />}
+              title="Checkable from outside this app"
             >
-              Register the fourteenth event and you get token 14. One number
-              identifies the event, the badge, and the page you share.
+              Each badge carries a portable identifier naming the chain, the contract
+              and the event, so a holder can prove the mint anywhere, with or without
+              Tessera.
             </SmallCard>
           </Reveal>
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Reveal index={3}>
-          <SmallCard
-            icon={<MapPin size={18} aria-hidden="true" />}
-            title="Name and picture, then whatever else you have"
-          >
-            A name and an image are the only things required. Date, location,
-            description and a link to your own site are optional, and leaving them
-            out does not make the badge look unfinished.
-          </SmallCard>
-        </Reveal>
-        <Reveal index={4}>
-          <SmallCard
-            icon={<Fingerprint size={18} aria-hidden="true" />}
-            title="Checkable from outside this app"
-          >
-            Each badge carries a portable identifier naming the chain, the contract
-            and the event, so a holder can prove the mint anywhere, with or without
-            Tessera.
-          </SmallCard>
-        </Reveal>
       </div>
     </Section>
   );

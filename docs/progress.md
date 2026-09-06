@@ -18,8 +18,9 @@ contract reference, and `docs/implementation.md` for the build ordering.
 ## Current state
 
 The contract reference is vendored and verified. The landing page is complete:
-hero, a facts strip, and twelve sections down to the footer, all in the hero's
-visual language. No chain code exists yet.
+hero plus eight blocks down to the footer, all in the hero's visual language,
+after a consolidation pass that reduced thirteen blocks below the hero to
+eight. No chain code exists yet.
 
 Nothing has been committed since the documentation commit `5649145`. Every
 application file listed below is untracked.
@@ -54,18 +55,17 @@ components/shadcn-space/button/button-01.tsx    Open App button, links to /app
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
 components/landing/landing-page.tsx             navbar, section order, footer
 components/landing/{section,section-heading,reveal,wordmark}.tsx   primitives
-components/landing/facts-strip.tsx              five contract facts under the hero
 components/landing/what-it-is-section.tsx       bento, onchain storage argument
 components/landing/create-section.tsx           four registration steps
-components/landing/distribution-section.tsx     the three ways to hand a badge out
-components/landing/soulbound-section.tsx        bound versus transferable
-components/landing/lifecycle-section.tsx        day 0, day 30, day 37 timeline
+components/landing/choices-section.tsx          mint routes, bound or
+                                               transferable, the clock
+components/lifecycle-timeline.tsx               day 0, day 30, day 37 track,
+                                               milestones as props
 components/landing/gallery-section.tsx          bento gallery, See the full gallery
-components/landing/use-cases-section.tsx        four real event setups
-components/landing/verify-section.tsx           metadata sample, how to check a mint
-components/landing/integrations-section.tsx     Farcaster, wallets, explorers, scripts
-components/landing/farcaster-section.tsx        Mini App availability
-components/landing/faq-section.tsx              ten questions, two accordions
+components/landing/use-cases-section.tsx        three event setups
+components/landing/verify-section.tsx           metadata sample, holder check,
+                                               integration tiles
+components/landing/faq-section.tsx              five questions, one accordion
 components/landing/cta-section.tsx              teal closing panel
 components/landing/site-footer.tsx              three link columns, contract details
 components/ui/{button,dropdown-menu,card,badge,accordion}.tsx  shadcn registry
@@ -140,6 +140,69 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Landing page consolidation, thirteen blocks to eight
+
+Reduced the page below the hero from thirteen blocks to eight and rewrote the
+reading order into one argument: what a POAP is, how you make one, the choices
+you get, what people have made with it, where it fits, why you can trust it
+without trusting us, then the questions people ask before starting. New order:
+WhatItIs (plain), Create (muted), Choices (plain), Gallery (muted), UseCases
+(plain), Open by Design (muted, keeps `id="verify"`), FAQ (plain), CTA (teal).
+The alternating bands survive.
+
+- **Choices merges three sections.** Distribution, Soulbound, and Lifecycle
+  became one `#choices` section with three sub-blocks under small uppercase
+  sub-eyebrows: who can mint (route cards, `bestFor` dropped since UseCases is
+  now the only scenario guidance), bound or transferable (bullet pairs, the
+  summary paragraph folded into one lead sentence), and the clock. The section
+  lead states the shared claim-record fact once.
+- **The timeline moved to `components/lifecycle-timeline.tsx`.** Milestones are
+  now a typed prop array, so the dashboard can pass live timestamps later, per
+  the build-ordering note that the visual is built once and reused. The static
+  data lives in the Choices section. The day-30 freeze warning travels with the
+  milestone it belongs to, as an optional `warning` field, and still appears
+  exactly once on the page.
+- **The facts strip is gone, reversing an earlier decision.** It existed so the
+  first thing after the headline is concrete. The correction: every number in
+  the strip appeared again within two screens, so the strip repeated the page
+  rather than anchoring it. Each fact keeps a home: one badge per wallet in
+  WhatItIs, three routes in Choices, the 30 and 37 day windows in the
+  timeline, and the 101-wallet batch cap in the day-30 body.
+- **WhatItIs keeps two of four small cards.** "Event number is token number"
+  lives in the gallery tiles and Create step 04's note; the required-minimum
+  fact lives in Create step 01 and the CTA fact strip.
+- **Create lost the step-03 freeze note.** The timeline in Choices owns that
+  warning, stated once with its warning box.
+- **Verify became "Open by Design".** The metadata sample and the holder-check
+  card keep their 3 + 2 arrangement. The "No middle layer" card folded into
+  the section lead (no database, no indexer, one network URL per clean clone).
+  Integrations became a compact tile row under the two cards, and the
+  Farcaster section is deleted outright because the integration tile already
+  covers connected wallets, minting in the feed, and casting a badge back out.
+- **UseCases went from four cards to three.** Meetups and Streams, both "open
+  link, transferable", merged into one card for online events and talks, and
+  the grid is now `sm:grid-cols-2 lg:grid-cols-3`.
+- **FAQ went from ten entries to five, one centered accordion at `max-w-3xl`.**
+  Kept: cost (stated nowhere else), artwork size, post-registration changes
+  (the permanence objection), wallet needed to browse (lowers the entry
+  barrier), and Tessera disappearing (the trust objection). Removed five
+  because each restated a section: invitation-list limits (Choices route card
+  plus the clock), one code serving a room (Choices route card), batch sends
+  (timeline day-30 body), double minting (WhatItIs card plus the Choices
+  lead), and the network question (WhatItIs dl, CTA, integration tiles).
+- **Footer Learn column retargeted.** Documentation, How badges get handed out
+  (`#choices`), Questions (`#faq`). The separate Deadlines link is gone
+  because the clock lives inside `#choices`.
+
+Anchors now: `#what-it-is`, `#create`, `#choices`, `#gallery`, `#use-cases`,
+`#verify`, `#faq`, `#start`. Files deleted: `facts-strip.tsx`,
+`distribution-section.tsx`, `soulbound-section.tsx`,
+`lifecycle-section.tsx`, `integrations-section.tsx`,
+`farcaster-section.tsx`. Files created: `choices-section.tsx`,
+`components/lifecycle-timeline.tsx`. Every constant in `lib/poap-data.ts`
+stays referenced. `npx tsc --noEmit` and `npx eslint .` both exit clean apart
+from the two accepted hero `<img>` warnings.
 
 ### Badge, applied globally
 

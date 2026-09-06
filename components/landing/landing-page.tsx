@@ -1,17 +1,12 @@
 import Navbar from "@/components/shadcn-space/blocks/hero-03/navbar";
 import { NavLinkItem } from "@/components/shadcn-space/blocks/hero-03/navlink";
 import HeroSection from "@/components/shadcn-space/blocks/hero-03/hero";
-import FactsStrip from "@/components/landing/facts-strip";
 import WhatItIsSection from "@/components/landing/what-it-is-section";
 import CreateSection from "@/components/landing/create-section";
-import DistributionSection from "@/components/landing/distribution-section";
-import SoulboundSection from "@/components/landing/soulbound-section";
-import LifecycleSection from "@/components/landing/lifecycle-section";
+import ChoicesSection from "@/components/landing/choices-section";
 import GallerySection from "@/components/landing/gallery-section";
 import UseCasesSection from "@/components/landing/use-cases-section";
 import VerifySection from "@/components/landing/verify-section";
-import IntegrationsSection from "@/components/landing/integrations-section";
-import FarcasterSection from "@/components/landing/farcaster-section";
 import FaqSection from "@/components/landing/faq-section";
 import CtaSection from "@/components/landing/cta-section";
 import SiteFooter from "@/components/landing/site-footer";
@@ -25,9 +20,10 @@ const navigationData: NavLinkItem[] = [
 ];
 
 /**
- * The landing page in reading order: what a POAP is, how you make one, how you
- * hand it out, what is permanent, what the deadlines are, what other people have
- * made, where it fits, and then the questions people ask before starting.
+ * The landing page in reading order: what a POAP is, how you make one, the
+ * choices you get, what people have made with it, where it fits, why you can
+ * trust it without trusting us, and then the questions people ask before
+ * starting.
  */
 const LandingPage = () => {
   return (
@@ -35,17 +31,12 @@ const LandingPage = () => {
       <Navbar navigationData={navigationData} />
       <main className="-mt-20">
         <HeroSection />
-        <FactsStrip />
         <WhatItIsSection />
         <CreateSection />
-        <DistributionSection />
-        <SoulboundSection />
-        <LifecycleSection />
+        <ChoicesSection />
         <GallerySection />
         <UseCasesSection />
         <VerifySection />
-        <IntegrationsSection />
-        <FarcasterSection />
         <FaqSection />
         <CtaSection />
       </main>

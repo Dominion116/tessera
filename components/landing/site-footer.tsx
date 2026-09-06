@@ -24,8 +24,7 @@ const COLUMNS = [
     heading: "Learn",
     links: [
       { label: "Documentation", href: "/docs" },
-      { label: "Handing out badges", href: "#distribution" },
-      { label: "Deadlines", href: "#lifecycle" },
+      { label: "How badges get handed out", href: "#choices" },
       { label: "Questions", href: "#faq" },
     ],
   },

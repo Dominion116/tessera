@@ -1,4 +1,4 @@
-import { GraduationCap, Mic, Radio, Users } from "lucide-react";
+import { GraduationCap, Mic, Radio } from "lucide-react";
 import Section from "@/components/landing/section";
 import SectionHeading from "@/components/landing/section-heading";
 import Reveal from "@/components/landing/reveal";
@@ -13,12 +13,6 @@ const CASES = [
     body: "Attendees mint as they collect their lanyard. Because the badge cannot be transferred, holding it later still means they were there.",
   },
   {
-    icon: <Users size={18} aria-hidden="true" />,
-    title: "Meetups",
-    setup: "Open link, transferable",
-    body: "Post the link in the group chat after the talk. Nothing to prepare in advance, and regulars end up with a run of badges from the same series.",
-  },
-  {
     icon: <GraduationCap size={18} aria-hidden="true" />,
     title: "Courses and cohorts",
     setup: "Invitation list, bound to the wallet",
@@ -26,9 +20,9 @@ const CASES = [
   },
   {
     icon: <Radio size={18} aria-hidden="true" />,
-    title: "Streams and launches",
+    title: "Online events and talks",
     setup: "Open link, transferable",
-    body: "One badge for everyone watching live. Send it to wallets yourself afterwards if you collected addresses during the stream.",
+    body: "Post the link in the group chat or under the stream, and everyone mints their own. Regulars end up with a run of badges from the same series.",
   },
 ];
 
@@ -38,10 +32,10 @@ const UseCasesSection = () => {
       <SectionHeading
         eyebrow="In practice"
         title="What people set up, and why."
-        lead="The same four settings cover most events. These are the combinations that come up again and again, with the reasoning behind each one."
+        lead="Most events land on one of three setups, and the reasoning behind each is the part worth copying."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CASES.map((item, i) => (
           <Reveal key={item.title} index={i} className="h-full">
             <Card className="h-full gap-4 border-border/70 bg-card/60 tile-grout">
@@ -68,4 +62,3 @@ const UseCasesSection = () => {
 };
 
 export default UseCasesSection;
-
