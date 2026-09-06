@@ -37,15 +37,15 @@ const REPO_URL = "https://github.com/jvaleskadevs/onchain-poaps";
 const SiteFooter = () => {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 xl:px-16">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:py-16 xl:px-16">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
           <div className="flex flex-col gap-4">
             <Wordmark className="text-foreground" />
-            <p className="max-w-sm text-sm leading-6 text-fg-secondary">
+            <p className="max-w-sm text-base leading-7 text-fg-secondary">
               Proof you were there, stored entirely onchain. Create a POAP, hand it
               out at your event, keep it forever.
             </p>
-            <dl className="flex flex-col gap-1 pt-2 text-xs">
+            <dl className="flex flex-col gap-1 pt-2 text-sm">
               <div className="flex gap-2">
                 <dt className="text-fg-tertiary">Contract</dt>
                 <dd className="font-mono tabular-nums select-all">
@@ -62,7 +62,7 @@ const SiteFooter = () => {
           <nav aria-label="Footer" className="grid gap-8 sm:grid-cols-3">
             {COLUMNS.map((column) => (
               <div key={column.heading} className="flex flex-col gap-3">
-                <p className="text-xs font-medium tracking-wide text-fg-tertiary uppercase">
+                <p className="text-sm font-medium tracking-wide text-fg-tertiary uppercase">
                   {column.heading}
                 </p>
                 <ul className="flex flex-col gap-2">
@@ -70,7 +70,7 @@ const SiteFooter = () => {
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
+                        className="text-base text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
                       >
                         {link.label}
                       </Link>
@@ -83,7 +83,7 @@ const SiteFooter = () => {
         </div>
 
         <div className="flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-fg-tertiary">
+          <p className="text-sm text-fg-tertiary">
             MIT licensed. Open source, and deployable by anyone.
           </p>
           <ul className="flex flex-wrap items-center gap-4">
@@ -92,7 +92,7 @@ const SiteFooter = () => {
                 href={BASESCAN_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
+                className="inline-flex items-center gap-1.5 text-sm text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
               >
                 Contract on BaseScan
                 <ExternalLink size={12} aria-hidden="true" />
@@ -103,7 +103,7 @@ const SiteFooter = () => {
                 href={REPO_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
+                className="inline-flex items-center gap-1.5 text-sm text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
               >
                 Contract source
                 <ExternalLink size={12} aria-hidden="true" />
@@ -112,7 +112,7 @@ const SiteFooter = () => {
             <li>
               <Link
                 href="/docs"
-                className="text-xs text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
+                className="text-sm text-fg-secondary transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
               >
                 Docs
               </Link>
