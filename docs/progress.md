@@ -73,7 +73,12 @@ components/ui/faq-monocrhome.tsx               supplied FAQ block, five question
                                               site tokens
 components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
 app/cta-01/page.tsx                             block path, CTA only
-components/landing/site-footer.tsx              three link columns, contract details
+components/landing/site-footer.tsx              footer composition, brand and nav
+                               columns above a divider, meta row, wordmark
+components/landing/footer-brand.tsx             Tessera mark, tagline, contract details
+components/landing/footer-nav.tsx               Explore, Create, Learn link columns
+components/landing/footer-meta.tsx              licence line, BaseScan, source, Docs
+components/landing/footer-wordmark.tsx          oversized TESSERA background text
 components/ui/{button,dropdown-menu,card,badge,accordion}.tsx  shadcn registry
                               badge carries one added variant, accent
 components/theme-provider.tsx
@@ -146,6 +151,38 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Footer redesigned and modularised
+
+Redesigned the site footer as a branded wordmark footer, following the layout
+reference supplied with the task. The design intent carries over: the content
+sits on a deep teal band (`bg-teal-950`), the link columns and a full-width
+hairline divider separate the meta row, and an oversized TESSERA wordmark sits
+behind the content, cropped at the bottom edge of the band. The wordmark is
+decorative: `aria-hidden`, `pointer-events-none`, and a low opacity teal that
+cannot compete with the links above it.
+
+The task required the footer's text to survive untouched, and it did. No link,
+label, heading, or sentence was added, removed, or reworded. Colours and type
+stay in the site's existing language: white and muted mint text on the brand
+teal, the same tile mark, and `teal-300` focus rings so keyboard focus reads
+against the dark band.
+
+The footer is now a composition of four single-purpose components, matching how
+the rest of `components/landing/` is split:
+
+- `footer-brand.tsx` renders the Tessera mark, the tagline, and the contract and
+  network details.
+- `footer-nav.tsx` renders the Explore, Create, and Learn columns and owns their
+  link data.
+- `footer-meta.tsx` renders the licence line and the BaseScan, source, and Docs
+  pills.
+- `footer-wordmark.tsx` renders the oversized background TESSERA text.
+
+`landing-page.tsx` still imports the footer from `site-footer.tsx`, which now
+composes the four parts and owns the band, the divider, and the layering.
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### FAQ block, supplied and wired in
 
