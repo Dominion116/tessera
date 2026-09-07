@@ -152,6 +152,17 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Metadata base URL guard
+
+The first Vercel deployment build failed before any page data could be
+collected. The platform sets `NEXT_PUBLIC_APP_URL` to an empty string rather
+than leaving it absent, so the `??` fallback in `app/layout.tsx` never fired and
+`new URL("")` threw `ERR_INVALID_URL` while collecting configuration for
+`/_not-found`. The fallback now treats a blank value as unset (`?.trim() ||`
+instead of `??`), so `metadataBase` always receives a parseable origin. This
+was caught on the deployment host, not locally, because builds are never run
+here. `npx tsc --noEmit` and `npx eslint .` still exit clean.
+
 ### Footer redesigned and modularised
 
 Redesigned the site footer as a branded wordmark footer, following the layout
