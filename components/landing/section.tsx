@@ -9,8 +9,10 @@ type SectionProps = {
 };
 
 /**
- * One horizontal rhythm for the whole page, matching the hero's container:
- * max-w-7xl with px-4 and xl:px-16.
+ * One rhythm for every section below the hero, taken from the feature block:
+ * py-12 climbing to py-20, and gap-8 between a heading and its grid climbing to
+ * gap-16. The horizontal container stays px-4 with xl:px-16 so section content
+ * lines up with the navbar and the hero rather than with the block's own px-8.
  */
 const Section = ({ id, children, className, muted = false }: SectionProps) => {
   return (
@@ -22,7 +24,7 @@ const Section = ({ id, children, className, muted = false }: SectionProps) => {
         className
       )}
     >
-      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-20 sm:gap-14 sm:py-24 xl:px-16">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:py-16 md:gap-16 lg:py-20 xl:px-16">
         {children}
       </div>
     </section>
@@ -30,3 +32,4 @@ const Section = ({ id, children, className, muted = false }: SectionProps) => {
 };
 
 export default Section;
+
