@@ -28,8 +28,9 @@ application file listed below is untracked.
 ### What runs
 
 `/` renders the full landing page. `/hero-03` still renders the hero on its own,
-at the path the block prompt specified. There is no other route. Light and dark
-themes both work and the toggle switches them.
+and `/cta-01` renders the CTA block on its own, at the paths the block prompts
+specified. There is no other route. Light and dark themes both work and the
+toggle switches them.
 
 ### Verification standard
 
@@ -66,7 +67,8 @@ components/landing/use-cases-section.tsx        three event setups
 components/landing/verify-section.tsx           metadata sample, holder check,
                                                integration tiles
 components/landing/faq-section.tsx              five questions, one accordion
-components/landing/cta-section.tsx              teal closing panel
+components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
+app/cta-01/page.tsx                             block path, CTA only
 components/landing/site-footer.tsx              three link columns, contract details
 components/ui/{button,dropdown-menu,card,badge,accordion}.tsx  shadcn registry
                               badge carries one added variant, accent
@@ -140,6 +142,39 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### CTA block, supplied and wired in
+
+Replaced the hand-built closing panel with the supplied CTA block at
+`components/shadcn-space/blocks/cta-01/cta.tsx`, plus its standalone route
+`/cta-01`. The project already met the block's requirements (shadcn structure,
+React 19, Tailwind 4, TypeScript 5), so no setup or installs were needed; the
+block only uses `motion`, `lucide-react` and the registry `Button`, all
+present, and standard Tailwind utilities, so `globals.css` gained nothing.
+
+Block conventions as before: structure, classes and animation values stay as
+delivered, with the two usual forced exceptions and one more. Content became
+Tessera copy (the old panel's heading and lead, which carry the
+required-minimum fact and the chain number from `lib/poap-data.ts`). The
+button wraps `next/link` to `/app/create` through `asChild`, matching
+`button-01`. The colour exception: the supplied sky-to-amber glow became teal
+in both themes (`teal-100` via white in light, `teal-400/10` via black in
+dark), because the project's accent is teal and the block was otherwise off
+brand. The section keeps `id="start"` so the anchor list is unchanged.
+
+Consequences worth knowing:
+
+- The closing band is no longer a full-bleed teal panel. It is now a bordered
+  rounded card on the page background with a teal glow behind it, so the hero
+  is the only full-bleed colour block on the page.
+- The old panel's fact strip (to create, to collect, to browse) is gone with
+  it. The required-minimum fact survives in Create step 01 and the CTA lead;
+  browsing without a wallet survives in the FAQ; the "Read the docs first"
+  link survives in the navbar, footer and Open by Design.
+- `components/landing/cta-section.tsx` is deleted.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### Landing page consolidation, thirteen blocks to eight
 
@@ -443,7 +478,8 @@ Ordering lives in `docs/implementation.md`. Immediately actionable:
 
 - Documentation section. No blocking inputs, can run in parallel.
 - Dashboard surface, once the dashboard block arrives. The lifecycle timeline in
-  `components/landing/lifecycle-section.tsx` is the one to reuse there.
+  `components/lifecycle-timeline.tsx` is the one to reuse there; it takes
+  milestones as props, so it accepts live timestamps.
 - Chain layer, which retires `lib/poap-data.ts` in favour of real
   `totalEvents()` and `events(id)` reads through Multicall3. The placeholder
   types already match, so the gallery should only need its data source swapped.

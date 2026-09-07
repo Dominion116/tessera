@@ -8,7 +8,7 @@ import GallerySection from "@/components/landing/gallery-section";
 import UseCasesSection from "@/components/landing/use-cases-section";
 import VerifySection from "@/components/landing/verify-section";
 import FaqSection from "@/components/landing/faq-section";
-import CtaSection from "@/components/landing/cta-section";
+import CTA from "@/components/shadcn-space/blocks/cta-01/cta";
 import SiteFooter from "@/components/landing/site-footer";
 
 const navigationData: NavLinkItem[] = [
@@ -38,7 +38,7 @@ const LandingPage = () => {
         <UseCasesSection />
         <VerifySection />
         <FaqSection />
-        <CtaSection />
+        <CTA />
       </main>
       <SiteFooter />
     </>
