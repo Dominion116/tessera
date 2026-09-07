@@ -20,7 +20,7 @@ const COLUMNS = [
     heading: "Learn",
     links: [
       { label: "Documentation", href: "/docs" },
-      { label: "How badges get handed out", href: "#choices" },
+      { label: "How it works", href: "#how-it-works" },
       { label: "Questions", href: "#faq" },
     ],
   },

@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import Reveal from "@/components/landing/reveal";
+import {
+  CREATOR_MINT_BATCH_LIMIT,
+  CREATOR_TIMELOCK_DAYS,
+  SIGNATURE_WINDOW_DAYS,
+} from "@/lib/poap-data";
 
 const INTRO_STYLE_ID = "faq1-animations";
 
@@ -27,9 +32,19 @@ const faqs: Faq[] = [
   },
   {
     question: "Can I change the details after registering?",
-    answer:
-      "The name, description, date, location, link and artwork are permanent. Two things stay adjustable for the first 30 days: whether the badge is open to everyone, and attaching an invitation list if you registered without one.",
+    answer: `The name, description, date, location, link and artwork are permanent. Two things stay adjustable for the first ${CREATOR_TIMELOCK_DAYS} days: whether the badge is open to everyone, and attaching an invitation list if you registered without one.`,
     meta: "Permanence",
+  },
+  {
+    question: "Which deadlines should I care about?",
+    answer: `Two dates. Day ${CREATOR_TIMELOCK_DAYS} is the last day of creator controls, including dropping badges into wallets yourself in batches of up to ${CREATOR_MINT_BATCH_LIMIT}. Day ${SIGNATURE_WINDOW_DAYS} is when codes at the door stop working. Both count from the registration transaction, not from the event date.`,
+    meta: "Deadlines",
+  },
+  {
+    question: "Bound to the wallet, or free to move?",
+    answer:
+      "Set once at registration and never changed afterwards, so decide before you register. Bound is for when the badge is evidence: a certificate that can be resold is not evidence of anything. Transferable is for when the artwork is the point, or when holders will want to consolidate wallets later.",
+    meta: "Choices",
   },
   {
     question: "Do I need a wallet just to look around?",

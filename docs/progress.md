@@ -18,9 +18,9 @@ contract reference, and `docs/implementation.md` for the build ordering.
 ## Current state
 
 The contract reference is vendored and verified. The landing page is complete:
-hero plus eight blocks down to the footer, all in the hero's visual language,
-after a consolidation pass that reduced thirteen blocks below the hero to
-eight. No chain code exists yet.
+hero plus five blocks down to the footer, all in the hero's visual language,
+after consolidation passes that took the blocks below the hero from thirteen
+to eight, then eight to five. No chain code exists yet.
 
 Superseded, see the FAQ block log entry: application files are committed now
 (`c33b38e`, `5cf5135` and `75176d0` landed after the documentation commit
@@ -57,21 +57,19 @@ components/shadcn-space/blocks/hero-03/{index,hero,navbar,navlink}.tsx
 components/shadcn-space/button/button-01.tsx    Open App button, links to /app
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
 components/landing/landing-page.tsx             navbar, section order, footer
-components/landing/{section,section-heading,reveal,wordmark}.tsx   primitives
+components/landing/{section,section-heading,section-footer,feature-card,
+                                                reveal,wordmark}.tsx, the
+                                                shared section primitives
 components/landing/what-it-is-section.tsx       supplied bento grid, five facts
-                                               and the browse note
-components/landing/create-section.tsx           four registration steps
-components/landing/choices-section.tsx          mint routes, bound or
-                                               transferable, the clock
+                                                and the browse note
+components/landing/how-it-works-section.tsx     register, hand out, prove
 components/lifecycle-timeline.tsx               day 0, day 30, day 37 track,
-                                               milestones as props
+                                                milestones as props, kept for
+                                                the dashboard
 components/landing/gallery-section.tsx          bento gallery, See the full gallery
-components/landing/use-cases-section.tsx        three event setups
-components/landing/verify-section.tsx           metadata sample, holder check,
-                                               integration tiles
-components/ui/faq-monocrhome.tsx               supplied FAQ block, five questions
-                                               with meta chips, teal accent on
-                                               site tokens
+components/ui/faq-monocrhome.tsx               supplied FAQ block, seven questions
+                                                with meta chips, teal accent on
+                                                site tokens
 components/ui/bento-product-features.tsx      supplied bento grid layout, six slots
 components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
 app/cta-01/page.tsx                             block path, CTA only
@@ -153,6 +151,80 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Section footer buttons unified with the closing panel
+
+Two changes after review of the consolidation:
+
+- The how-it-works footer note ("The event number is yours the moment the
+  transaction confirms") is removed. `note` is now optional on
+  `SectionFooter`, so that section closes with its action alone while the
+  Gallery footer keeps its note. The unreferenced section files still on disk
+  pass notes only, which still typechecks.
+- The footer action button is the closing panel's arrow pill, copied verbatim
+  from `cta-01` into `SectionFooter` rather than extracted into a shared
+  component, because supplied blocks stay fixed. The how-it-works "Create a
+  POAP" and gallery "See the full gallery" buttons now match the CTA button:
+  `h-12` rounded-full, the sliding `ArrowUpRight` circle that rotates 45
+  degrees on hover, and the padding swap as the circle crosses. The old
+  custom footer styling (`h-auto`, `px-5 py-2.5`, `shadow-xs`, teal focus
+  ring) is gone; focus styling falls back to the registry Button's own ring.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
+
+### Landing page consolidation, eight blocks to five
+
+Replaced four sections with one: Create, Choices, In practice, and Proof are
+deleted, and a single `#how-it-works` section shaped Register, Hand out, Prove
+sits between WhatItIs and the Gallery. The page below the hero is now
+WhatItIs (plain), HowItWorks (muted), Gallery (plain, flipped from muted so
+the alternating bands survive), FAQ, CTA, Footer. The reading order recorded
+in the `landing-page.tsx` comment: what a POAP is, how one is made and handed
+out, what people are holding, and the questions people ask before starting.
+
+- **The new section follows the `create-section.tsx` pattern.** Three
+  `FeatureCard`s on the numbered-step grid, each with a body and a small-print
+  note under the border. Register: one transaction settles everything the
+  badge will ever say, and the open or invitation list, bound or transferable
+  choices are made in plain language; the note carries the day-30 freeze of
+  the open-to-everyone setting. Hand out: the three routes, run alone or
+  together, all check one claim record so no wallet mints twice; the note
+  carries the day-37 end of door codes and the no-deadline status of the other
+  routes. Prove: details and artwork live in the contract, so a block
+  explorer, the app, or your own script give the same answer; the note carries
+  the old Proof section's no-database, no-indexer, one-network-URL facts
+  nearly verbatim. The Create a POAP footer action survives here, still the
+  only create CTA between the hero and the closing panel.
+- **The clock and the bound-or-transferable guidance moved to the FAQ.** Two
+  new entries bring it to seven: "Which deadlines should I care about?" (day
+  30 ends creator controls including batch drops of up to 101 wallets, day 37
+  ends door codes, both count from the registration transaction rather than
+  the event date) and "Bound to the wallet, or free to move?" (set once at
+  registration, never changed afterwards; evidence versus artwork). The new
+  answers interpolate the constants from `lib/poap-data.ts`, and the existing
+  Permanence answer now interpolates its 30 as well, so every deadline number
+  on the page has one source. All three constants stay referenced:
+  `CREATOR_TIMELOCK_DAYS` in the section note and two FAQ answers,
+  `SIGNATURE_WINDOW_DAYS` in the section note and the deadlines answer,
+  `CREATOR_MINT_BATCH_LIMIT` in the deadlines answer.
+- **Cut outright:** the event-type recipe cards, the metadata JSON sample, the
+  holder-check steps, and the Worth knowing route caveats. The one-chance
+  list rule was already stated by the FAQ Permanence answer and is not
+  repeated in the new entries. The per-attendee-codes caveat is gone from the
+  page entirely.
+- **`components/lifecycle-timeline.tsx` is kept**, now unreferenced by the
+  landing page, still earmarked for the dashboard.
+- **Footer Learn column retargeted.** "How badges get handed out" pointing at
+  `#choices` became "How it works" pointing at `#how-it-works`.
+
+Anchors now: `#what-it-is`, `#how-it-works`, `#gallery`, `#faq`, `#start`.
+Files deleted: `create-section.tsx`, `choices-section.tsx`,
+`use-cases-section.tsx`, `verify-section.tsx`, all previously imported only
+by `landing-page.tsx`. File created: `how-it-works-section.tsx`.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### What a POAP is section, supplied bento block wired in
 

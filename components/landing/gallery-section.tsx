@@ -10,7 +10,7 @@ import { formatCount, formatUtcDate, svgToDataUrl } from "@/lib/format";
 
 const GallerySection = () => {
   return (
-    <Section id="gallery" muted>
+    <Section id="gallery">
       <SectionHeading
         eyebrow="Collections"
         title="Badges people are holding right now"
@@ -97,7 +97,6 @@ const GallerySection = () => {
       </ul>
 
       <SectionFooter
-        note="Artwork on every tile is read out of the contract, not a cache"
         action={{ label: "See the full gallery", href: "/poaps" }}
       />
     </Section>
