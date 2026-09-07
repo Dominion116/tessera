@@ -7,7 +7,7 @@ import ChoicesSection from "@/components/landing/choices-section";
 import GallerySection from "@/components/landing/gallery-section";
 import UseCasesSection from "@/components/landing/use-cases-section";
 import VerifySection from "@/components/landing/verify-section";
-import FaqSection from "@/components/landing/faq-section";
+import FAQ1 from "@/components/ui/faq-monocrhome";
 import CTA from "@/components/shadcn-space/blocks/cta-01/cta";
 import SiteFooter from "@/components/landing/site-footer";
 
@@ -37,7 +37,7 @@ const LandingPage = () => {
         <GallerySection />
         <UseCasesSection />
         <VerifySection />
-        <FaqSection />
+        <FAQ1 />
         <CTA />
       </main>
       <SiteFooter />

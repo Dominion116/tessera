@@ -79,3 +79,4 @@ contracts/lib/
 /tmp/
 /scratch/
 *.local
+/.kilo

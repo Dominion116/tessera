@@ -22,8 +22,10 @@ hero plus eight blocks down to the footer, all in the hero's visual language,
 after a consolidation pass that reduced thirteen blocks below the hero to
 eight. No chain code exists yet.
 
-Nothing has been committed since the documentation commit `5649145`. Every
-application file listed below is untracked.
+Superseded, see the FAQ block log entry: application files are committed now
+(`c33b38e`, `5cf5135` and `75176d0` landed after the documentation commit
+`5649145`), and the working tree was clean apart from `.gitignore` before the
+FAQ block task.
 
 ### What runs
 
@@ -66,7 +68,9 @@ components/landing/gallery-section.tsx          bento gallery, See the full gall
 components/landing/use-cases-section.tsx        three event setups
 components/landing/verify-section.tsx           metadata sample, holder check,
                                                integration tiles
-components/landing/faq-section.tsx              five questions, one accordion
+components/ui/faq-monocrhome.tsx               supplied FAQ block, five questions
+                                              with meta chips, teal accent on
+                                              site tokens
 components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
 app/cta-01/page.tsx                             block path, CTA only
 components/landing/site-footer.tsx              three link columns, contract details
@@ -142,6 +146,53 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### FAQ block, supplied and wired in
+
+Replaced the hand-built accordion section with the supplied FAQ block at
+`components/ui/faq-monocrhome.tsx` (the filename keeps the prompt's spelling),
+imported straight into `landing-page.tsx` the same way the CTA block is. The
+project already met the block's requirements, and the block needs nothing
+beyond React, so no installs.
+
+Structure, classes and animation values stay as delivered, with exceptions,
+each forced by this app:
+
+- Content is the same five questions, heading, lead and eyebrow the accordion
+  section carried, so the page's argument is unchanged. Each entry gained a
+  meta chip (Cost, Artwork, Permanence, Access, Trust).
+- The block's own theme system is removed. It toggled `dark` directly and
+  persisted a `bento-theme` key, which fights `next-themes`, and its Night/Day
+  button duplicated the navbar toggle. All colours are now site tokens or
+  `dark:` variants, so the section follows the site theme with no hydration
+  mismatch and no second source of truth.
+- The colour exception, as with the CTA glow: the monochrome white glows
+  became the accent. The card hover glow, the aurora wash behind the section
+  and the intro pill's rotating beam are teal (teal-600 in light, teal-400 in
+  dark), and cards use `bg-card/60`, `border-border/70` and `tile-grout` like
+  every other card on the page.
+- The standalone-page shell is gone: no `min-h-screen` surface, and the
+  entrance is the shared `Reveal` rather than the block's window-load fade, so
+  the section animates in on scroll like its neighbours and honours reduced
+  motion. The section keeps `id="faq"`, `scroll-mt-24` and `border-t`, so the
+  anchor list and the band rhythm are untouched.
+- Heading levels dropped one step (h2 title, h3 questions) because the page
+  already has an h1 in the hero.
+
+The intro pill keeps its beam, pulse, meter and tick keyframes and the
+pointer-following card glow, injected as delivered.
+`components/landing/faq-section.tsx` is deleted; its answers were the source
+for the block's content.
+
+Two corrections to earlier entries: the six section files the consolidation
+lists as deleted (`facts-strip`, `distribution-section`, `soulbound-section`,
+`lifecycle-section`, `integrations-section`, `farcaster-section`) are still on
+disk, tracked and unreferenced, so a cleanup pass should decide them together.
+And the "every application file is untracked" claim in Current state no longer
+holds, as noted above.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### CTA block, supplied and wired in
 
