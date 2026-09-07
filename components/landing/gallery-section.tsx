@@ -96,9 +96,7 @@ const GallerySection = () => {
         ))}
       </ul>
 
-      <SectionFooter
-        action={{ label: "See the full gallery", href: "/poaps" }}
-      />
+      <SectionFooter action={{ label: "See the full gallery", href: "/poaps" }} />
     </Section>
   );
 };

@@ -157,9 +157,10 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 Two changes after review of the consolidation:
 
 - The how-it-works footer note ("The event number is yours the moment the
-  transaction confirms") is removed. `note` is now optional on
-  `SectionFooter`, so that section closes with its action alone while the
-  Gallery footer keeps its note. The unreferenced section files still on disk
+  transaction confirms") is removed, and so is the gallery footer note
+  ("Artwork on every tile is read out of the contract, not a cache") after a
+  later review. `note` is now optional on `SectionFooter`, so both sections
+  close with their action alone. The unreferenced section files still on disk
   pass notes only, which still typechecks.
 - The footer action button is the closing panel's arrow pill, copied verbatim
   from `cta-01` into `SectionFooter` rather than extracted into a shared
