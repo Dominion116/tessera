@@ -58,7 +58,8 @@ components/shadcn-space/button/button-01.tsx    Open App button, links to /app
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
 components/landing/landing-page.tsx             navbar, section order, footer
 components/landing/{section,section-heading,reveal,wordmark}.tsx   primitives
-components/landing/what-it-is-section.tsx       bento, onchain storage argument
+components/landing/what-it-is-section.tsx       supplied bento grid, five facts
+                                               and the browse note
 components/landing/create-section.tsx           four registration steps
 components/landing/choices-section.tsx          mint routes, bound or
                                                transferable, the clock
@@ -69,8 +70,9 @@ components/landing/use-cases-section.tsx        three event setups
 components/landing/verify-section.tsx           metadata sample, holder check,
                                                integration tiles
 components/ui/faq-monocrhome.tsx               supplied FAQ block, five questions
-                                              with meta chips, teal accent on
-                                              site tokens
+                                               with meta chips, teal accent on
+                                               site tokens
+components/ui/bento-product-features.tsx      supplied bento grid layout, six slots
 components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
 app/cta-01/page.tsx                             block path, CTA only
 components/landing/site-footer.tsx              footer composition, brand and nav
@@ -151,6 +153,51 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### What a POAP is section, supplied bento block wired in
+
+Replaced the hand-built what-it-is section with the supplied bento product
+features block at `components/ui/bento-product-features.tsx`, keeping the
+section's `id="what-it-is"` and its argument: five facts about a POAP across
+six grid cells, with the "no wallet to browse" note folded into the wide bottom
+card, so this section no longer ends with a `SectionFooter`.
+
+Content is the old section's facts, condensed to fit the cells. The onchain
+storage argument fills the tall left column with the storage parts and contract
+facts beneath it, one badge per wallet sits over a row of holders, event number
+is token number becomes a dotted 14 cell, the two required fields become a 2
+cell, and the portable identifier card closes the grid. No stock copy shipped.
+
+Colour and type use the site language as with the FAQ and CTA blocks: hairline
+`border-border/70` cards on `bg-card/60` with the `tile-grout` shadow and the
+teal hover top edge from `feature-card.tsx`, text on the `fg-` tokens,
+`tabular-nums` on every number, and card titles one step below the section h2.
+
+Three deviations from the delivered file, each forced:
+
+- Import moved from `framer-motion` to `motion/react`, because the project pins
+  `motion` and a clean clone would otherwise need a new dependency. The variant
+  objects gained `Variants` annotations so `type: "spring"` keeps its literal
+  type under `tsc`.
+- Grid breakpoints moved from `md` to `lg`. The supplied grid opened three text
+  columns at 768 px, where a column narrows to roughly 180 px of measure; the
+  repo's own feature-card rule is that three text columns only start at `lg`.
+  Below `lg` the section stacks to one column.
+- Entrance changed from `animate` on mount to `whileInView` once, so the grid
+  animates in on scroll like its neighbours (the FAQ replacement dropped its own
+  window-load fade for the same reason). The motion is unguarded for reduced
+  motion, the same tolerated exception as the other supplied blocks.
+
+The demo's interactive controls went with its stock content: no Configure
+button or toggles survive, because a fake toggle would be a dead control. The
+three holder images reuse the gallery's inline SVG artwork as data URLs, so no
+network asset is needed, and the per-line `no-img-element` disables carry the
+gallery's existing reason. No registry component changed and no dependency was
+installed: `card`, `badge`, `motion` and `lucide-react` were already present,
+and nothing in the section uses `switch` or `label`.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### Metadata base URL guard
 
