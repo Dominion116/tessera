@@ -1,0 +1,100 @@
+"use client";
+
+import { ArrowUpRight, Wallet } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useWallet } from "@/components/wallet/wallet-provider";
+
+const TITLE = "Connect a wallet";
+const LEAD =
+  "Your wallet is your account on Tessera. It holds the POAPs you create and collect, and it signs the transactions that put each badge onchain.";
+const NOTE =
+  "Tessera runs on Base Sepolia, a public network where creating and minting cost nothing. Any wallet that speaks Ethereum works.";
+
+type ConnectPromptProps = {
+  variant: "modal" | "page";
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onConnected?: () => void;
+};
+
+/**
+ * One prompt, two presentations: the Dialog the Open App buttons trigger,
+ * and the full-page card that gates /app. The words are shared constants,
+ * so the connect story is the same wherever you meet it.
+ */
+const ConnectPrompt = ({
+  variant,
+  open,
+  onOpenChange,
+  onConnected,
+}: ConnectPromptProps) => {
+  const { connect } = useWallet();
+
+  const handleConnect = () => {
+    connect();
+    onConnected?.();
+  };
+
+  const actions = (
+    <div className="flex flex-col gap-4">
+      <Button size="lg" className="w-full" onClick={handleConnect}>
+        Connect wallet
+        <ArrowUpRight aria-hidden="true" />
+      </Button>
+      <p className="text-xs leading-5 text-fg-tertiary">{NOTE}</p>
+    </div>
+  );
+
+  const mark = (
+    <div
+      aria-hidden="true"
+      className="flex size-10 items-center justify-center rounded-lg border border-teal-400/30 bg-teal-400/10 text-teal-600 dark:text-teal-300"
+    >
+      <Wallet className="size-5" />
+    </div>
+  );
+
+  if (variant === "modal") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            {mark}
+            <DialogTitle>{TITLE}</DialogTitle>
+            <DialogDescription className="leading-6">{LEAD}</DialogDescription>
+          </DialogHeader>
+          {actions}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-background px-4">
+      <Card className="tile-grout w-full max-w-md gap-6 border-border/70 bg-card/60">
+        <CardHeader>
+          {mark}
+          <CardTitle className="text-xl">{TITLE}</CardTitle>
+          <CardDescription className="leading-6">{LEAD}</CardDescription>
+        </CardHeader>
+        <CardContent>{actions}</CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ConnectPrompt;

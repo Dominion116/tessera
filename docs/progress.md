@@ -20,7 +20,10 @@ contract reference, and `docs/implementation.md` for the build ordering.
 The contract reference is vendored and verified. The landing page is complete:
 hero plus five blocks down to the footer, all in the hero's visual language,
 after consolidation passes that took the blocks below the hero from thirteen
-to eight, then eight to five. No chain code exists yet.
+to eight, then eight to five. The app surface now exists at `/app`: a wallet
+gate, the sidebar shell at `lg` and up, the dock below `lg`, and the dashboard
+home (stats, two charts, events table, deadline watch). No chain code exists
+yet; the wallet layer is a mock behind one seam.
 
 Superseded, see the FAQ block log entry: application files are committed now
 (`c33b38e`, `5cf5135` and `75176d0` landed after the documentation commit
@@ -31,8 +34,11 @@ FAQ block task.
 
 `/` renders the full landing page. `/hero-03` still renders the hero on its own,
 and `/cta-01` renders the CTA block on its own, at the paths the block prompts
-specified. There is no other route. Light and dark themes both work and the
-toggle switches them.
+specified. `/app` renders the wallet gate until a wallet is connected, then the
+dashboard shell with the dashboard home. Light and dark themes both work and the
+toggle switches them. The dashboard's Open App entry points (navbar and mobile
+dropdown) open the connect prompt when disconnected and link to `/app` when
+connected.
 
 ### Verification standard
 
@@ -84,6 +90,28 @@ components/landing/footer-meta.tsx              licence line, BaseScan, source, 
 components/landing/footer-wordmark.tsx          oversized TESSERA background text
 components/ui/{button,dropdown-menu,card,badge,accordion}.tsx  shadcn registry
                               badge carries one added variant, accent
+components/ui/{chart,sidebar,table,dialog,sheet,tooltip,separator,
+                              skeleton,input}.tsx   shadcn registry, pulled in
+                              for the dashboard; sidebar and use-mobile carry
+                              two forced lint rewrites, see the log
+hooks/use-mobile.ts           media-query hook, rewritten from the registry
+components/wallet/wallet-provider.tsx  mock wallet context, the swap seam
+components/wallet/connect-prompt.tsx   one prompt, modal and full-page
+components/wallet/wallet-chip.tsx      short address plus disconnect
+components/shadcn-space/button/button-01.tsx   Open App, now client and gated
+components/dashboard/dashboard-shell.tsx sidebar shell at lg, topbar below
+components/dashboard/sidebar-nav.tsx    dashboard nav, exact match on /app
+components/navigation/dock-nav.tsx      fixed bottom dock below lg, shared
+components/dashboard/app-gate.tsx       /app switch: prompt or shell
+components/dashboard/dashboard-page.tsx the template grid composition
+components/dashboard/stat-cards.tsx     four numbers, teal icon chips
+components/dashboard/mint-activity-chart.tsx  area chart, mints per day
+components/dashboard/method-mix-chart.tsx     donut, mints by route
+components/dashboard/events-table.tsx   your events with artwork thumbs
+components/dashboard/deadline-watch.tsx timeline plus approaching deadlines
+lib/dashboard-data.ts        placeholder dashboard reads, contract-shaped
+app/app/page.tsx             the dashboard route
+app/layout.tsx               ThemeProvider, WalletProvider, metadata
 components/theme-provider.tsx
 components/theme-toggle.tsx
 lib/utils.ts                  cn
@@ -104,10 +132,17 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   real footage or a different treatment before this ships. Content decision.
 - In light mode the dropdown panel goes light while the nav still sits over dark
   video. Not yet reconciled.
-- Every internal link points at a route that does not exist yet: `/app`,
-  `/app/create`, `/app/collection`, `/app/created`, `/poaps`, `/docs`. They 404
-  until those phases land. The hrefs are correct for the surface in
-  `docs/agent.md` §7, so nothing needs rewiring later.
+- Every internal link points at a route that does not exist yet: `/app/create`,
+  `/app/collection`, `/app/created`, `/poaps`, `/docs`. They 404 until those
+  surfaces are built. The hrefs are correct for the surface in
+  `docs/agent.md` §7, so nothing needs rewiring later. `/app` now exists;
+  its sidebar and dock link to the still-missing routes with final hrefs.
+- The wallet gate is a mock: one placeholder address, session-only memory,
+  nothing signed. Real @reown/appkit wiring replaces
+  `components/wallet/wallet-provider.tsx` internals in the chain-layer task.
+- Dashboard numbers, series and events come from `lib/dashboard-data.ts`,
+  not chain reads. Timestamps are relative to load time so the deadline
+  arithmetic reads correctly while the data is static.
 - Gallery slides are placeholder events with generated SVG artwork in
   `public/nft/`, not chain reads. `lib/poap-data.ts` still feeds
   WhatItIs.
@@ -157,6 +192,87 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Dashboard home, dock navigation, wallet gate
+
+`/app` exists now: a wallet gate, the sidebar shell at `lg` and up, a fixed
+bottom dock below `lg`, and the dashboard home (stats, two charts, the events
+table, the deadline watch). Scope held to the plan: create wizard, manage
+screens, collection, explore and claim stay out, and their routes stay 404.
+
+Decisions:
+
+- **The supplied dashboard template is a reference, not a vendor source.**
+  Its widgets are rebuilt in Tessera terms as single-purpose files under
+  `components/dashboard/`, the same modularisation the landing page got. No
+  `dashboard-shell-01` demo route exists and no template file is copied
+  whole. This supersedes the "supplied blocks stay fixed" rule for this
+  template only; its 12-column grid, spacing and widget arrangement remain
+  the layout language every dashboard widget follows.
+- **recharts 3.8.0, pinned.** The registry `chart` component names that
+  exact version, and its peer range accepts React 19. Charts theme through
+  the `--chart-*` tokens, where `chart-2` is the teal slot in both themes,
+  so the mint activity area carries the site accent without hardcoded
+  colours.
+- **The registry `sidebar` runs with `collapsible="none"`.** Below `lg` the
+  whole sidebar is hidden, not collapsed, because the dock is the
+  navigation at that width; collapsing icons would duplicate it. The
+  sidebar is `lg:sticky lg:top-0 lg:h-svh` on the shell, which the
+  `collapsible="none"` branch allows without editing the registry file: no
+  fixed positioning, no sheet, no gap-dance. The mobile topbar plus dock
+  live inside `SidebarInset`, and the content column carries
+  `pb-[calc(5.5rem+env(safe-area-inset-bottom))]` so the dock never covers
+  content on notched phones.
+- **The mock wallet is one seam.** `wallet-provider.tsx` holds a single
+  placeholder address sourced from `lib/dashboard-data.ts`, in memory,
+  session-only, never persisted, nothing signed or broadcast. Every
+  component above it consumes `useWallet`, so the real @reown/appkit
+  wiring replaces this provider's internals and touches nothing else.
+  That wiring also replaces RainbowKit in the `docs/agent.md` §4 stack
+  table when the chain-layer task lands; the table is deliberately not
+  touched yet.
+- **`@iconify/react` skipped.** It was approved, but the rebuilt widgets
+  cover their icons with lucide-react, the repo's set, so a second icon
+  system would be pure duplication. Add it only if a registry component
+  ever requires it.
+- **Dock Home is `/app`**, the app-context home, not the landing page.
+  Explore, Create, Collection and Docs fill the other four slots, each
+  with icon, short label, active state via `usePathname`, focus rings and
+  the `press` feedback. The dock is shared with the mini-app view later.
+- **Two forced rewrites in registry files**, both lint errors rather than
+  choices, continuing the pattern from the theme toggle and the carousel:
+  `use-mobile` called setState in an effect and is now a
+  useSyncExternalStore subscription with a false server snapshot; and
+  `SidebarMenuSkeleton` drew its width with `Math.random` during render,
+  which the new `react-hooks/purity` rule rejects, so the width is a fixed
+  70%, which also satisfies the skeleton rule in §6 (a skeleton matches
+  the final content's dimensions, not a random one).
+- **`ArrowButton` grew an optional `onClick`.** With `href` it is the
+  delivered pill as a link; with `onClick` the same pill is a real button.
+  That is how Open App opens the connect prompt while disconnected and
+  links to `/app` once connected, without a second visual.
+
+The gate flow: disconnected, Open App (navbar and mobile dropdown) opens a
+Dialog prompt; connecting there lands on `/app`, which shows the same prompt
+as a full-page card until a wallet is connected. The prompt is one component
+with shared copy constants, explaining wallets and Base Sepolia in plain
+language. Disconnecting from the wallet chip returns `/app` to the prompt.
+
+`lib/dashboard-data.ts` is contract-shaped: `PoapEvent` reused from
+`lib/poap-data.ts`, a 30-day deterministic mint series, a route mix whose
+total equals the collectors stat, and timestamps laid out relative to load
+time so deadline arithmetic stays correct while the data is static. Awkward
+cases included on purpose: an event past its creator window, one freezing
+closed tomorrow, a set allowlist root, an undated event, an empty location.
+`deadline-watch.tsx` reuses `components/lifecycle-timeline.tsx` with
+milestones derived from those timestamps, the reuse the landing
+consolidation earmarked; the day-30 warning states which way the public-mint
+flag freezes, because that setting never comes back.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged. The events table artwork uses
+the gallery's inline-SVG `<img>` pattern with the per-line disable and
+reason.
 
 ### Consistency, accessibility and modularity pass
 
@@ -875,11 +991,10 @@ function had already been exercised on Base Sepolia.
 Ordering lives in `docs/implementation.md`. Immediately actionable:
 
 - Documentation section. No blocking inputs, can run in parallel.
-- Dashboard surface, once the dashboard block arrives. The lifecycle timeline in
-  `components/lifecycle-timeline.tsx` is the one to reuse there; it takes
-  milestones as props, so it accepts live timestamps.
-- Chain layer, which retires `lib/poap-data.ts` in favour of real
-  `totalEvents()` and `events(id)` reads through Multicall3. The placeholder
-  types already match, so the gallery should only need its data source swapped.
+- Chain layer, which retires `lib/poap-data.ts` and
+  `lib/dashboard-data.ts` in favour of real `totalEvents()` and `events(id)`
+  reads through Multicall3, and replaces the mock wallet provider's
+  internals with @reown/appkit. The placeholder types already match, so the
+  gallery and the dashboard should only need their data sources swapped.
 - Hero background video. Still a content decision, still pointing at another
   project's CDN.

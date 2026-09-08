@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { WalletProvider } from "@/components/wallet/wallet-provider";
 import "./globals.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
@@ -53,7 +54,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <WalletProvider>{children}</WalletProvider>
         </ThemeProvider>
       </body>
     </html>
