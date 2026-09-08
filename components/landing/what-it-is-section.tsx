@@ -23,14 +23,14 @@ const HOLDERS = GALLERY_POAPS.slice(0, 3);
 
 /** The shared card surface: hairline border, tile shadow, teal hover top edge. */
 const CARD_SURFACE =
-  "h-full border-border/70 border-t-4 border-t-transparent bg-card/60 tile-grout transition-colors duration-200 hover:border-t-teal-400";
+  "h-full border-border/70 bg-card/65 shadow-[inset_0_1px_0_oklch(1_0_0_/_6%),0_1px_2px_oklch(0_0_0_/_5%),0_8px_24px_oklch(0_0_0_/_4%)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-teal-400/30 hover:bg-card/80 hover:shadow-[inset_0_1px_0_oklch(1_0_0_/_8%),0_2px_4px_oklch(0_0_0_/_6%),0_12px_28px_oklch(0_0_0_/_7%)]";
 
 /** Tall left slot. The onchain storage argument, with the parts and the facts. */
 const ArtworkCard = () => (
   <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col gap-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-teal-400/20 bg-teal-400/10 text-teal-600 dark:text-teal-300">
-        <Database className="h-6 w-6" aria-hidden="true" strokeWidth={1.2} />
+    <CardContent className="flex h-full flex-col gap-5 px-7 py-8">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-teal-400/20 bg-teal-400/10 text-teal-600 dark:text-teal-300">
+        <Database className="h-5 w-5" aria-hidden="true" strokeWidth={1.4} />
       </div>
       <div className="flex flex-col gap-3">
         <h3 className="text-xl font-semibold">
@@ -77,7 +77,7 @@ const ArtworkCard = () => (
 /** Top-middle slot. The shared claim record, with a row of holders beneath. */
 const OnePerWalletCard = () => (
   <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col gap-6">
+    <CardContent className="flex h-full flex-col gap-5 px-7 py-8">
       <div className="flex flex-col gap-3">
         <h3 className="text-xl font-semibold">One badge per wallet</h3>
         <p className="text-base leading-7 text-fg-secondary">
@@ -116,8 +116,8 @@ const EventNumberCard = () => (
         backgroundSize: "16px 16px",
       }}
     />
-    <CardContent className="relative z-10 flex h-full flex-col items-center justify-center gap-4">
-      <span className="text-8xl font-bold tabular-nums">14</span>
+    <CardContent className="relative z-10 flex h-full flex-col items-center justify-center gap-3 px-7 py-8">
+      <span className="text-7xl font-semibold tabular-nums tracking-[-0.06em]">14</span>
       <p className="max-w-56 text-center text-sm leading-6 text-fg-tertiary">
         Register the 14th event and you get token 14: one number names the
         event, the badge and the page you share.
@@ -129,7 +129,7 @@ const EventNumberCard = () => (
 /** Middle-middle slot. The registration minimum: a name and one picture. */
 const RequiredFieldsCard = () => (
   <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col gap-6">
+    <CardContent className="flex h-full flex-col gap-5 px-7 py-8">
       <div className="flex items-start justify-between gap-4">
         <h3 className="text-xl font-semibold">
           A name and a picture is enough
@@ -138,7 +138,7 @@ const RequiredFieldsCard = () => (
           Required fields
         </Badge>
       </div>
-      <span className="text-6xl font-bold tabular-nums">2</span>
+      <span className="text-5xl font-semibold tabular-nums tracking-[-0.05em]">2</span>
       <div className="mt-auto flex items-center justify-between gap-4 text-sm text-fg-tertiary">
         <span>Name and artwork</span>
         <span>Everything else optional</span>
@@ -150,7 +150,7 @@ const RequiredFieldsCard = () => (
 /** Middle-right slot. The portable identifier that makes badges verifiable. */
 const PortableBadgeCard = () => (
   <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col justify-end gap-3">
+    <CardContent className="flex h-full flex-col justify-end gap-3 px-7 py-8">
       <h3 className="text-xl font-semibold">
         Checkable from outside this app
       </h3>
@@ -166,7 +166,7 @@ const PortableBadgeCard = () => (
 /** Wide bottom slot. Reading is open: no wallet, no account. */
 const BrowseCard = () => (
   <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col items-center justify-center gap-3 text-center">
+    <CardContent className="flex h-full flex-col items-center justify-center gap-3 px-7 py-8 text-center">
       <h3 className="text-xl font-semibold">
         Browsing needs no wallet, and no account
       </h3>
@@ -180,8 +180,9 @@ const BrowseCard = () => (
 
 const WhatItIsSection = () => {
   return (
-    <Section id="what-it-is">
+    <Section id="what-it-is" className="what-it-is-section">
       <SectionHeading
+        className="max-w-3xl"
         eyebrow="What a POAP is"
         title="A badge that proves you were there, and that nobody can rewrite later"
         lead="One token per person per event. You register the event once, attendees mint their own copy, and the badge stays in their wallet with the artwork and the details attached to it."

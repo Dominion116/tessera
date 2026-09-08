@@ -34,18 +34,18 @@ const FeatureCard = ({
   return (
     <Card
       className={cn(
-        "group h-full border-border/70 border-t-4 border-t-transparent bg-card/60 py-10 tile-grout transition-colors duration-200 hover:border-t-teal-400",
+        "group h-full border-border/70 bg-card/65 py-8 shadow-[inset_0_1px_0_oklch(1_0_0_/_6%),0_1px_2px_oklch(0_0_0_/_5%),0_8px_24px_oklch(0_0_0_/_4%)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-teal-400/30 hover:bg-card/80 hover:shadow-[inset_0_1px_0_oklch(1_0_0_/_8%),0_2px_4px_oklch(0_0_0_/_6%),0_12px_28px_oklch(0_0_0_/_7%)]",
         className
       )}
     >
-      <CardContent className="flex flex-1 flex-col gap-6 px-8">
+      <CardContent className="flex flex-1 flex-col gap-5 px-7">
         {Icon || meta ? (
           <div className="flex items-start justify-between gap-4">
             {Icon ? (
               <Icon
                 aria-hidden="true"
                 strokeWidth={1.2}
-                className="size-8 shrink-0 text-teal-600 dark:text-teal-300"
+                className="size-7 shrink-0 text-teal-600 dark:text-teal-300"
               />
             ) : null}
             {meta}

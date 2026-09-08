@@ -4,28 +4,27 @@ import * as React from "react";
 import { motion, type Variants } from "motion/react";
 import { cn } from "@/lib/utils";
 
-// Animation variants for the container to stagger children
+// A short, controlled reveal keeps the bento present without making it feel
+// like six separate widgets dropping into place.
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+      staggerChildren: 0.07,
+      delayChildren: 0.04,
     },
   },
 };
 
-// Animation variants for each grid item
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 10,
+      duration: 0.24,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };

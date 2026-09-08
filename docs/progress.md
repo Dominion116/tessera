@@ -193,6 +193,37 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### What a POAP is and How it works visual refinement
+
+The two explanatory landing sections received a visual cleanup without
+changing their structure, copy, slot mapping, routes or data flow. The bento
+cards in `what-it-is-section.tsx` and the three `FeatureCard` steps in
+`how-it-works-section.tsx` now use quieter translucent surfaces, alpha
+borders, softer stacked shadows, tighter internal spacing and a restrained
+one-pixel hover lift. The previous four-pixel transparent top edge was removed
+from these cards because repeated accent rails made every tile feel like the
+same generated component.
+
+- The What a POAP is section keeps all six bento slots, but its icon tile and
+  large numeric treatments are smaller and more deliberate. Card padding is
+  consistent across the tall, standard and wide slots, while the artwork,
+  contract facts, holder row and required-field badge remain unchanged.
+- The How it works section keeps the ordered three-card flow, section footer
+  and existing copy. `FeatureCard` now shares the quieter card material and
+  uses a slightly smaller icon with less vertical padding, making the step
+  numbers and caveats read as supporting information instead of competing
+  badges.
+- `BentoGridShowcase` keeps the same responsive grid and six slot wrappers,
+  but its spring entrance is now a 240 ms ease-out opacity and 12 px reveal
+  with a 70 ms stagger. This matches the site's existing reveal language and
+  avoids the elastic, stock-demo feel.
+- The existing `Reveal` animation still controls the section headings and How
+  it works cards. New hover transitions animate only color, shadow and
+  transform, and the global reduced-motion rule continues to remove movement.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
 ### Dashboard visual refinement
 
 The dashboard structure and data flow stayed unchanged, but its visual

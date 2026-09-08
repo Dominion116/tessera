@@ -46,8 +46,9 @@ const STEPS: Step[] = [
  */
 const HowItWorksSection = () => {
   return (
-    <Section id="how-it-works" muted>
+    <Section id="how-it-works" muted className="how-it-works-section">
       <SectionHeading
+        className="max-w-3xl"
         eyebrow="How it works"
         title="Register once, hand it out, and the proof takes care of itself"
         lead="One transaction makes the badge, the routes hand it out, and checking the result needs nothing but the chain."
