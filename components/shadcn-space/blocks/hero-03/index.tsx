@@ -5,7 +5,7 @@ import HeroSection from "@/components/shadcn-space/blocks/hero-03/hero";
 const HeroPage = () => {
   const navigationData: NavLinkItem[] = [
     { title: "Home", href: "/", isActive: true },
-    { title: "Explore", href: "/poaps", isActive: false },
+    { title: "Explore", href: "/app", isActive: false },
     { title: "Create", href: "/app/create", isActive: false },
     { title: "Collection", href: "/app/collection", isActive: false },
     { title: "Docs", href: "/docs", isActive: false },

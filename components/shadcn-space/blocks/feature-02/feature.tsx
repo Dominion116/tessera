@@ -108,7 +108,7 @@ const Feature = ({ featureData }: { featureData: Features }) => {
                 asChild
                 className="h-auto rounded-full px-5 py-2.5 shadow-xs"
               >
-                <Link href="/poaps">Browse the badges</Link>
+                <Link href="/app">Browse the badges</Link>
               </Button>
             </motion.div>
           </div>

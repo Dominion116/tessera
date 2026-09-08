@@ -13,12 +13,17 @@ const DOCK_ITEMS = [
   { href: "/docs", label: "Docs", icon: BookOpen },
 ] as const;
 
+type DockNavProps = {
+  activeView?: "dashboard" | "explore";
+  onExplore?: () => void;
+};
+
 /**
  * The fixed bottom dock, shared with the mini-app view later. It is the
  * primary navigation below `lg`, where the sidebar shell is hidden. Home
  * means the app home, not the landing page.
  */
-const DockNav = () => {
+const DockNav = ({ activeView, onExplore }: DockNavProps = {}) => {
   const pathname = usePathname();
 
   return (
@@ -28,12 +33,32 @@ const DockNav = () => {
     >
       <ul className="mx-auto grid max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {DOCK_ITEMS.map((item) => {
-          const active =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isLocalExplore = item.href === "/poaps" && onExplore;
+          const active = isLocalExplore
+            ? activeView === "explore"
+            : item.href === "/app" && activeView
+              ? activeView === "dashboard"
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
             <li key={item.href}>
+              {isLocalExplore ? (
+                <button
+                  type="button"
+                  onClick={onExplore}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "press w-full min-h-14 flex-col items-center justify-center gap-1 px-1 pt-2 pb-3 text-xs outline-none transition-colors duration-180 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-inset",
+                    active
+                      ? "font-medium text-teal-600 dark:text-teal-300"
+                      : "text-fg-tertiary hover:text-fg-secondary"
+                  )}
+                >
+                  <Icon aria-hidden="true" className="size-5" />
+                  <span>{item.label}</span>
+                </button>
+              ) : (
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
@@ -47,6 +72,7 @@ const DockNav = () => {
                 <Icon aria-hidden="true" className="size-5" />
                 <span>{item.label}</span>
               </Link>
+              )}
             </li>
           );
         })}

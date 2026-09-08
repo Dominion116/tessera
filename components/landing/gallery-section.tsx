@@ -17,7 +17,7 @@ const GallerySection = () => {
         <CarouselStacked />
       </Reveal>
 
-      <SectionFooter action={{ label: "See the full gallery", href: "/poaps" }} />
+      <SectionFooter action={{ label: "See the full gallery", href: "/app" }} />
     </Section>
   );
 };

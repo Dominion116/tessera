@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -13,7 +14,9 @@ import {
 import Wordmark from "@/components/landing/wordmark";
 import DockNav from "@/components/navigation/dock-nav";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
+import DashboardExploreView from "@/components/dashboard/dashboard-explore-view";
 import WalletChip from "@/components/wallet/wallet-chip";
+import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 /**
  * The app frame. `lg` and up gets the sidebar shell with the content area
@@ -22,7 +25,10 @@ import WalletChip from "@/components/wallet/wallet-chip";
  * covers it. The sidebar does not collapse: below `lg` it is hidden
  * entirely, because the dock replaces it.
  */
-const DashboardShell = ({ children }: { children: React.ReactNode }) => (
+const DashboardShell = ({ children }: { children: React.ReactNode }) => {
+  const [activeView, setActiveView] = useState<DashboardView>("dashboard");
+
+  return (
   <SidebarProvider>
     <Sidebar
       collapsible="none"
@@ -39,7 +45,10 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => (
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
-        <SidebarNav />
+        <SidebarNav
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
       </SidebarContent>
       <SidebarFooter>
         <WalletChip />
@@ -57,11 +66,19 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => (
         <WalletChip className="w-auto" />
       </header>
       <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
-        {children}
+        {activeView === "explore" ? (
+          <DashboardExploreView />
+        ) : (
+          children
+        )}
       </div>
     </SidebarInset>
-    <DockNav />
+    <DockNav
+      activeView={activeView}
+      onExplore={() => setActiveView("explore")}
+    />
   </SidebarProvider>
-);
+  );
+};
 
 export default DashboardShell;

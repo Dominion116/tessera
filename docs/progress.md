@@ -193,6 +193,83 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Standalone Explore index removed
+
+The standalone `/poaps` gallery index has been removed because Explore now
+belongs inside the dashboard shell. `components/dashboard/dashboard-explore-view.tsx`
+is the single gallery entry point from the sidebar and mobile dock, so it keeps
+the `/app` URL and dashboard state while rendering in the main content area.
+
+- Removed `app/poaps/page.tsx`, `components/explore/explore-page.tsx` and
+  `components/explore/explore-pagination.tsx`.
+- Removed the embedded gallery's `Back to dashboard` control because Dashboard
+  remains available directly in the sidebar and dock.
+- Retargeted landing and supplied block Explore links to `/app` so they do not
+  point at the deleted index route.
+- Kept `/poaps/[id]` and `/poaps/[id]/claim` because individual POAP cards in
+  the embedded gallery still use those public detail and claim destinations.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Dashboard Explore view embedded in the shell
+
+The dashboard's Explore navigation no longer leaves `/app` or mounts the
+standalone public Explore route. `components/dashboard/dashboard-shell.tsx`
+now owns a local `DashboardView` state and renders either the existing
+dashboard content or an embedded Explore gallery inside the current
+`SidebarInset`.
+
+- `components/dashboard/sidebar-nav.tsx` treats Dashboard and Explore as
+  local view controls. They render accessible buttons, not links, so selecting
+  either view does not change the URL, reload the route or reset the wallet
+  context.
+- `components/dashboard/dashboard-explore-view.tsx` reuses the existing
+  `ExploreCard` and `GALLERY_POAPS` data while keeping pagination in local
+  state. It includes a Back to dashboard control, preserves the desktop
+  sidebar, and uses the existing dashboard entrance animation.
+- `components/navigation/dock-nav.tsx` receives the same local view state, so
+  Explore behaves consistently below `lg`. Other destinations remain normal
+  links and retain their existing route behavior.
+- The standalone `/poaps` route remains available for public browsing from
+  direct links and public navigation. Only the dashboard's Explore control is
+  intentionally embedded.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Explore surface
+
+The public Explore experience now exists at `/poaps`, `/poaps/[id]` and
+`/poaps/[id]/claim`. It uses the existing `PoapEvent` contract-shaped data
+from `lib/poap-data.ts`, so browsing remains wallet-free and the later chain
+layer can replace the source without changing the page-facing model.
+
+- `components/explore/public-header.tsx` provides a compact public header with
+  links to the landing page, documentation, dashboard and theme toggle.
+- `components/explore/explore-page.tsx` renders the gallery with six events per
+  page. Pagination is URL-based through `?page=`, with bounds clamped to the
+  available page count and linkable previous/next controls.
+- `components/explore/explore-card.tsx` exposes the event ID, artwork, public or
+  invite-only status, date, location, collectors, distribution state and
+  soulbound or transferable state. Empty date and location fields have explicit
+  labels rather than blank space.
+- `components/explore/poap-detail-page.tsx` renders the full artwork, event
+  metadata, creator, collector count, public mint state, transfer behavior,
+  contract link and claim-page link. The SSTORE2 pointer is not rendered as an
+  image; the placeholder artwork field stands in for the later `uri()` decode.
+- `components/explore/claim-page.tsx` supports `/poaps/[id]/claim?method=allowlist`
+  and `?method=signature`, validates the event ID, and uses the existing wallet
+  seam to require a connected address. It intentionally does not pretend to
+  submit a transaction while the wallet layer is still a local session state.
+- `components/explore/mint-action.tsx` gives public events a working connect,
+  prepare and confirmation flow without claiming that a chain write occurred.
+  Non-public events explain that an allowlist proof or recipient-bound
+  signature is required.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
 ### Documentation desktop sidebar visibility correction
 
 The mobile disclosure fix initially reused one native `<details>` tree for
