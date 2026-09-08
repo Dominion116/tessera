@@ -193,6 +193,81 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Documentation desktop sidebar visibility correction
+
+The mobile disclosure fix initially reused one native `<details>` tree for
+both breakpoints. Because a closed `<details>` suppresses all descendants,
+desktop responsive display classes could not reveal the sidebar until the
+mobile disclosure had been opened.
+
+`components/docs/docs-shell.tsx` now renders two breakpoint-specific
+presentations without changing the navigation data or article structure. The
+desktop `lg:block` panel is always visible and remains sticky. The mobile
+`lg:hidden` panel is the collapsible `<details>` disclosure. Shared link markup
+is generated once inside the component and reused by both presentations. The
+`Back to app` link remains available in both versions.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Documentation mobile navigation correction
+
+The documentation sidebar previously rendered its complete section list in
+normal mobile flow. On narrow screens that list consumed most of the viewport
+before the article began, making the documentation content appear hidden.
+
+- `components/docs/docs-shell.tsx` now uses a native `<details>` disclosure for
+  the documentation navigation below `lg`. Mobile shows one compact
+  `Documentation sections` summary row and expands the list only when the user
+  requests it. Desktop keeps the complete sticky sidebar unchanged.
+- The disclosure uses the browser's native keyboard and assistive-technology
+  behavior, with a visible focus ring and a rotating chevron to communicate
+  state. The navigation list remains available to screen readers when opened.
+- A persistent `Back to app` link now points to `/app` from every documentation
+  page. Users can return to the main application directly after reading an
+  article instead of relying on browser history.
+- `min-w-0` was added to the docs aside so long labels cannot force the grid
+  wider than the viewport. The article grid retains its desktop two-column
+  layout and its mobile single-column flow.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Technical documentation section
+
+The documentation surface now exists at `/docs` with seven linked articles
+under the overview: getting started, creating a POAP, distribution methods,
+deadlines and permissions, contract reference, verification and proof formats,
+and application architecture. The content is data-driven in
+`components/docs/docs-data.tsx`, so the sidebar, breadcrumbs, metadata and
+pagination all derive from one ordered navigation list.
+
+- `components/docs/docs-shell.tsx` provides the persistent section index,
+  semantic breadcrumb navigation, article layout and previous/next pagination.
+  The sidebar remains sticky on large screens and becomes a normal compact
+  navigation block on smaller screens.
+- `app/docs/page.tsx` owns the overview route. `app/docs/[...slug]/page.tsx`
+  resolves the remaining articles, generates per-page metadata and returns the
+  framework's not-found response for unknown paths.
+- The articles document the actual Base Sepolia deployment, ERC-1155 event and
+  token identity, `registerEvent` inputs, UTF-8 byte limits, JSON-unsafe
+  characters, SVG and SSTORE2 behavior, public and allowlist minting,
+  recipient-bound signatures, creator airdrops, the day-30 and day-37 windows,
+  custom error handling, ownership checks, and the current wallet and data
+  seams.
+- The allowlist article records the contract's single-hashed raw-address leaf
+  scheme and includes the packed encoding shape required by a compatible
+  client. The signature article explicitly rules out one shared poster
+  signature because the recipient address is part of the digest.
+- No MDX dependency was added. The current project has no MDX content pipeline,
+  and typed React article data keeps the route self-contained while preserving
+  code blocks, tables, hierarchy and project-specific formatting. MDX can be
+  introduced later if the documentation volume requires authored files or
+  syntax highlighting.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
 ### What a POAP is and How it works visual refinement
 
 The two explanatory landing sections received a visual cleanup without
