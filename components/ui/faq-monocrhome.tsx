@@ -249,8 +249,8 @@ const FAQ1 = () => {
           <ul className="space-y-4">
             {faqs.map((item, index) => {
               const open = activeIndex === index;
-              const panelId = `faq-panel-${index}`;
               const buttonId = `faq-trigger-${index}`;
+              const panelId = `faq-panel-${index}`;
 
               return (
                 <li
@@ -260,6 +260,7 @@ const FAQ1 = () => {
                   onMouseLeave={clearCardGlow}
                 >
                   <div
+                    aria-hidden="true"
                     className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
                       open ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                     }`}
@@ -269,15 +270,11 @@ const FAQ1 = () => {
                     }}
                   />
 
-                  <button
-                    type="button"
-                    id={buttonId}
-                    aria-controls={panelId}
-                    aria-expanded={open}
-                    onClick={() => toggleQuestion(index)}
-                    className="relative flex w-full items-start gap-6 px-8 py-7 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
-                  >
-                    <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-card transition-all duration-500 group-hover:scale-105">
+                  <div className="relative flex items-start gap-6 px-8 pt-7 pb-7">
+                    <span
+                      aria-hidden="true"
+                      className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-card transition-all duration-500 group-hover:scale-105"
+                    >
                       <span
                         className={`pointer-events-none absolute inset-0 rounded-full border border-teal-400/50 opacity-30 ${
                           open ? "animate-ping" : ""
@@ -306,13 +303,22 @@ const FAQ1 = () => {
                       </svg>
                     </span>
 
-                    <div className="flex flex-1 flex-col gap-4">
+                    <div className="flex min-w-0 flex-1 flex-col gap-4">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <h3 className="text-lg font-medium leading-tight sm:text-xl">
-                          {item.question}
+                        <h3 className="min-w-0">
+                          <button
+                            type="button"
+                            id={buttonId}
+                            aria-expanded={open}
+                            aria-controls={panelId}
+                            onClick={() => toggleQuestion(index)}
+                            className="-m-1 cursor-pointer rounded-lg p-1 text-left text-lg font-semibold leading-tight transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400 sm:text-xl"
+                          >
+                            {item.question}
+                          </button>
                         </h3>
                         {item.meta ? (
-                          <span className="inline-flex w-fit items-center rounded-full border border-border/70 px-3 py-1 text-[10px] uppercase tracking-[0.35em] text-fg-tertiary sm:ml-auto">
+                          <span className="inline-flex w-fit items-center rounded-full border border-border/70 px-3 py-1 text-xs uppercase tracking-[0.35em] text-fg-tertiary sm:ml-auto">
                             {item.meta}
                           </span>
                         ) : null}
@@ -323,13 +329,13 @@ const FAQ1 = () => {
                         role="region"
                         aria-labelledby={buttonId}
                         className={`overflow-hidden text-base leading-7 text-fg-secondary transition-[max-height] duration-500 ease-out ${
-                          open ? "max-h-64" : "max-h-0"
+                          open ? "max-h-96" : "max-h-0"
                         }`}
                       >
                         <p className="pr-2">{item.answer}</p>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 </li>
               );
             })}

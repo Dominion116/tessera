@@ -20,6 +20,8 @@ const HeroSection: React.FC = () => {
         autoPlay
         muted
         playsInline
+        aria-hidden="true"
+        tabIndex={-1}
       >
         <source
           src="https://images.shadcnspace.com/assets/video/hero05-banner-video.mp4"
@@ -28,16 +30,16 @@ const HeroSection: React.FC = () => {
       </video>
 
       {/* Overlay to improve text readability */}
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div aria-hidden="true" className="absolute inset-0 bg-black/50"></div>
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 xl:px-16">
         <div className="flex flex-col gap-4 sm:gap-6 py-10 sm:py-16">
           <div className="flex items-start gap-2.5 md:gap-4">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0">
+            <div aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11 shrink-0">
               <motion.img
                 src={"/tessera-mark.svg"}
-                alt="icon"
+                alt=""
                 width={44}
                 height={44}
                 animate={{ rotate: 360 }}
@@ -62,7 +64,7 @@ const HeroSection: React.FC = () => {
             <div>
               <div className="bg-teal-400 rounded-full p-1 pl-8">
                 <div className="lg:p-3 p-2 bg-white text-black rounded-full">
-                  <ArrowUpRight size={24} />
+                  <ArrowUpRight size={24} aria-hidden="true" />
                 </div>
               </div>
             </div>

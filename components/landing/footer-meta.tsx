@@ -10,7 +10,7 @@ const PILL_CLASSES =
 
 const FooterMeta = () => {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-24 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pb-32 lg:px-8 xl:px-16">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-24 sm:flex-row sm:items-center sm:justify-between sm:pb-32 xl:px-16">
       <p className="text-sm text-teal-100/60">
         MIT licensed. Open source, and deployable by anyone.
       </p>

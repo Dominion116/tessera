@@ -12,13 +12,13 @@ const FooterBrand = () => {
       </p>
       <dl className="flex flex-col gap-1 pt-2 text-sm">
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <dt className="text-teal-100/40">Contract</dt>
+          <dt className="text-teal-100/50">Contract</dt>
           <dd className="font-mono tabular-nums text-teal-100/80 select-all">
             {shortAddress(CONTRACT_ADDRESS)}
           </dd>
         </div>
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <dt className="text-teal-100/40">Network</dt>
+          <dt className="text-teal-100/50">Network</dt>
           <dd className="tabular-nums text-teal-100/80">
             Base, chain {CHAIN_ID}
           </dd>

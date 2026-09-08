@@ -79,7 +79,7 @@ const OnePerWalletCard = () => (
   <Card className={CARD_SURFACE}>
     <CardContent className="flex h-full flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <h3 className="text-lg font-semibold leading-tight">One badge per wallet</h3>
+        <h3 className="text-xl font-semibold">One badge per wallet</h3>
         <p className="text-base leading-7 text-fg-secondary">
           Every mint route checks the same claim record, so nobody collects the
           same POAP twice, whichever way they arrived.
@@ -131,7 +131,7 @@ const RequiredFieldsCard = () => (
   <Card className={CARD_SURFACE}>
     <CardContent className="flex h-full flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-lg font-semibold leading-tight">
+        <h3 className="text-xl font-semibold">
           A name and a picture is enough
         </h3>
         <Badge variant="outline" className="shrink-0">
@@ -151,7 +151,7 @@ const RequiredFieldsCard = () => (
 const PortableBadgeCard = () => (
   <Card className={CARD_SURFACE}>
     <CardContent className="flex h-full flex-col justify-end gap-3">
-      <h3 className="text-lg font-semibold leading-tight">
+      <h3 className="text-xl font-semibold">
         Checkable from outside this app
       </h3>
       <p className="text-base leading-7 text-fg-secondary">
