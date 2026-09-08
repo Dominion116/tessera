@@ -24,8 +24,14 @@ const navigationData: NavLinkItem[] = [
 const LandingPage = () => {
   return (
     <>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-background focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:ring-2 focus:ring-teal-400"
+      >
+        Skip to content
+      </a>
       <Navbar navigationData={navigationData} />
-      <main className="relative z-10 -mt-20 bg-background">
+      <main id="main" className="relative z-10 -mt-20 bg-background">
         <HeroSection />
         <WhatItIsSection />
         <HowItWorksSection />

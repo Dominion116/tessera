@@ -57,10 +57,10 @@ const Header = ({ navigationData }: NavbarProps) => {
           "relative mx-auto max-w-7xl px-4 xl:px-16 flex item-center justify-between w-full"
         )}
       >
-        <Link href="/">
+        <Link href="/" aria-label="Tessera, home">
           <img
             src="/tessera-wordmark.svg"
-            alt="brand logo"
+            alt=""
             width={147}
             height={40}
           />
@@ -77,46 +77,55 @@ const Header = ({ navigationData }: NavbarProps) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMenuOpen(false)}
+                aria-hidden="true"
                 className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
               />
             )}
           </AnimatePresence>
-            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-              {/* Trigger */}
-              <DropdownMenuTrigger className="bg-white text-black flex items-center justify-center rounded-full sm:h-12 sm:w-12 h-10 w-10 p-2.5 sm:p-4 outline-none cursor-pointer">
-                <Equal size={16} />
-              </DropdownMenuTrigger>
-              {/* Content */}
-              <DropdownMenuContent
-                align="end"
-                sideOffset={20}
-                className="min-w-xs sm:min-w-sm bg-background py-8 px-6 shadow-lg rounded-3xl border-none -mt-16"
-              >
-                <div className="flex flex-col gap-6">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <p className="text-lg font-medium text-foreground">Menu</p>
-                    <button
-                      onClick={() => setMenuOpen(false)}
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                  <hr className="border-border" />
-                  {/* Navigation */}
-                  <ul className="flex flex-col gap-4 pb-4">
-                    {navigationData.map((menuItem, index) => (
-                      <NavLink key={index} item={menuItem} />
-                    ))}
-                  </ul>
-                  {/* Open App, for viewports where the nav button is hidden */}
-                  <div className="sm:hidden">
-                    <OpenAppButton />
-                  </div>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            {/* Trigger */}
+            <DropdownMenuTrigger
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="bg-white text-black flex items-center justify-center rounded-full sm:h-12 sm:w-12 h-10 w-10 p-2.5 sm:p-4 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              <Equal size={16} aria-hidden="true" />
+            </DropdownMenuTrigger>
+            {/* Content */}
+            <DropdownMenuContent
+              align="end"
+              sideOffset={20}
+              className="min-w-xs sm:min-w-sm bg-background py-8 px-6 shadow-lg rounded-3xl border-none -mt-16"
+            >
+              <div className="flex flex-col gap-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-medium text-foreground">Menu</p>
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X size={20} aria-hidden="true" />
+                  </button>
                 </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <hr className="border-border" />
+                {/* Navigation */}
+                <ul className="flex flex-col gap-4 pb-4">
+                  {navigationData.map((menuItem, index) => (
+                    <NavLink
+                      key={index}
+                      item={menuItem}
+                      onClick={() => setMenuOpen(false)}
+                    />
+                  ))}
+                </ul>
+                {/* Open App, for viewports where the nav button is hidden */}
+                <div className="sm:hidden">
+                  <OpenAppButton />
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </motion.nav>
     </header>

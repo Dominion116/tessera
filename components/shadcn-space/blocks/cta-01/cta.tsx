@@ -1,9 +1,7 @@
 "use client";
 import { useRef } from "react";
-import Link from "next/link";
 import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
+import ArrowButton from "@/components/landing/arrow-button";
 import { CHAIN_ID } from "@/lib/poap-data";
 
 type CTAProps = {
@@ -32,7 +30,7 @@ const CTA = ({ className }: CTAProps) => {
               className="flex flex-col gap-6 items-center mx-auto"
             >
               <div className="flex flex-col gap-3 items-center text-center">
-                <h2 className="text-3xl md:text-5xl font-medium">
+                <h2 className="text-3xl font-semibold md:text-4xl">
                   Register an event now, hand out badges tonight.
                 </h2>
                 <p className="max-w-2xl mx-auto">
@@ -41,19 +39,7 @@ const CTA = ({ className }: CTAProps) => {
                   plain language before you commit to it.
                 </p>
               </div>
-              <Button
-                asChild
-                className="relative text-sm font-medium rounded-full h-12 p-1 ps-6 pe-14 group transition-all duration-500 hover:ps-14 hover:pe-6 w-fit overflow-hidden hover:bg-primary/80 cursor-pointer"
-              >
-                <Link href="/app/create">
-                  <span className="relative z-10 transition-all duration-500">
-                    Create a POAP
-                  </span>
-                  <div className="absolute right-1 w-10 h-10 bg-background text-foreground rounded-full flex items-center justify-center transition-all duration-500 group-hover:right-[calc(100%-44px)] group-hover:rotate-45">
-                    <ArrowUpRight size={16} />
-                  </div>
-                </Link>
-              </Button>
+              <ArrowButton href="/app/create">Create a POAP</ArrowButton>
             </motion.div>
           </div>
         </div>

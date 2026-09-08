@@ -58,8 +58,8 @@ components/shadcn-space/button/button-01.tsx    Open App button, links to /app
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
 components/landing/landing-page.tsx             navbar, section order, footer
 components/landing/{section,section-heading,section-footer,feature-card,
-                                                reveal,wordmark}.tsx, the
-                                                shared section primitives
+                                                reveal,wordmark,arrow-button}.tsx,
+                                                the shared section primitives
 components/landing/what-it-is-section.tsx       supplied bento grid, five facts
                                                 and the browse note
 components/landing/how-it-works-section.tsx     register, hand out, prove
@@ -157,6 +157,70 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Consistency, accessibility and modularity pass
+
+A pass over the composed landing page in the owner's terms: unify drift in
+typography and spacing, keep the supplied blocks' visuals intact while fixing
+real semantic and keyboard defects, and retire dead code. Decisions:
+
+- **Seven superseded section files deleted.** The cleanup earlier entries
+  deferred is done: `facts-strip`, `distribution-section`,
+  `soulbound-section`, `lifecycle-section`, `integrations-section`,
+  `farcaster-section` and `cta-section` were all still on disk, tracked, and
+  imported by nothing after the consolidation passes. `lifecycle-timeline.tsx`
+  stays, still earmarked for the dashboard.
+- **One arrow pill button owns the page's section actions.** The closing
+  CTA's arrow pill was written out three times: in the CTA block, in
+  `SectionFooter` (copied "verbatim" because supplied blocks stayed fixed),
+  and in the Open App button. `components/landing/arrow-button.tsx` now holds
+  that markup once, and all three call sites render it. The CTA block and the
+  Open App button changed only their internals; the delivered look is
+  unchanged. This reverses the earlier "copied rather than shared" decision
+  because the shared component is now the point of the task.
+- **FAQ items now use valid disclosure markup.** The delivered block put the
+  answer panel, headings and paragraphs inside the toggle `<button>`, which is
+  invalid nesting and made the whole answer part of the control's label. Each
+  card is now the standard disclosure shape: the question is an `<h3>`
+  wrapping the toggle button, and the answer is a labelled `role="region"`
+  sibling that opens beneath it. The button carries `aria-expanded` and
+  `aria-controls`, and the answer text is selectable again now that it is no
+  longer inside a button. The meta chips stepped from `text-[10px]` to
+  `text-xs`, the question weight is `font-semibold` like every other card
+  title, the plus icon and the ping ring are `aria-hidden`, and the answer's
+  open height guard grew to `max-h-96` so long answers are not clipped at
+  320 px.
+- **Nav and hero controls are labelled.** The hamburger trigger and the close
+  button have accessible names (open or close menu), the dropdown backdrop is
+  `aria-hidden`, and decorative images no longer announce: the nav wordmark
+  link carries `aria-label="Tessera, home"`, and the menu mark, hero mark and
+  hero arrow are `aria-hidden` with empty alt. The hero background video is
+  `aria-hidden` too. The hamburger and the menu links gained visible focus
+  rings, the menu link now reveals its spinning mark on keyboard focus as well
+  as hover, and choosing a link closes the menu.
+- **A skip link opens the landing page.** The first tab stop jumps to
+  `#main`, which the landing page's `<main>` now carries. Standard for a page
+  whose first interactive element is a menu button.
+- **Type drift pulled back to the site scale.** The CTA headline was
+  `text-3xl md:text-5xl font-medium`; every other section headline is
+  `text-3xl md:text-4xl font-semibold`, so the CTA now uses the same line.
+  Three what-it-is card titles were `text-lg` while their neighbours were
+  `text-xl`; the grid now reads one title size across the bento.
+- **Footer rhythm and contrast.** The footer band and the meta row stepped
+  their horizontal padding at `sm` and `lg` (`sm:px-6 lg:px-8`) while every
+  section and the navbar stay at `px-4 xl:px-16`, so the footer columns sat
+  outside the content column at intermediate widths. Both now follow the
+  shared rhythm. The faint `teal-100/40` definition labels rose to `/50` so
+  small text clears contrast on the teal band.
+
+Files touched: the seven deletions above, `arrow-button.tsx` created,
+`section-footer.tsx`, the CTA block, `button-01.tsx`, `faq-monocrhome.tsx`,
+the hero block's `navbar.tsx`, `navlink.tsx` and `hero.tsx`,
+`what-it-is-section.tsx`, `site-footer.tsx`, `footer-meta.tsx`,
+`footer-brand.tsx`, `landing-page.tsx`.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
 
 ### Sticky footer corrected for mobile, nav columns horizontal
 
