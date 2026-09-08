@@ -25,7 +25,7 @@ const LandingPage = () => {
   return (
     <>
       <Navbar navigationData={navigationData} />
-      <main className="-mt-20">
+      <main className="relative z-10 -mt-20 bg-background">
         <HeroSection />
         <WhatItIsSection />
         <HowItWorksSection />

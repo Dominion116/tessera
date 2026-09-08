@@ -158,6 +158,34 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Sticky footer pattern applied to the site footer
+
+The footer now uses the Sticky Footer pattern from Fancy Components. That
+library ships it as a technique rather than a component, so nothing was
+vendored and no dependency was added: the doc is explicit that three Tailwind
+classes are the whole mechanism.
+
+- **`site-footer.tsx`** swapped `relative` for `sticky bottom-0 z-0`. The
+  footer pins to the bottom of the viewport for the entire scroll and slides
+  out from behind the page content over the final stretch, instead of sitting
+  in flow until you reach it. `overflow-hidden` and the teal-950 ground are
+  unchanged, and the absolutely positioned wordmark still anchors to the
+  footer, sticky being a positioned ancestor.
+- **`landing-page.tsx`** promoted `main` to the covering layer,
+  `relative z-10 bg-background`. The background is required, not cosmetic:
+  the muted section bands are `bg-muted/40`, translucent, and without an
+  opaque main the pinned footer would show teal through them. Over the body's
+  own `bg-background` the layer is visually identical in both themes.
+- **Consequence of the pattern:** the footer is always behind `main` in the
+  viewport, so its links are clickable only once it is revealed at the end of
+  the scroll. Pointer events land on the page content otherwise, which is the
+  intended behaviour.
+- The pattern is scoped to the landing composition. `/hero-03` and `/cta-01`
+  render without the footer and are unaffected.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 with the two accepted
+`no-img-element` warnings, unchanged.
+
 ### Gallery bento replaced with the stacked card carousel
 
 The bento grid is gone from `#gallery`. It is now `carousel-07` from the shadcn
