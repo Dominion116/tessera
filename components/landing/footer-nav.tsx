@@ -28,7 +28,7 @@ const COLUMNS = [
 
 const FooterNav = () => {
   return (
-    <nav aria-label="Footer" className="grid gap-10 sm:grid-cols-3">
+    <nav aria-label="Footer" className="grid grid-cols-3 gap-x-4 sm:gap-x-10">
       {COLUMNS.map((column) => (
         <div key={column.heading} className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-white/90">

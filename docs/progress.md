@@ -158,6 +158,39 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Sticky footer corrected for mobile, nav columns horizontal
+
+Correction to the sticky footer entry below. A pinned footer taller than the
+viewport hides its own top permanently: the pattern reveals the footer only
+over the final stretch of scroll, and at maximum scroll the viewport shows
+just the last viewport-height of it. On phones the footer stacks brand, nav,
+meta and wordmark to roughly 1000 px against a ~650 px viewport, so the
+brand block and the top of the columns could never be scrolled into view.
+
+- **The sticky reveal now runs only at `lg`.** `site-footer.tsx` is
+  `relative overflow-hidden bg-teal-950 lg:sticky lg:bottom-0 lg:z-0`. At
+  `lg` the two-column footer is about 580 px tall, under every real
+  viewport at that width, so the reveal is safe there. Below `lg` the
+  footer sits in normal flow after `main`, fully scrollable, and the
+  wordmark's absolute anchoring is unaffected because `relative` returns.
+  `main` keeps `relative z-10 bg-background` for the `lg` case, where it
+  is still the covering layer.
+- **The footer nav columns go horizontal on mobile.** `footer-nav.tsx`
+  changed from `grid gap-10 sm:grid-cols-3` (one stacked column below
+  `sm`, three from `sm`) to `grid grid-cols-3 gap-x-4 sm:gap-x-10`, so
+  Explore, Create and Learn always sit side by side. Labels wrap within
+  their narrow columns at 320 px, which only costs line height. The
+  stacked columns were the largest single block of the mobile footer
+  height, about 470 px of it; the row is about 150. Each column's links
+  stay a vertical list inside its column, so the grouping still reads.
+- The reveal is a large-screen flourish now, which matches how the
+  component library itself frames the pattern: their demo assumes a
+  footer that fits the viewport. Mobile and tablet get the standard
+  scroll-to-the-end footer.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 with the two accepted
+`no-img-element` warnings, unchanged.
+
 ### Sticky footer pattern applied to the site footer
 
 The footer now uses the Sticky Footer pattern from Fancy Components. That
