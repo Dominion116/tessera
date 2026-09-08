@@ -66,7 +66,10 @@ components/landing/how-it-works-section.tsx     register, hand out, prove
 components/lifecycle-timeline.tsx               day 0, day 30, day 37 track,
                                                 milestones as props, kept for
                                                 the dashboard
-components/landing/gallery-section.tsx          bento gallery, See the full gallery
+components/landing/gallery-section.tsx          carousel gallery, See the full gallery
+components/ui/carousel-07.tsx                   stacked card carousel from the
+                                                shadcn registry, holding the
+                                                gallery's placeholder POAPs
 components/ui/faq-monocrhome.tsx               supplied FAQ block, seven questions
                                                 with meta chips, teal accent on
                                                 site tokens
@@ -89,6 +92,7 @@ lib/format.ts                 UTC date, thousands, short address, SVG data URL
 lib/poap-data.ts              placeholder events shaped like `events(uint256)`
 public/tessera-mark.svg       four-tile mosaic, favicon and spinning nav mark
 public/tessera-wordmark.svg   nav logo
+public/nft/                   six generated 2:3 mosaic SVGs, carousel artwork
 package.json, package-lock.json, tsconfig.json, components.json
 next.config.ts, postcss.config.mjs, eslint.config.mjs
 .env.example, .gitignore, LICENSE, README.md
@@ -104,7 +108,9 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   `/app/create`, `/app/collection`, `/app/created`, `/poaps`, `/docs`. They 404
   until those phases land. The hrefs are correct for the surface in
   `docs/agent.md` §7, so nothing needs rewiring later.
-- Gallery tiles are placeholder events from `lib/poap-data.ts`, not chain reads.
+- Gallery slides are placeholder events with generated SVG artwork in
+  `public/nft/`, not chain reads. `lib/poap-data.ts` still feeds
+  WhatItIs.
 - `app/opengraph-image.tsx` renders through `next/og`, which was never executed
   here because builds are not run locally. Worth eyeballing once deployed.
 - Vendored contracts cannot be compiled here: Foundry is not installed, and
@@ -151,6 +157,54 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Gallery bento replaced with the stacked card carousel
+
+The bento grid is gone from `#gallery`. It is now `carousel-07` from the shadcn
+registry at `components/ui/carousel-07.tsx`: six cards in an overlapping stack,
+dragged or swiped through, spring-settled, the centred card carrying the
+readable copy. No packages were installed; `motion` 13.1.1 and
+`class-variance-authority` 0.7.1 were already pinned.
+
+- **Artwork is six generated SVGs in `public/nft/`, one per event.** Each is a
+  2:3 portrait mosaic on that event's own gradient pair from
+  `lib/poap-data.ts`, over the same 50 px tesserae grid with teal and slate
+  accents as the nav mark, plus a ghost event number, so the stack reads as
+  one collection on one palette. They stand in for the base64 SVG `uri()`
+  returns; the chain layer swaps the slides array for real reads.
+- **The supplied badge file was not copied.** The repo's
+  `components/ui/badge.tsx` is a newer registry version carrying the `accent`
+  variant and `asChild`, both in use elsewhere, and the supplied one is a
+  subset of it. The carousel uses the existing badge with the bento tile
+  treatment: `outline` variant, `bg-background/85`, backdrop blur, and the
+  `Lock` icon on soulbound slides.
+- **Deviations from the delivered carousel, each forced by the rules.** Slide
+  content is POAP-specific. `rounded-2xl` became `rounded-xl` and `font-bold`
+  became `font-semibold`, the site's card radius and heading weight. The
+  italic description weight went to normal. The image hover zoom is dropped:
+  the cards are `pointer-events-none` under the drag surface, so that hover
+  could never fire, and its 700 ms exceeded the 400 ms motion ceiling anyway.
+  The badge's `bg-white/95 text-black` became theme-following
+  `bg-background/85`.
+- **Two additions.** The drag surface is focusable and arrow keys move the
+  stack, so the carousel is keyboard-operable, with a focus ring on the
+  surface. Under `prefers-reduced-motion`, drags snap straight to the target
+  with `set()` instead of the spring; pointer tracking during a drag stays,
+  because it is direct manipulation. `touch-action: pan-y` on the drag surface
+  keeps vertical swipes scrolling the page on touch.
+- **The bento's per-tile facts (collector count, date, event number) left the
+  landing page.** A carousel card has room for title, description and status
+  only. The lead still promises those facts, and the See the full gallery
+  action leads to `/poaps` for them.
+- **One forced rewrite inside the supplied block.** The delivered component
+  measured `window.innerWidth` with `setState` inside an effect, and
+  `react-hooks/set-state-in-effect` rejects that as an error, the same rule
+  that forced the theme-toggle rewrite. Replaced with `useSyncExternalStore`
+  over a resize subscription, server snapshot 0 so first paint keeps the
+  mobile config. Same behaviour, no effect at all.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings.
 
 ### Section footer buttons unified with the closing panel
 

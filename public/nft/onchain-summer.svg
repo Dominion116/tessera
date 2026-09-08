@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Placeholder artwork for Onchain Summer Block Party">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1c1917"/>
+      <stop offset="1" stop-color="#7c2d12"/>
+    </linearGradient>
+    <pattern id="t" width="50" height="50" patternUnits="userSpaceOnUse">
+      <rect x="4" y="4" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="600" fill="url(#g)"/>
+  <rect width="400" height="600" fill="url(#t)"/>
+  <circle cx="200" cy="225" r="62" fill="#2dd4bf" fill-opacity="0.18"/>
+  <circle cx="200" cy="225" r="86" fill="none" stroke="#2dd4bf" stroke-opacity="0.32" stroke-width="2"/>
+  <rect x="54" y="104" width="42" height="42" rx="6" fill="#2dd4bf" fill-opacity="0.5"/>
+  <rect x="304" y="404" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.2"/>
+  <text x="200" y="300" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="240" font-weight="700" fill="#f8fafc" fill-opacity="0.07">33</text>
+</svg>

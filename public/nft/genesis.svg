@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Placeholder artwork for Genesis">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#020617"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <pattern id="t" width="50" height="50" patternUnits="userSpaceOnUse">
+      <rect x="4" y="4" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="600" fill="url(#g)"/>
+  <rect width="400" height="600" fill="url(#t)"/>
+  <circle cx="200" cy="300" r="130" fill="none" stroke="#2dd4bf" stroke-opacity="0.22" stroke-width="2"/>
+  <circle cx="200" cy="300" r="90" fill="none" stroke="#f8fafc" stroke-opacity="0.12" stroke-width="2"/>
+  <circle cx="200" cy="300" r="52" fill="#2dd4bf" fill-opacity="0.14"/>
+  <rect x="304" y="104" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.22"/>
+  <rect x="54" y="454" width="42" height="42" rx="6" fill="#2dd4bf" fill-opacity="0.55"/>
+  <text x="200" y="300" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="240" font-weight="700" fill="#f8fafc" fill-opacity="0.07">0</text>
+</svg>

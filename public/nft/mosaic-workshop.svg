@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Placeholder artwork for Tessera Mosaic Workshop">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <pattern id="t" width="50" height="50" patternUnits="userSpaceOnUse">
+      <rect x="4" y="4" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="600" fill="url(#g)"/>
+  <rect width="400" height="600" fill="url(#t)"/>
+  <rect x="140" y="240" width="120" height="120" rx="12" transform="rotate(45 200 300)" fill="#2dd4bf" fill-opacity="0.16"/>
+  <rect x="170" y="270" width="60" height="60" rx="8" transform="rotate(45 200 300)" fill="#2dd4bf" fill-opacity="0.45"/>
+  <rect x="304" y="54" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.2"/>
+  <rect x="54" y="504" width="42" height="42" rx="6" fill="#f8fafc" fill-opacity="0.2"/>
+  <text x="200" y="300" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="240" font-weight="700" fill="#f8fafc" fill-opacity="0.07">19</text>
+</svg>
