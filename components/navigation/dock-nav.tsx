@@ -38,7 +38,7 @@ const DockNav = () => {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "press flex min-h-14 flex-col items-center justify-center gap-1 px-1 pt-2 pb-3 text-xs outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-inset",
+                  "press flex min-h-14 flex-col items-center justify-center gap-1 px-1 pt-2 pb-3 text-xs outline-none transition-colors duration-180 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-inset",
                   active
                     ? "font-medium text-teal-600 dark:text-teal-300"
                     : "text-fg-tertiary transition-colors hover:text-fg-secondary"

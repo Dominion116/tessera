@@ -25,7 +25,7 @@ import { ZERO_ROOT } from "@/lib/poap-data";
  * artwork stands in for the base64 SVG `uri()` returns.
  */
 const EventsTable = () => (
-  <Card className="tile-grout col-span-12 gap-4 border-border/70 bg-card/60 py-5">
+  <Card className="dashboard-panel col-span-12 gap-4 py-5">
     <CardHeader>
       <CardTitle>Your events</CardTitle>
       <CardDescription>
@@ -47,7 +47,10 @@ const EventsTable = () => (
           {[...DASHBOARD_EVENTS]
             .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
             .map((event) => (
-              <TableRow key={String(event.eventId)}>
+              <TableRow
+                key={String(event.eventId)}
+                className="transition-colors duration-180 hover:bg-teal-400/[0.04]"
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     {/* Inline SVG data URL, which next/image cannot optimize. */}

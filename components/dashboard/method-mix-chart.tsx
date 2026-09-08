@@ -32,7 +32,7 @@ const chartConfig = {
  * batch airdrop. Every route keeps working past day 37 except door codes.
  */
 const MethodMixChart = () => (
-  <Card className="tile-grout col-span-12 gap-4 border-border/70 bg-card/60 py-5 xl:col-span-4">
+  <Card className="dashboard-panel col-span-12 gap-4 py-5 xl:col-span-4">
     <CardHeader>
       <CardTitle>How people mint</CardTitle>
       <CardDescription>

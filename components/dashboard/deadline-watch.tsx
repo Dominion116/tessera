@@ -81,7 +81,7 @@ const DeadlineWatch = () => {
       {nearest ? (
         <LifecycleTimeline milestones={milestonesFor(nearest)} />
       ) : (
-        <Card className="tile-grout border-border/70 bg-card/60 py-5">
+        <Card className="dashboard-panel py-5">
           <CardHeader>
             <CardTitle>Nothing freezes soon</CardTitle>
             <CardDescription>
@@ -92,7 +92,7 @@ const DeadlineWatch = () => {
         </Card>
       )}
 
-      <Card className="tile-grout border-border/70 bg-card/60 py-5">
+      <Card className="dashboard-panel py-5">
         <CardHeader>
           <CardTitle>Other approaching freezes</CardTitle>
           <CardDescription>
@@ -109,7 +109,7 @@ const DeadlineWatch = () => {
             others.map((row) => (
               <div
                 key={String(row.event.eventId)}
-                className="flex items-center justify-between gap-4 rounded-lg border border-border/70 px-4 py-3"
+                className="flex items-center justify-between gap-4 rounded-lg border border-border/70 px-4 py-3 transition-colors duration-180 hover:border-teal-400/30 hover:bg-teal-400/[0.04]"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">

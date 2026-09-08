@@ -26,7 +26,7 @@ const chartConfig = {
  * slot of the chart palette in both themes, so the accent holds.
  */
 const MintActivityChart = () => (
-  <Card className="tile-grout col-span-12 gap-4 border-border/70 bg-card/60 py-5 xl:col-span-8">
+  <Card className="dashboard-panel col-span-12 gap-4 py-5 xl:col-span-8">
     <CardHeader>
       <CardTitle>Mint activity</CardTitle>
       <CardDescription>

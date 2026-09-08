@@ -49,11 +49,11 @@ const CARDS: StatCard[] = [
  * tabular so they hold their width when the source becomes live reads.
  */
 const StatCards = () => (
-  <div className="col-span-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+  <div className="dashboard-stats col-span-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
     {CARDS.map((card) => (
       <Card
         key={card.label}
-        className="tile-grout gap-4 border-border/70 bg-card/60 py-5"
+        className="dashboard-panel gap-4 py-5"
       >
         <CardContent className="flex flex-col gap-2">
           <div className="flex items-center gap-2.5">

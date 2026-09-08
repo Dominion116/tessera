@@ -193,6 +193,31 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Dashboard visual refinement
+
+The dashboard structure and data flow stayed unchanged, but its visual
+language was tightened to remove the repeated generated-card feeling. A
+shared `dashboard-panel` utility now gives the charts, table and stat cards a
+quieter translucent surface, alpha border, restrained stacked shadow and a
+subtle one-pixel hover lift. The utility uses the existing theme tokens, so
+light and dark mode do not introduce a second palette.
+
+- The dashboard heading now has a small `Creator overview` eyebrow, tighter
+  display tracking, a readable measure and a bottom rule that separates page
+  context from the data blocks.
+- A single 220 ms ease-out entrance animation runs through the existing grid
+  children, with a short stagger. Stat cards receive a second, shorter
+  internal stagger so the row resolves in sequence rather than appearing as
+  four identical panels at once.
+- Table rows and approaching-deadline rows now use a low-contrast teal hover
+  wash and 180 ms color transition. Sidebar and dock navigation receive the
+  same transition timing, while the existing global reduced-motion rule
+  disables transforms and compresses transitions for users who request it.
+- No component hierarchy, route, data source or interaction behavior changed.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
 ### Dashboard home, dock navigation, wallet gate
 
 `/app` exists now: a wallet gate, the sidebar shell at `lg` and up, a fixed

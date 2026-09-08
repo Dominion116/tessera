@@ -188,6 +188,94 @@
     0 2px 8px oklch(0 0 0 / 3%);
 }
 
+@utility dashboard-panel {
+  border-color: color-mix(in oklab, var(--border) 82%, transparent);
+  background: color-mix(in oklab, var(--card) 74%, transparent);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 8%),
+    0 1px 2px oklch(0 0 0 / 6%),
+    0 8px 24px oklch(0 0 0 / 5%);
+  transition:
+    border-color 180ms ease-out,
+    background-color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    transform 180ms ease-out;
+
+  &:hover {
+    border-color: color-mix(in oklab, oklch(0.75 0.14 176) 34%, var(--border));
+    background: color-mix(in oklab, var(--card) 88%, transparent);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 8%),
+      0 2px 4px oklch(0 0 0 / 9%),
+      0 12px 32px oklch(0 0 0 / 12%);
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes dashboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-page > * {
+  animation: dashboard-enter 220ms ease-out both;
+}
+
+.dashboard-page > .dashboard-stats > * {
+  animation: dashboard-enter 220ms ease-out both;
+}
+
+.dashboard-page > .dashboard-stats > :nth-child(1) {
+  animation-delay: 35ms;
+}
+
+.dashboard-page > .dashboard-stats > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.dashboard-page > .dashboard-stats > :nth-child(3) {
+  animation-delay: 105ms;
+}
+
+.dashboard-page > .dashboard-stats > :nth-child(4) {
+  animation-delay: 140ms;
+}
+
+.dashboard-page > :nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.dashboard-page > :nth-child(2) {
+  animation-delay: 35ms;
+}
+
+.dashboard-page > :nth-child(3) {
+  animation-delay: 70ms;
+}
+
+.dashboard-page > :nth-child(4) {
+  animation-delay: 105ms;
+}
+
+.dashboard-page > :nth-child(5) {
+  animation-delay: 140ms;
+}
+
+.dashboard-page > :nth-child(6) {
+  animation-delay: 175ms;
+}
+
+.dashboard-page > :nth-child(7) {
+  animation-delay: 210ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

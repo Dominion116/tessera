@@ -10,10 +10,13 @@ import DeadlineWatch from "@/components/dashboard/deadline-watch";
  * width, and the deadline watch closing the page.
  */
 const DashboardPage = () => (
-  <div className="mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
-    <header className="col-span-12 flex flex-col gap-1">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="text-sm text-fg-secondary">
+  <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
+    <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
+      <p className="text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">
+        Creator overview
+      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <p className="max-w-xl text-sm text-fg-secondary">
         The POAPs you created, who is minting them, and what freezes next.
       </p>
     </header>

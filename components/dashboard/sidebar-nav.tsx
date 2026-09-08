@@ -48,7 +48,11 @@ const SidebarNav = () => {
 
             return (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild isActive={active}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={active}
+                  className="transition-colors duration-180"
+                >
                   <Link href={item.href}>
                     <item.icon aria-hidden="true" />
                     <span>{item.label}</span>
