@@ -15,6 +15,7 @@ import Wordmark from "@/components/landing/wordmark";
 import DockNav from "@/components/navigation/dock-nav";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
 import DashboardExploreView from "@/components/dashboard/dashboard-explore-view";
+import CreatedPoapsView from "@/components/dashboard/created-poaps-view";
 import CreatePoapView from "@/components/dashboard/create-poap-view";
 import WalletChip from "@/components/wallet/wallet-chip";
 import type { DashboardView } from "@/components/dashboard/sidebar-nav";
@@ -74,6 +75,8 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
       <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         {activeView === "explore" ? (
           <DashboardExploreView />
+        ) : activeView === "created" ? (
+          <CreatedPoapsView />
         ) : activeView === "create" ? (
           <CreatePoapView />
         ) : (

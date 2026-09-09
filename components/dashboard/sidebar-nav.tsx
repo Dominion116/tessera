@@ -19,11 +19,18 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export type DashboardView = "dashboard" | "explore" | "create";
+export type DashboardView = "dashboard" | "explore" | "created" | "create";
 
 type SidebarNavProps = {
   activeView: DashboardView;
   onViewChange: (view: DashboardView) => void;
+};
+
+const VIEW_BY_HREF: Record<string, DashboardView> = {
+  "/app": "dashboard",
+  "/poaps": "explore",
+  "/app/created": "created",
+  "/app/create": "create",
 };
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
@@ -47,34 +54,18 @@ const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
       <SidebarGroupContent>
         <SidebarMenu>
           {NAV_ITEMS.map((item) => {
-            const isLocalView =
-              item.href === "/app" ||
-              item.href === "/poaps" ||
-              item.href === "/app/create";
-            const active =
-              isLocalView
-                ? item.href === "/app"
-                  ? activeView === "dashboard"
-                  : item.href === "/poaps"
-                    ? activeView === "explore"
-                    : activeView === "create"
-                : pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`);
+            const localView = VIEW_BY_HREF[item.href];
+            const active = localView
+              ? localView === activeView
+              : pathname === item.href ||
+                pathname.startsWith(`${item.href}/`);
 
             return (
               <SidebarMenuItem key={item.href}>
-                {isLocalView ? (
+                {localView ? (
                   <SidebarMenuButton
                     isActive={active}
-                    onClick={() =>
-                      onViewChange(
-                        item.href === "/app"
-                          ? "dashboard"
-                          : item.href === "/poaps"
-                            ? "explore"
-                            : "create"
-                      )
-                    }
+                    onClick={() => onViewChange(localView)}
                     className="transition-colors duration-180"
                   >
                     <item.icon aria-hidden="true" />

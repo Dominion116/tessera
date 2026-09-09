@@ -23,14 +23,15 @@ const HeroSection: React.FC = () => {
         aria-hidden="true"
         tabIndex={-1}
       >
-        <source
-          src="https://images.shadcnspace.com/assets/video/hero05-banner-video.mp4"
-          type="video/mp4"
-        />
+        <source src="/nftbg.mp4" type="video/mp4" />
       </video>
 
-      {/* Overlay to improve text readability */}
-      <div aria-hidden="true" className="absolute inset-0 bg-black/50"></div>
+      {/* Dark overlay to improve text readability and visual contrast,
+          weighted toward the bottom where the content sits. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/25"
+      ></div>
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 xl:px-16">

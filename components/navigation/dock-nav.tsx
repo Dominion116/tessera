@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Album, BookOpen, CirclePlus, Compass, House } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 const DOCK_ITEMS = [
   { href: "/app", label: "Home", icon: House },
@@ -14,7 +15,7 @@ const DOCK_ITEMS = [
 ] as const;
 
 type DockNavProps = {
-  activeView?: "dashboard" | "explore" | "create";
+  activeView?: DashboardView;
   onExplore?: () => void;
   onCreate?: () => void;
 };
