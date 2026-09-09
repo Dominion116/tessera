@@ -15,6 +15,7 @@ import Wordmark from "@/components/landing/wordmark";
 import DockNav from "@/components/navigation/dock-nav";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
 import DashboardExploreView from "@/components/dashboard/dashboard-explore-view";
+import CreatePoapView from "@/components/dashboard/create-poap-view";
 import WalletChip from "@/components/wallet/wallet-chip";
 import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
@@ -25,8 +26,13 @@ import type { DashboardView } from "@/components/dashboard/sidebar-nav";
  * covers it. The sidebar does not collapse: below `lg` it is hidden
  * entirely, because the dock replaces it.
  */
-const DashboardShell = ({ children }: { children: React.ReactNode }) => {
-  const [activeView, setActiveView] = useState<DashboardView>("dashboard");
+type DashboardShellProps = {
+  children: React.ReactNode;
+  initialView?: DashboardView;
+};
+
+const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellProps) => {
+  const [activeView, setActiveView] = useState<DashboardView>(initialView);
 
   return (
   <SidebarProvider>
@@ -68,6 +74,8 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
       <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         {activeView === "explore" ? (
           <DashboardExploreView />
+        ) : activeView === "create" ? (
+          <CreatePoapView />
         ) : (
           children
         )}
@@ -76,6 +84,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
     <DockNav
       activeView={activeView}
       onExplore={() => setActiveView("explore")}
+      onCreate={() => setActiveView("create")}
     />
   </SidebarProvider>
   );
