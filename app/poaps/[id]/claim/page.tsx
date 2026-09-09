@@ -1,20 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ClaimPage from "@/components/explore/claim-page";
-import { GALLERY_POAPS } from "@/lib/poap-data";
+import { findPoapEvent } from "@/lib/poap-registry";
 
 type ClaimRouteProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ method?: string }>;
 };
 
-function getPoap(id: string) {
-  return GALLERY_POAPS.find((event) => event.eventId.toString() === id);
-}
-
 export async function generateMetadata({ params }: ClaimRouteProps): Promise<Metadata> {
   const { id } = await params;
-  const event = getPoap(id);
+  const event = findPoapEvent(id);
 
   return {
     title: event ? `Claim ${event.name}` : "Claim POAP",
@@ -24,7 +20,7 @@ export async function generateMetadata({ params }: ClaimRouteProps): Promise<Met
 
 export default async function ClaimRoute({ params, searchParams }: ClaimRouteProps) {
   const [{ id }, { method = "signature" }] = await Promise.all([params, searchParams]);
-  const event = getPoap(id);
+  const event = findPoapEvent(id);
 
   if (!event) {
     notFound();

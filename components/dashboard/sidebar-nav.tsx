@@ -19,7 +19,12 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export type DashboardView = "dashboard" | "explore" | "created" | "create";
+export type DashboardView =
+  | "dashboard"
+  | "explore"
+  | "created"
+  | "collection"
+  | "create";
 
 type SidebarNavProps = {
   activeView: DashboardView;
@@ -30,6 +35,7 @@ const VIEW_BY_HREF: Record<string, DashboardView> = {
   "/app": "dashboard",
   "/poaps": "explore",
   "/app/created": "created",
+  "/app/collection": "collection",
   "/app/create": "create",
 };
 

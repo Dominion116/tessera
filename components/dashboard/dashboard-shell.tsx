@@ -16,6 +16,7 @@ import DockNav from "@/components/navigation/dock-nav";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
 import DashboardExploreView from "@/components/dashboard/dashboard-explore-view";
 import CreatedPoapsView from "@/components/dashboard/created-poaps-view";
+import CollectionView from "@/components/dashboard/collection-view";
 import CreatePoapView from "@/components/dashboard/create-poap-view";
 import WalletChip from "@/components/wallet/wallet-chip";
 import type { DashboardView } from "@/components/dashboard/sidebar-nav";
@@ -77,6 +78,8 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
           <DashboardExploreView />
         ) : activeView === "created" ? (
           <CreatedPoapsView />
+        ) : activeView === "collection" ? (
+          <CollectionView />
         ) : activeView === "create" ? (
           <CreatePoapView />
         ) : (
@@ -84,11 +87,7 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
         )}
       </div>
     </SidebarInset>
-    <DockNav
-      activeView={activeView}
-      onExplore={() => setActiveView("explore")}
-      onCreate={() => setActiveView("create")}
-    />
+    <DockNav activeView={activeView} onViewChange={setActiveView} />
   </SidebarProvider>
   );
 };

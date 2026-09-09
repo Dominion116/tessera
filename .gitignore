@@ -80,3 +80,5 @@ contracts/lib/
 /scratch/
 *.local
 /.kilo
+
+ROADMAP.md

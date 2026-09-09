@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PoapDetailPage from "@/components/explore/poap-detail-page";
-import { GALLERY_POAPS } from "@/lib/poap-data";
+import { findPoapEvent } from "@/lib/poap-registry";
 
 type PoapRouteProps = {
   params: Promise<{ id: string }>;
 };
 
-function getPoap(id: string) {
-  return GALLERY_POAPS.find((event) => event.eventId.toString() === id);
-}
-
 export async function generateMetadata({ params }: PoapRouteProps): Promise<Metadata> {
   const { id } = await params;
-  const event = getPoap(id);
+  const event = findPoapEvent(id);
 
   return {
     title: event?.name ?? "POAP",
@@ -23,7 +19,7 @@ export async function generateMetadata({ params }: PoapRouteProps): Promise<Meta
 
 export default async function PoapRoute({ params }: PoapRouteProps) {
   const { id } = await params;
-  const event = getPoap(id);
+  const event = findPoapEvent(id);
 
   if (!event) {
     notFound();
