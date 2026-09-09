@@ -52,7 +52,7 @@ const PoapDetailPage = ({ event }: { event: PoapEvent }) => (
               <CardDescription>{event.isPublic ? "Anyone can claim one while public minting is open." : "This event is not open to everyone. Use an invitation or recipient-specific claim route."}</CardDescription>
             </CardHeader>
             <CardContent>
-              {event.isPublic ? <MintAction eventName={event.name} /> : <p className="rounded-lg border border-border/70 bg-background/50 p-4 text-sm leading-6 text-fg-secondary">Public minting is closed for this event. A valid allowlist proof or recipient-bound signature is required.</p>}
+              {event.isPublic ? <MintAction eventName={event.name} eventId={event.eventId} /> : <p className="rounded-lg border border-border/70 bg-background/50 p-4 text-sm leading-6 text-fg-secondary">Public minting is closed for this event. A valid allowlist proof or recipient-bound signature is required.</p>}
             </CardContent>
           </Card>
 

@@ -4,7 +4,8 @@ import SectionHeading from "@/components/landing/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BentoGridShowcase } from "@/components/ui/bento-product-features";
-import { CHAIN_ID, CONTRACT_ADDRESS, GALLERY_POAPS } from "@/lib/poap-data";
+import { CHAIN_ID, CONTRACT_ADDRESS, type PoapEvent } from "@/lib/poap-data";
+import { readLatestEvents } from "@/lib/poap-contract";
 import { shortAddress, svgToDataUrl } from "@/lib/format";
 
 const STORAGE_PARTS = [
@@ -19,7 +20,13 @@ const CONTRACT_FACTS = [
   { label: "Token standard", value: "ERC-1155", mono: false },
 ];
 
-const HOLDERS = GALLERY_POAPS.slice(0, 3);
+async function readHolders(): Promise<PoapEvent[]> {
+  try {
+    return await readLatestEvents(3);
+  } catch {
+    return [];
+  }
+}
 
 /** The shared card surface: hairline border, tile shadow, teal hover top edge. */
 const CARD_SURFACE =
@@ -75,34 +82,40 @@ const ArtworkCard = () => (
 );
 
 /** Top-middle slot. The shared claim record, with a row of holders beneath. */
-const OnePerWalletCard = () => (
-  <Card className={CARD_SURFACE}>
-    <CardContent className="flex h-full flex-col gap-5 px-7 py-8">
-      <div className="flex flex-col gap-3">
-        <h3 className="text-xl font-semibold">One badge per wallet</h3>
-        <p className="text-base leading-7 text-fg-secondary">
-          Every mint route checks the same claim record, so nobody collects the
-          same POAP twice, whichever way they arrived.
-        </p>
-      </div>
-      <div className="mt-auto flex items-center -space-x-2">
-        {HOLDERS.map((poap) => (
-          // Artwork arrives as an onchain SVG data URL, so a plain img is
-          // correct here: there is nothing for the image optimizer to do.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={poap.eventId.toString()}
-            src={svgToDataUrl(poap.artwork)}
-            alt=""
-            className="inline-block h-9 w-9 rounded-full object-cover ring-2 ring-background"
-            loading="lazy"
-            decoding="async"
-          />
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
+const OnePerWalletCard = async () => {
+  const holders = await readHolders();
+
+  return (
+    <Card className={CARD_SURFACE}>
+      <CardContent className="flex h-full flex-col gap-5 px-7 py-8">
+        <div className="flex flex-col gap-3">
+          <h3 className="text-xl font-semibold">One badge per wallet</h3>
+          <p className="text-base leading-7 text-fg-secondary">
+            Every mint route checks the same claim record, so nobody collects the
+            same POAP twice, whichever way they arrived.
+          </p>
+        </div>
+        {holders.length > 0 ? (
+          <div className="mt-auto flex items-center -space-x-2">
+            {holders.map((poap) => (
+              // Artwork arrives as an onchain SVG data URL, so a plain img is
+              // correct here: there is nothing for the image optimizer to do.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={poap.eventId.toString()}
+                src={svgToDataUrl(poap.artwork)}
+                alt=""
+                className="inline-block h-9 w-9 rounded-full object-cover ring-2 ring-background"
+                loading="lazy"
+                decoding="async"
+              />
+            ))}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+};
 
 /** Top-right slot. The event number is the token number, as a graphic cell. */
 const EventNumberCard = () => (

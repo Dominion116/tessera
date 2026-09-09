@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
 import "./globals.css";
@@ -40,11 +41,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await headers();
+  const cookies = cookieStore.get("cookie");
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
@@ -54,7 +58,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <WalletProvider>{children}</WalletProvider>
+          <WalletProvider cookies={cookies}>{children}</WalletProvider>
         </ThemeProvider>
       </body>
     </html>

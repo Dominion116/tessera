@@ -15,14 +15,14 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * Stacked card carousel from the shadcn registry (`carousel-07`), holding the
- * gallery's placeholder POAPs. Adapted from the delivered version: POAP
- * content, local SVG artwork, the site's badge treatment, heading weight and
+ * Stacked card carousel from the shadcn registry (`carousel-07`), holding
+ * the gallery's POAPs. Adapted from the delivered version: POAP content
+ * supplied as props, the site's badge treatment, heading weight and
  * card radius, arrow-key browsing, and reduced-motion snapping. The drag
  * physics and layout are unchanged.
  */
 
-interface Slide {
+export interface Slide {
   image: string;
   title: string;
   description: string;
@@ -30,59 +30,6 @@ interface Slide {
   /** Draws the padlock in the badge, the marker the bento tiles carried. */
   soulbound?: boolean;
 }
-
-/**
- * Placeholder cards standing in for the SVG a registered event returns through
- * `uri()`. Artwork is the generated mosaics in `public/nft/`, one file per
- * event, so the stack reads as one collection. The chain layer swaps this
- * array for real contract reads.
- */
-const slides: Slide[] = [
-  {
-    image: "/nft/builders-night.svg",
-    title: "Base Sepolia Builders Night",
-    description:
-      "Twelve teams shipped a contract in one evening. Everyone who deployed got one.",
-    badge: "Soulbound",
-    soulbound: true,
-  },
-  {
-    image: "/nft/farcaster-meetup.svg",
-    title: "Farcaster Devs Meetup 12",
-    description:
-      "A signing station at the door, one mint per attendee, no list collected in advance.",
-    badge: "Soulbound",
-    soulbound: true,
-  },
-  {
-    image: "/nft/onchain-summer.svg",
-    title: "Onchain Summer Block Party",
-    description: "Open to anyone who walked in. 902 mints and counting.",
-    badge: "Transferable",
-  },
-  {
-    image: "/nft/solidity-study.svg",
-    title: "Solidity Study Group, Week 9",
-    description:
-      "Storage layout and SSTORE2, nine weeks in. The group roster was the allowlist.",
-    badge: "Soulbound",
-    soulbound: true,
-  },
-  {
-    image: "/nft/mosaic-workshop.svg",
-    title: "Tessera Mosaic Workshop",
-    description:
-      "Hand-drawn SVG tiles optimized to 6 KB before registration. A tile can be traded.",
-    badge: "Transferable",
-  },
-  {
-    image: "/nft/genesis.svg",
-    title: "Genesis",
-    description: "The first POAP, written in the constructor. Event ID zero.",
-    badge: "Soulbound",
-    soulbound: true,
-  },
-];
 
 interface CarouselConfig {
   distanceDivisor: number;
@@ -133,7 +80,7 @@ const subscribeToResize = (onStoreChange: () => void) => {
   return () => window.removeEventListener("resize", onStoreChange);
 };
 
-const CarouselStacked = () => {
+const CarouselStacked = ({ slides }: { slides: Slide[] }) => {
   const scrollProgress = useMotionValue(0);
   const startProgress = React.useRef(0);
   // The server snapshot is 0, so first paint uses the mobile config and the
@@ -152,6 +99,10 @@ const CarouselStacked = () => {
     () => getCarouselConfig(windowWidth),
     [windowWidth],
   );
+
+  if (total === 0) {
+    return null;
+  }
 
   const goTo = (target: number) => {
     // Reduced motion gets the position with no spring at all. Tracking the
@@ -297,8 +248,8 @@ const Card = ({ slide, index, total, progress, config }: CardProps) => {
         "h-56 w-44 sm:h-80 sm:w-56 lg:h-96 lg:w-64",
       )}
     >
-      {/* Artwork is a local SVG file, which the image optimizer has nothing to
-          do with, so a plain img is correct here. */}
+      {/* Artwork is an onchain SVG data URL, which the image optimizer has
+          nothing to do with, so a plain img is correct here. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={slide.image}

@@ -87,7 +87,7 @@ const docs: DocPage[] = [
     slug: "getting-started",
     section: "Start here",
     title: "Getting started",
-    description: "Run the frontend, understand the available routes, and identify which parts currently use contract-shaped placeholder data.",
+    description: "Run the frontend, understand the available routes, and see where the live Base Sepolia reads happen.",
     sections: [
       {
         title: "Local setup",
@@ -95,7 +95,7 @@ const docs: DocPage[] = [
           <>
             <p>The repository requires Node 22.11 or newer and npm. Install the pinned dependencies, create the local environment file, and run the standard Next.js development command from the repository root.</p>
             <Code>{`git clone <your-fork-url>\ncd tessera\nnpm install\ncp .env.example .env.local\nnpm run dev`}</Code>
-            <p>The application opens at <InlineCode>http://localhost:3000</InlineCode>. The landing page and readable placeholder surfaces do not require API keys. Base Sepolia RPC configuration becomes relevant when live contract reads and writes are enabled.</p>
+            <p>The application opens at <InlineCode>http://localhost:3000</InlineCode>. No API keys are required: the landing page, the public event pages and the dashboard all read the Base Sepolia contract through the configured RPC, and wallets connect through the Reown AppKit modal. A private RPC URL via <InlineCode>NEXT_PUBLIC_RPC_URL</InlineCode> is recommended for heavier pages such as the collection, which scans mint logs in chunks.</p>
           </>
         ),
       },
@@ -103,7 +103,7 @@ const docs: DocPage[] = [
         title: "Environment variables",
         content: (
           <p>
-            <InlineCode>NEXT_PUBLIC_APP_URL</InlineCode> defines the canonical origin used by metadata and future Mini App embeds. <InlineCode>NEXT_PUBLIC_RPC_URL</InlineCode> overrides the public Base Sepolia endpoint for chain access. <InlineCode>NEXT_PUBLIC_CHAIN_ID</InlineCode> and <InlineCode>NEXT_PUBLIC_POAP_ADDRESS</InlineCode> default to the values in the contract reference. <InlineCode>NEXT_PUBLIC_WC_PROJECT_ID</InlineCode> is reserved for WalletConnect-based connection flows and is not required by the readable experience.
+            <InlineCode>NEXT_PUBLIC_APP_URL</InlineCode> defines the canonical origin used by metadata and future Mini App embeds. <InlineCode>NEXT_PUBLIC_RPC_URL</InlineCode> overrides the public Base Sepolia endpoint for chain access. <InlineCode>NEXT_PUBLIC_CHAIN_ID</InlineCode> and <InlineCode>NEXT_PUBLIC_POAP_ADDRESS</InlineCode> default to the values in the contract reference. <InlineCode>NEXT_PUBLIC_WC_PROJECT_ID</InlineCode> supplies the Reown Cloud project ID used by the wallet modal; without one, a shared development ID is used and browser-injected wallets still connect.
           </p>
         ),
       },
@@ -111,7 +111,7 @@ const docs: DocPage[] = [
         title: "Routes and data status",
         content: (
           <>
-            <p>The landing page is available at <InlineCode>/</InlineCode>, the dashboard gate at <InlineCode>/app</InlineCode>, and the standalone supplied block demonstrations remain available at <InlineCode>/hero-03</InlineCode>, <InlineCode>/cta-01</InlineCode> and <InlineCode>/feature-02</InlineCode>. The dashboard currently renders a session-only mock wallet and contract-shaped data from <InlineCode>lib/dashboard-data.ts</InlineCode>. Its component interfaces are deliberately shaped for later replacement by Base Sepolia reads.</p>
+            <p>The landing page is available at <InlineCode>/</InlineCode>, the dashboard gate at <InlineCode>/app</InlineCode>, and the standalone supplied block demonstrations remain available at <InlineCode>/hero-03</InlineCode>, <InlineCode>/cta-01</InlineCode> and <InlineCode>/feature-02</InlineCode>. Wallets connect through Reown AppKit over wagmi, and every screen reads the contract directly: event pages and the landing gallery through server-side reads in <InlineCode>lib/poap-contract.ts</InlineCode>, the dashboard views through the react-query hooks in <InlineCode>hooks/use-poap-reads.ts</InlineCode>.</p>
             <p>The navigation already uses the final destinations for Explore, collection, creator management and documentation. A route should not be treated as a contract capability until its page and chain source are implemented together.</p>
           </>
         ),
@@ -264,7 +264,7 @@ const docs: DocPage[] = [
     slug: "architecture",
     section: "Implementation",
     title: "Application architecture",
-    description: "How the current Next.js frontend separates presentation, placeholder data, wallet state and future chain integration.",
+    description: "How the Next.js frontend separates presentation, the live read layer, wallet state and chain integration.",
     sections: [
       {
         title: "Route composition",
@@ -272,11 +272,11 @@ const docs: DocPage[] = [
       },
       {
         title: "Wallet seam",
-        content: <p><InlineCode>components/wallet/wallet-provider.tsx</InlineCode> exposes <InlineCode>address</InlineCode>, <InlineCode>connect()</InlineCode> and <InlineCode>disconnect()</InlineCode> through React context. The current implementation stores one placeholder address in memory and does not sign or broadcast. The provider is mounted inside the theme provider in <InlineCode>app/layout.tsx</InlineCode>, so replacing its internals with the planned wallet client does not require dashboard components to know which connector is active.</p>,
+        content: <p><InlineCode>components/wallet/wallet-provider.tsx</InlineCode> exposes <InlineCode>address</InlineCode>, <InlineCode>connect()</InlineCode> and <InlineCode>disconnect()</InlineCode> through React context. The implementation wraps Reown AppKit over wagmi: <InlineCode>connect()</InlineCode> opens the AppKit modal, account state comes from wagmi, and disconnecting clears the query cache so a different wallet never sees the reads left by the previous one. The provider is mounted inside the theme provider in <InlineCode>app/layout.tsx</InlineCode>, so dashboard components never learn which connector is active.</p>,
       },
       {
         title: "Data seam",
-        content: <p><InlineCode>lib/poap-data.ts</InlineCode> models contract event responses, including bigint timestamps and the distinction between an SSTORE2 pointer and rendered artwork. <InlineCode>lib/dashboard-data.ts</InlineCode> reuses that type for creator events, mint series and route mix data. Future chain hooks should replace these sources while preserving component-facing fields and the edge cases already represented in the UI.</p>,
+        content: <p><InlineCode>lib/poap-contract.ts</InlineCode> is the one read layer: it imports the vendored ABI, batches <InlineCode>events()</InlineCode>, <InlineCode>uri()</InlineCode> and <InlineCode>totalSupply()</InlineCode> through Multicall3, and decodes the base64 metadata into the artwork string and fields every screen renders. <InlineCode>hooks/use-poap-reads.ts</InlineCode> wraps those functions in react-query for client views, and <InlineCode>lib/mint-logs.ts</InlineCode> scans <InlineCode>NewMint</InlineCode> logs in bounded chunks for chart counts and mint dates. <InlineCode>lib/poap-data.ts</InlineCode> holds the shared event type and chain constants.</p>,
       },
       {
         title: "Visual and motion system",

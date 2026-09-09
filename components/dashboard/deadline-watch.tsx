@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -6,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import LifecycleTimeline, { type Milestone } from "@/components/lifecycle-timeline";
 import { formatCount, formatUtcDate } from "@/lib/format";
 import {
@@ -13,9 +16,10 @@ import {
   signatureDeadline,
   upcomingFreezes,
   type FreezeRow,
-} from "@/lib/dashboard-data";
+} from "@/lib/deadlines";
 import {
   CREATOR_TIMELOCK_DAYS,
+  type PoapEvent,
   SIGNATURE_WINDOW_DAYS,
 } from "@/lib/poap-data";
 
@@ -62,9 +66,15 @@ const milestonesFor = (nearest: FreezeRow): Milestone[] => [
  * widget. The warning box states which way the public-mint flag freezes,
  * because that is the one setting that never comes back.
  */
-const DeadlineWatch = () => {
-  const nearest = nearestFreeze();
-  const others = upcomingFreezes(CREATOR_TIMELOCK_DAYS).filter(
+const DeadlineWatch = ({
+  events,
+  loading,
+}: {
+  events: PoapEvent[];
+  loading: boolean;
+}) => {
+  const nearest = nearestFreeze(events);
+  const others = upcomingFreezes(events, CREATOR_TIMELOCK_DAYS).filter(
     (row) => row.event.eventId !== nearest?.event.eventId
   );
 
@@ -78,7 +88,15 @@ const DeadlineWatch = () => {
         </p>
       </header>
 
-      {nearest ? (
+      {loading ? (
+        <Card className="dashboard-panel gap-4 py-5">
+          <CardContent className="flex flex-col gap-3">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+      ) : nearest ? (
         <LifecycleTimeline milestones={milestonesFor(nearest)} />
       ) : (
         <Card className="dashboard-panel py-5">
@@ -101,7 +119,11 @@ const DeadlineWatch = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          {others.length === 0 ? (
+          {loading ? (
+            Array.from({ length: 2 }, (_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-lg" />
+            ))
+          ) : others.length === 0 ? (
             <p className="rounded-lg border border-border/70 px-4 py-3 text-sm text-fg-secondary">
               Nothing else freezes in the next {CREATOR_TIMELOCK_DAYS} days.
             </p>

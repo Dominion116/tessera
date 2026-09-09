@@ -20,10 +20,13 @@ contract reference, and `docs/implementation.md` for the build ordering.
 The contract reference is vendored and verified. The landing page is complete:
 hero plus five blocks down to the footer, all in the hero's visual language,
 after consolidation passes that took the blocks below the hero from thirteen
-to eight, then eight to five. The app surface now exists at `/app`: a wallet
-gate, the sidebar shell at `lg` and up, the dock below `lg`, and the dashboard
-home (stats, two charts, events table, deadline watch). No chain code exists
-yet; the wallet layer is a mock behind one seam.
+to eight, then eight to five. The app surface at `/app` is a live dapp now:
+wallets connect through Reown AppKit over wagmi, and every screen reads the
+OnchainPOAPs contract on Base Sepolia directly, batched through Multicall3,
+with no mock or placeholder data source left. The create funnel runs two
+steps, artwork and details then registration choices, with byte-accurate
+validation and the SVG size ceiling enforced. No screen submits a
+transaction yet.
 
 Superseded, see the FAQ block log entry: application files are committed now
 (`c33b38e`, `5cf5135` and `75176d0` landed after the documentation commit
@@ -32,20 +35,30 @@ FAQ block task.
 
 ### What runs
 
-`/` renders the full landing page. `/hero-03` still renders the hero on its own,
-and `/cta-01` renders the CTA block on its own, at the paths the block prompts
-specified. `/app` renders the wallet gate until a wallet is connected, then the
-dashboard shell with the dashboard home. Light and dark themes both work and the
-toggle switches them. The dashboard's Open App entry points (navbar and mobile
-dropdown) open the connect prompt when disconnected and link to `/app` when
-connected.
+`/` renders the full landing page, whose gallery carousel and holder row now
+read the newest registered events off the chain. `/hero-03` still renders the
+hero on its own, and `/cta-01` renders the CTA block on its own, at the paths
+the block prompts specified. `/app` renders the wallet gate until a wallet
+connects through the AppKit modal, then the dashboard shell: the dashboard
+home (stats, mint activity, event mix, events table, deadline watch), Explore
+with paginated live reads, the two-step create view, the created list and the
+collection, all scoped to the connected address. `/poaps/[id]` and
+`/poaps/[id]/claim` render server-side reads with per-page loading and error
+boundaries. Light and dark themes both work, the toggle switches them, and
+the AppKit modal follows the site theme. The dashboard's Open App entry
+points (navbar and mobile dropdown) open the AppKit modal when disconnected
+and link to `/app` when connected.
 
 ### Verification standard
 
 `npx tsc --noEmit` exits 0 and `npx eslint .` exits 0. Builds and dev servers are
 never run locally, per `docs/agent.md` instruction 12. The two remaining lint
 warnings are `no-img-element` on the `<img>` tags the supplied hero block itself
-specifies, left in place because converting them would alter the block.
+specifies, left in place because converting them would alter the block. The read
+layer's live behaviour was additionally exercised against the real contract with
+a throwaway Node script (since deleted): out-of-range IDs drop through the
+`uri()` failure, the UTF-8 metadata decode round-trips non-ASCII names, and a
+60-call multicall batch succeeds in one round trip.
 
 ### Files
 
@@ -54,34 +67,39 @@ docs/agent.md                 rules, bounty text, contract reference
 docs/implementation.md        build ordering
 docs/progress.md              this file
 contracts/                    vendored upstream snapshot, read only
-app/layout.tsx                ThemeProvider, metadata, favicon, OG and Twitter tags
-app/page.tsx                  root, renders the landing page
+app/layout.tsx                ThemeProvider, WalletProvider, metadata; passes
+                              request cookies into wagmi's SSR hydration
+app/page.tsx                  root, renders the landing page, 300 s revalidate
 app/opengraph-image.tsx       1200x800 share image, drawn from the theme tokens
 app/hero-03/page.tsx          block path from the supplied prompt, hero only
+app/cta-01/page.tsx           block path, CTA only
 app/globals.css               Tailwind v4 theme, shadcn neutral tokens, base layer
+app/app/page.tsx              the dashboard route
+app/app/{create,created,collection}/page.tsx  AppGate routes for each view
+app/poaps/[id]/page.tsx       public POAP page, server-side live read, 60 s
+app/poaps/[id]/claim/page.tsx claim destination, server-side live read
+app/poaps/[id]/loading.tsx    skeleton matching the detail layout
+app/poaps/[id]/error.tsx      read failure with a retry
 components/shadcn-space/blocks/hero-03/{index,hero,navbar,navlink}.tsx
-components/shadcn-space/button/button-01.tsx    Open App button, links to /app
+components/shadcn-space/button/button-01.tsx    Open App, gated by the wallet
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
 components/landing/landing-page.tsx             navbar, section order, footer
 components/landing/{section,section-heading,section-footer,feature-card,
                                                 reveal,wordmark,arrow-button}.tsx,
                                                 the shared section primitives
-components/landing/what-it-is-section.tsx       supplied bento grid, five facts
-                                                and the browse note
+components/landing/what-it-is-section.tsx       supplied bento grid, five facts,
+                                                live holder row off the chain
 components/landing/how-it-works-section.tsx     register, hand out, prove
 components/lifecycle-timeline.tsx               day 0, day 30, day 37 track,
-                                                milestones as props, kept for
-                                                the dashboard
-components/landing/gallery-section.tsx          carousel gallery, See the full gallery
+                                                milestones as props
+components/landing/gallery-section.tsx          carousel gallery, live showcase
 components/ui/carousel-07.tsx                   stacked card carousel from the
-                                                shadcn registry, holding the
-                                                gallery's placeholder POAPs
+                                                shadcn registry, slides as props
 components/ui/faq-monocrhome.tsx               supplied FAQ block, seven questions
                                                 with meta chips, teal accent on
                                                 site tokens
 components/ui/bento-product-features.tsx      supplied bento grid layout, six slots
 components/shadcn-space/blocks/cta-01/cta.tsx   closing CTA block, teal glow
-app/cta-01/page.tsx                             block path, CTA only
 components/landing/site-footer.tsx              footer composition, brand and nav
                                columns above a divider, meta row, wordmark
 components/landing/footer-brand.tsx             Tessera mark, tagline, contract details
@@ -95,32 +113,45 @@ components/ui/{chart,sidebar,table,dialog,sheet,tooltip,separator,
                               for the dashboard; sidebar and use-mobile carry
                               two forced lint rewrites, see the log
 hooks/use-mobile.ts           media-query hook, rewritten from the registry
-components/wallet/wallet-provider.tsx  mock wallet context, the swap seam
+hooks/use-poap-reads.ts       react-query hooks over the read layer: event
+                              pages, created, collection, claim records,
+                              mint scans, day series, event mix
+components/wallet/wallet-provider.tsx  AppKit + wagmi behind useWallet, the
+                              seam every component above still consumes
 components/wallet/connect-prompt.tsx   one prompt, modal and full-page
 components/wallet/wallet-chip.tsx      short address plus disconnect
-components/shadcn-space/button/button-01.tsx   Open App, now client and gated
+lib/appkit.ts                 WagmiAdapter, projectId, metadata, transports
+lib/poap-contract.ts          the read layer: typed ABI, multicall batching,
+                              uri() decode, hasClaimed, balances
+lib/mint-logs.ts              NewMint log scan, 10k-block chunks, graceful
+lib/deadlines.ts              freeze and signature deadline arithmetic
+lib/registration.ts           byte limits, JSON-unsafe rejection, SVG size
+                              ceiling, flags, root and date parsing
+lib/poap-data.ts              the PoapEvent type and chain constants
+lib/utils.ts                  cn
+lib/motion.ts                 shared easing, duration, distance, stagger
+lib/format.ts                 UTC date, thousands, short address, data URL, bytes
 components/dashboard/dashboard-shell.tsx sidebar shell at lg, topbar below
 components/dashboard/sidebar-nav.tsx    dashboard nav, exact match on /app
 components/navigation/dock-nav.tsx      fixed bottom dock below lg, shared
 components/dashboard/app-gate.tsx       /app switch: prompt or shell
-components/dashboard/dashboard-page.tsx the template grid composition
+components/dashboard/dashboard-page.tsx live stats and chart composition
 components/dashboard/stat-cards.tsx     four numbers, teal icon chips
-components/dashboard/mint-activity-chart.tsx  area chart, mints per day
-components/dashboard/method-mix-chart.tsx     donut, mints by route
+components/dashboard/mint-activity-chart.tsx  area chart, log-derived mints
+components/dashboard/method-mix-chart.tsx     donut, mints by event
 components/dashboard/events-table.tsx   your events with artwork thumbs
 components/dashboard/deadline-watch.tsx timeline plus approaching deadlines
-lib/dashboard-data.ts        placeholder dashboard reads, contract-shaped
-app/app/page.tsx             the dashboard route
-app/layout.tsx               ThemeProvider, WalletProvider, metadata
+components/dashboard/dashboard-explore-view.tsx  paginated live gallery
+components/dashboard/created-poaps-view.tsx    live creator library
+components/dashboard/collection-view.tsx       live balanceOfBatch grid
+components/dashboard/create-poap-view.tsx      two-step create, SVG canvas,
+                              templates, registration choices
+components/explore/{explore-card,poap-detail-page,mint-action,claim-page,
+                    public-header}.tsx  the public surfaces, live reads
 components/theme-provider.tsx
 components/theme-toggle.tsx
-lib/utils.ts                  cn
-lib/motion.ts                 shared easing, duration, distance, stagger
-lib/format.ts                 UTC date, thousands, short address, SVG data URL
-lib/poap-data.ts              placeholder events shaped like `events(uint256)`
 public/tessera-mark.svg       four-tile mosaic, favicon and spinning nav mark
 public/tessera-wordmark.svg   nav logo
-public/nft/                   six generated 2:3 mosaic SVGs, carousel artwork
 package.json, package-lock.json, tsconfig.json, components.json
 next.config.ts, postcss.config.mjs, eslint.config.mjs
 .env.example, .gitignore, LICENSE, README.md
@@ -132,20 +163,20 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   real footage or a different treatment before this ships. Content decision.
 - In light mode the dropdown panel goes light while the nav still sits over dark
   video. Not yet reconciled.
-- Every internal link points at a route that does not exist yet: `/app/create`,
-  `/app/collection`, `/app/created`, `/poaps`, `/docs`. They 404 until those
-  surfaces are built. The hrefs are correct for the surface in
-  `docs/agent.md` §7, so nothing needs rewiring later. `/app` now exists;
-  its sidebar and dock link to the still-missing routes with final hrefs.
-- The wallet gate is a mock: one placeholder address, session-only memory,
-  nothing signed. Real @reown/appkit wiring replaces
-  `components/wallet/wallet-provider.tsx` internals in the chain-layer task.
-- Dashboard numbers, series and events come from `lib/dashboard-data.ts`,
-  not chain reads. Timestamps are relative to load time so the deadline
-  arithmetic reads correctly while the data is static.
-- Gallery slides are placeholder events with generated SVG artwork in
-  `public/nft/`, not chain reads. `lib/poap-data.ts` still feeds
-  WhatItIs.
+- No screen submits a transaction: registration, all three mint routes, the
+  allowlist update, the public toggle and batch drops all end at
+  prepared-but-not-submitted states, matching the mint surfaces' honest copy.
+  That wiring is the transactions phase of the roadmap.
+- `/app/created/[id]`, the manage screen with the allowlist builder, the
+  public toggle and the batch drop and signature panels, does not exist yet.
+- The landing page reads the chain during static generation: a build without
+  RPC access renders the gallery and holder fallbacks instead of failing, but
+  the first revalidation needs the RPC up.
+- The dashboard charts and the collection's mint dates scan `NewMint` logs in
+  10k-block chunks. A wallet holding the genesis event scans roughly 130
+  chunks against the public RPC, which can take tens of seconds; the UI
+  degrades to "Minted onchain" and zero-count charts rather than erroring,
+  and a private RPC shortens the wait.
 - `app/opengraph-image.tsx` renders through `next/og`, which was never executed
   here because builds are not run locally. Worth eyeballing once deployed.
 - Vendored contracts cannot be compiled here: Foundry is not installed, and
@@ -164,13 +195,34 @@ from the mosaic reading. Unresolved: an NFT project called Tessera existed aroun
 2022, believed wound down, but search engines blocked every query, so a trademark
 check is still outstanding before a domain is bought.
 
-**wagmi stays on 2.x.** Not 3.x. RainbowKit 2.2.11 peer-requires `wagmi ^2.9.0`
-and `@farcaster/miniapp-wagmi-connector` 2.0.0 peer-requires
-`@wagmi/core ^2.14.1`. wagmi 3 breaks both.
+**Reown AppKit, not RainbowKit.** The roadmap named AppKit and the wallet seam
+was always shaped for it. AppKit 1.8.23 with the wagmi adapter peer-requires
+`wagmi >=2.19.5` and `@wagmi/core >=2.21.2`, so wagmi stays 2.19.5 and
+`@wagmi/core` is pinned explicitly at 2.22.1, because npm otherwise resolves
+the adapter's peer against `@wagmi/core` 3.x. Without
+`NEXT_PUBLIC_WC_PROJECT_ID` the adapter runs on Reown's documented public
+development projectId, which serves injected wallets; production sets a real
+one.
+
+**wagmi stays on 2.x.** Not 3.x. The AppKit wagmi adapter and
+`@farcaster/miniapp-wagmi-connector` 2.0.0 both peer-require wagmi 2.x core.
+wagmi 3 breaks both.
 
 **No indexer, no API keys.** All reads come from the contract through
-Multicall3, which is deployed at the canonical address on Base Sepolia. This is
-what makes the app deployable by a stranger with only an RPC URL.
+Multicall3, which is deployed at the canonical address on Base Sepolia, plus
+chunked `NewMint` log scans for the counts logs alone can answer. This is
+what makes the app deployable by a stranger with only an RPC URL, and mint-log
+data stays enrichment: every screen renders without it.
+
+**`uri()` is the range check.** `events(uint256)` is a mapping read, so an
+out-of-range ID returns a zero struct, not a revert. `readEvents` drops any
+ID whose `uri()` call fails in the aggregate, the only contract-precise
+signal that the ID does not exist.
+
+**The wallet seam kept its shape.** `useWallet` still exposes
+`address, connect, disconnect`; AppKit's modal replaces the mock's in-memory
+address behind it. Disconnecting clears the shared query cache, so a second
+wallet never inherits the first one's reads.
 
 **Theme switching is class-based.** `next-themes` with `attribute="class"`,
 default dark, system detection on. The theme toggle drives icon visibility
@@ -192,6 +244,76 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Wallet connection and live reads (roadmap phase 2)
+
+The seams are live. `WalletProvider` now wraps Reown AppKit over wagmi while
+exposing the same `useWallet` shape, and the placeholder data modules are
+deleted: every screen reads the OnchainPOAPs contract on Base Sepolia. The
+create funnel gained its second step, the registration choices, so the old
+dead-end at "Continue to registration" is gone.
+
+Decisions:
+
+- **One read layer, two consumers.** `lib/poap-contract.ts` holds the typed
+  ABI (the vendored JSON cast against a `parseAbi` mirror, so the extracted
+  artifact stays the runtime source of truth), the single public client, and
+  `readEvents`: `events(id)`, `uri(id)` and `totalSupply(id)` ride one
+  Multicall3 aggregate, 20 events per call, out-of-range IDs dropped through
+  the `uri()` failure, artwork decoded from the base64 metadata with a
+  `TextDecoder` because four onchain events carry non-ASCII names. Server
+  components (the public POAP pages, the landing gallery) call the same
+  functions the client hooks in `hooks/use-poap-reads.ts` wrap in one shared
+  react-query cache, so no screen keeps a private copy of the contract's
+  answers.
+- **Log-derived counts are enrichment, never a dependency.** The dashboard
+  charts and the collection's mint dates read `NewMint` logs through
+  `lib/mint-logs.ts` in 10k-block chunks, the widest range the public RPC
+  reliably serves (verified against it), four chunks in flight, failed
+  chunks contributing nothing. The route-mix donut was redesigned as "Where
+  mints land", mints by event, because the mint log names the event and the
+  recipient, not the route: the old four-route placeholder mix cannot be
+  derived onchain, and inventing it would be a lie. The collection card's
+  mint-route label is likewise derived from what the event itself says
+  (public, invitation-listed, or from the creator) rather than a per-token
+  route the chain does not record.
+- **The wallet seam kept its interface.** `connect` opens the AppKit modal,
+  wagmi's `useAccount` supplies the address, and disconnect runs through the
+  modal and clears the query cache. Request cookies flow from the root
+  layout into `WagmiProvider`'s `initialState`, so a server render and the
+  first client render agree on the connected account. The AppKit modal
+  follows the site theme through `useAppKitTheme` and carries the teal
+  accent and the site's radius.
+- **The create funnel is two steps.** Step one gained the event date and
+  external link inputs, byte counters (the contract counts UTF-8 bytes, not
+  characters) and JSON-unsafe character rejection with the reason stated,
+  because the contract interpolates metadata fields into JSON without
+  escaping. The artwork panel shows raw bytes, the projected base64 size
+  onchain, a warning past 100 KB and a refusal past 120 KB. Step two
+  presents the public-mint choice, the soulbound choice and the
+  invitation-list decision (none, later, or a 32-byte commitment pasted
+  now) as plain-language consequences, with the day-30 freeze spelled out
+  at the point of decision and a field-by-field review before a prepared
+  state that states no transaction is submitted. `lib/registration.ts`
+  holds every rule so the form and any future transaction assembly cannot
+  disagree.
+- **Public pages read server-side.** `/poaps/[id]` and its claim route parse
+  the numeric segment, read the event, and 404 on anything the contract
+  cannot answer, with a 60 s revalidate, a `loading.tsx` skeleton matching
+  the detail layout, and an `error.tsx` that offers a retry. The landing
+  page revalidates every 300 s and renders fallback copy if the RPC is
+  unreachable at build time.
+- **Deleted outright:** `lib/dashboard-data.ts`, `lib/poap-registry.ts`,
+  `lib/collection-data.ts` and the six placeholder mosaics in `public/nft/`,
+  all fully replaced by live reads. The `PoapEvent` type, the chain
+  constants and the deadline helpers live on unchanged in `lib/poap-data.ts`
+  and `lib/deadlines.ts`.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings. The read layer was exercised against the
+live contract with a throwaway Node script (since deleted): 51 events, 103
+mints, the out-of-range drop, the UTF-8 round trip and the 60-call multicall
+batch all behave as written.
 
 ### Template artwork and palette upgrade
 

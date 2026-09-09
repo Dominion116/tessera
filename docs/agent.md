@@ -546,7 +546,7 @@ Versions are pinned deliberately. Do not bump without checking peer ranges.
 | Package manager | **npm** | 11.x |
 | Chain client | viem | 2.56.x |
 | React hooks | wagmi | **2.19.5** |
-| Wallet UI | RainbowKit | 2.2.11 |
+| Wallet UI | Reown AppKit + wagmi adapter | 1.8.23 |
 | Async state | @tanstack/react-query | 5.102.x |
 | Mini App SDK | @farcaster/miniapp-sdk | 0.3.0 |
 | Mini App connector | @farcaster/miniapp-wagmi-connector | 2.0.0 |
@@ -562,10 +562,11 @@ Versions are pinned deliberately. Do not bump without checking peer ranges.
 | QR | qrcode | 1.5.4 |
 | Hosting | Vercel | n/a |
 
-**wagmi stays on 2.x.** wagmi 3 exists but RainbowKit 2.2.11 peer-requires
-`wagmi ^2.9.0` and `@farcaster/miniapp-wagmi-connector` 2.0.0 peer-requires
-`@wagmi/core ^2.14.1`. Upgrading to wagmi 3 breaks both. Revisit only when both
-publish v3-compatible releases.
+**wagmi stays on 2.x.** wagmi 3 exists but the Reown AppKit wagmi adapter
+1.8.23 peer-requires `wagmi >=2.19.5` and `@wagmi/core >=2.21.2`, and
+`@farcaster/miniapp-wagmi-connector` 2.0.0 peer-requires
+`@wagmi/core ^2.14.1`. Upgrading to wagmi 3 breaks both. Revisit only when
+both publish v3-compatible releases.
 
 `svgo` 4 exposes a browser build at the `svgo/browser` subpath export. Import
 from there so optimization runs client-side with no server round trip and no

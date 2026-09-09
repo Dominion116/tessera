@@ -12,7 +12,8 @@ const ExploreCard = ({ event }: { event: PoapEvent }) => (
       className="block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-400"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {/* Onchain SVG stand-in, kept as an inline data URL for the placeholder source. */}
+        {/* Onchain SVG decoded out of uri(), kept as an inline data URL: */}
+        {/* there is nothing for the image optimizer to do. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={svgToDataUrl(event.artwork)}

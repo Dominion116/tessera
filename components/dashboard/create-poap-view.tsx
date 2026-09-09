@@ -1,11 +1,17 @@
 "use client";
 
-import { ChangeEvent, PointerEvent, useRef, useState } from "react";
+import { ChangeEvent, PointerEvent, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
+  ArrowRightLeft,
   Circle,
   Download,
   Eraser,
   FileImage,
+  Fingerprint,
+  Globe,
+  ListChecks,
+  Lock,
   Minus,
   Pencil,
   Plus,
@@ -19,6 +25,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { formatBytes, formatUtcDate, svgToDataUrl } from "@/lib/format";
+import {
+  dateInputToUnix,
+  FIELD_RULES,
+  fieldError,
+  parseAllowlistRoot,
+  registrationFlags,
+  svgSizeStatus,
+  utf8Bytes,
+} from "@/lib/registration";
+import { CREATOR_TIMELOCK_DAYS } from "@/lib/poap-data";
 
 type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
 type Point = { x: number; y: number };
@@ -233,12 +250,22 @@ const renderShape = (shape: Shape, index: number) => {
   }
 };
 
+type AllowlistChoice = "none" | "later" | "now";
+
 const CreatePoapView = () => {
   const svgInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<SVGSVGElement>(null);
+  const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [eventDateInput, setEventDateInput] = useState("");
+  const [externalUrl, setExternalUrl] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [isSoulbound, setIsSoulbound] = useState(true);
+  const [allowlistChoice, setAllowlistChoice] = useState<AllowlistChoice>("none");
+  const [allowlistRootInput, setAllowlistRootInput] = useState("");
+  const [reviewed, setReviewed] = useState(false);
   const [tool, setTool] = useState<Tool>("brush");
   const [color, setColor] = useState("#2dd4bf");
   const [strokeWidth, setStrokeWidth] = useState(4);
@@ -389,14 +416,63 @@ const CreatePoapView = () => {
     </>
   );
 
+  const artworkSource = uploadedSvg ?? (shapes.length ? toSvg(shapes) : "");
+  const hasArtwork = artworkSource.length > 0;
+  const size = useMemo(() => svgSizeStatus(artworkSource), [artworkSource]);
+  const nameError = fieldError(name, FIELD_RULES.name);
+  const descriptionError = fieldError(description, FIELD_RULES.description);
+  const locationError = fieldError(location, FIELD_RULES.location);
+  const externalUrlError = fieldError(externalUrl, FIELD_RULES.externalUrl);
+  const allowlistRootError =
+    allowlistChoice === "now" && !parseAllowlistRoot(allowlistRootInput)
+      ? "The commitment must be 0x followed by 32 bytes of hex, from the tool that built your list."
+      : null;
+  const eventDate = dateInputToUnix(eventDateInput);
+
+  const detailsReady =
+    !nameError &&
+    !descriptionError &&
+    !locationError &&
+    !externalUrlError &&
+    hasArtwork &&
+    size.level !== "over";
+  const registrationReady = detailsReady && !allowlistRootError;
+
+  const stepOneBlockers = [
+    !hasArtwork && "Artwork is required.",
+    Boolean(nameError) && nameError,
+    Boolean(descriptionError) && descriptionError,
+    Boolean(locationError) && locationError,
+    Boolean(externalUrlError) && externalUrlError,
+    size.level === "over" && size.message,
+  ].filter(Boolean) as string[];
+
+  const sizeTone =
+    size.level === "over"
+      ? "border-red-400/30 bg-red-400/[0.06] text-red-700 dark:text-red-300"
+      : size.level === "warn"
+        ? "border-amber-400/30 bg-amber-400/[0.06] text-amber-700 dark:text-amber-300"
+        : "border-border/70 bg-background/50 text-fg-secondary";
+
   return (
     <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
       <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
         <p className="text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">Creator studio</p>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Create a POAP</h1>
         <p className="max-w-xl text-sm leading-6 text-fg-secondary">Register an event and make its artwork here, or bring an SVG you already designed.</p>
+        <ol className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-tertiary" aria-label="Registration steps">
+          <li className={step === 1 ? "font-medium text-foreground" : ""}>
+            <span className="tabular-nums">1</span>. Artwork and details
+          </li>
+          <li aria-hidden="true" className="text-fg-tertiary/70">→</li>
+          <li className={step === 2 ? "font-medium text-foreground" : ""}>
+            <span className="tabular-nums">2</span>. Registration choices
+          </li>
+        </ol>
       </header>
 
+      {step === 1 ? (
+        <>
       <Card className="dashboard-panel col-span-12 xl:col-span-7">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
@@ -484,6 +560,15 @@ const CreatePoapView = () => {
             {tool === "text" ? <label className="flex min-w-0 flex-col gap-1 text-xs text-fg-tertiary">Text<input value={textValue} onChange={(event) => setTextValue(event.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-teal-400" /></label> : <span />}
           </div>
 
+          <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border p-4 text-sm leading-6 ${sizeTone}`} aria-live="polite">
+            <p className="min-w-64 flex-1">{hasArtwork ? size.message : "No artwork yet. Draw, load a template, or import an SVG."}</p>
+            {hasArtwork ? (
+              <Badge variant="outline" className="tabular-nums">
+                {formatBytes(size.rawBytes)} raw · {formatBytes(size.onchainBytes)} stored
+              </Badge>
+            ) : null}
+          </div>
+
           <div className="flex flex-wrap gap-2 border-t border-border/70 pt-4">
             <input ref={svgInputRef} type="file" accept="image/svg+xml,.svg" onChange={importSvg} className="sr-only" />
             <Button type="button" variant="outline" onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
@@ -494,16 +579,152 @@ const CreatePoapView = () => {
       </Card>
 
       <Card className="dashboard-panel col-span-12 xl:col-span-5">
-        <CardHeader><CardTitle>Event details</CardTitle><CardDescription>These fields become the POAP metadata at registration.</CardDescription></CardHeader>
+        <CardHeader><CardTitle>Event details</CardTitle><CardDescription>These fields become the POAP metadata at registration. The contract measures them in bytes: most accented letters cost two, emoji cost four.</CardDescription></CardHeader>
         <CardContent className="flex flex-col gap-5">
-          <label className="flex flex-col gap-2 text-sm font-medium">POAP name<Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Base builders night" maxLength={128} /><span className="text-xs font-normal text-fg-tertiary">{name.length} / 128 characters</span></label>
-          <label className="flex flex-col gap-2 text-sm font-medium">Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What happened at this event?" maxLength={512} className="min-h-28 resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-teal-400" /><span className="text-xs font-normal text-fg-tertiary">{description.length} / 512 characters</span></label>
-          <label className="flex flex-col gap-2 text-sm font-medium">Location<Input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Lisbon, Portugal" maxLength={128} /><span className="text-xs font-normal text-fg-tertiary">Optional, up to 128 characters</span></label>
-          <div className="rounded-lg border border-teal-400/25 bg-teal-400/[0.04] p-4 text-sm leading-6 text-fg-secondary"><p className="font-medium text-foreground">Registration choices come next</p><p className="mt-1">Public minting, wallet-bound status and the invitation-list decision are set alongside the transaction. Keep the artwork under 100 KB before onchain encoding.</p></div>
-          <Button type="button" size="lg" className="w-full" disabled={!name.trim() || (!shapes.length && !uploadedSvg)}><Plus aria-hidden="true" />Continue to registration</Button>
-          {!name.trim() || (!shapes.length && !uploadedSvg) ? <p className="text-xs text-fg-tertiary">Add a name and artwork to continue.</p> : null}
+          <label className="flex flex-col gap-2 text-sm font-medium">POAP name<Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Base builders night" maxLength={128} aria-invalid={Boolean(nameError)} /><span className={`text-xs font-normal ${nameError ? "text-red-600 dark:text-red-400" : "text-fg-tertiary"}`}>{nameError ?? `${utf8Bytes(name)} / 128 bytes`}</span></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What happened at this event? One line: line breaks cannot be stored." maxLength={512} rows={3} className="min-h-20 resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-teal-400" aria-invalid={Boolean(descriptionError)} /><span className={`text-xs font-normal ${descriptionError ? "text-red-600 dark:text-red-400" : "text-fg-tertiary"}`}>{descriptionError ?? `${utf8Bytes(description)} / 512 bytes`}</span></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">Event date<Input type="date" value={eventDateInput} onChange={(event) => setEventDateInput(event.target.value)} /><span className="text-xs font-normal text-fg-tertiary">Optional. Stored as a UTC date on the badge.</span></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">Location<Input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Lisbon, Portugal" maxLength={128} aria-invalid={Boolean(locationError)} /><span className={`text-xs font-normal ${locationError ? "text-red-600 dark:text-red-400" : "text-fg-tertiary"}`}>{locationError ?? "Optional, up to 128 bytes"}</span></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">External link<Input value={externalUrl} onChange={(event) => setExternalUrl(event.target.value)} placeholder="https://your-event.site" maxLength={128} aria-invalid={Boolean(externalUrlError)} /><span className={`text-xs font-normal ${externalUrlError ? "text-red-600 dark:text-red-400" : "text-fg-tertiary"}`}>{externalUrlError ?? "Optional, up to 128 bytes"}</span></label>
+          <Button type="button" size="lg" className="w-full" disabled={!detailsReady} onClick={() => { setStep(2); setReviewed(false); }}><Plus aria-hidden="true" />Continue to registration</Button>
+          {stepOneBlockers.length > 0 ? (
+            <ul className="flex flex-col gap-1 text-xs leading-5 text-fg-tertiary">
+              {stepOneBlockers.slice(0, 2).map((blocker) => (
+                <li key={blocker}>{blocker}</li>
+              ))}
+            </ul>
+          ) : null}
         </CardContent>
       </Card>
+        </>
+      ) : (
+        <>
+      <Card className="dashboard-panel col-span-12 xl:col-span-7">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <div><CardTitle>Registration choices</CardTitle><CardDescription>Two settings the contract locks on day {CREATOR_TIMELOCK_DAYS}, and the invitation-list decision.</CardDescription></div>
+            <Badge variant="outline" className="tabular-nums">flags {registrationFlags(isSoulbound, isPublic)}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-7">
+          <fieldset className="flex flex-col gap-3">
+            <legend className="text-sm font-semibold">Who can mint</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${isPublic ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="who-can-mint" checked={isPublic} onChange={() => setIsPublic(true)} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-medium"><Globe aria-hidden="true" className="size-4 text-teal-600 dark:text-teal-300" />Anyone</span>
+                  <span className="text-xs leading-5 text-fg-secondary">Anyone who finds the event page claims their own badge. No list to manage, nothing to hand out.</span>
+                </span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${!isPublic ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="who-can-mint" checked={!isPublic} onChange={() => setIsPublic(false)} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-medium"><Lock aria-hidden="true" className="size-4 text-teal-600 dark:text-teal-300" />Only invited wallets</span>
+                  <span className="text-xs leading-5 text-fg-secondary">Attendees need an invitation list, a code you sign for them, or a badge you drop into their wallet.</span>
+                </span>
+              </label>
+            </div>
+            <p className="rounded-lg border border-amber-400/30 bg-amber-400/[0.06] p-3 text-xs leading-5 text-amber-700 dark:text-amber-300">Whichever way this is set on day {CREATOR_TIMELOCK_DAYS} after registration is how it stays forever. A closed mint can never be opened after that date, and an open one can never be closed.</p>
+          </fieldset>
+
+          <fieldset className="flex flex-col gap-3">
+            <legend className="text-sm font-semibold">Transfer rules</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${isSoulbound ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="transfer-rules" checked={isSoulbound} onChange={() => setIsSoulbound(true)} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-medium"><Fingerprint aria-hidden="true" className="size-4 text-teal-600 dark:text-teal-300" />Bound to the wallet</span>
+                  <span className="text-xs leading-5 text-fg-secondary">The badge stays in the wallet that minted it. Proof of presence, not something to trade. This cannot be changed later.</span>
+                </span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${!isSoulbound ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="transfer-rules" checked={!isSoulbound} onChange={() => setIsSoulbound(false)} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-medium"><ArrowRightLeft aria-hidden="true" className="size-4 text-teal-600 dark:text-teal-300" />Free to move</span>
+                  <span className="text-xs leading-5 text-fg-secondary">The badge can be sent or sold after minting. Choose this for art and collectibles rather than proof. This cannot be changed later.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="flex flex-col gap-3">
+            <legend className="flex items-center gap-2 text-sm font-semibold">Invitation list</legend>
+            <div className="grid gap-3">
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${allowlistChoice === "none" ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="invitation-list" checked={allowlistChoice === "none"} onChange={() => setAllowlistChoice("none")} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="text-sm font-medium">No invitation list</span>
+                  <span className="text-xs leading-5 text-fg-secondary">Minting works through the choices above only. The one-time list setting stays unused.</span>
+                </span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${allowlistChoice === "later" ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="invitation-list" checked={allowlistChoice === "later"} onChange={() => setAllowlistChoice("later")} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-medium"><ListChecks aria-hidden="true" className="size-4 text-teal-600 dark:text-teal-300" />Attach one later</span>
+                  <span className="text-xs leading-5 text-fg-secondary">Register without a list, then attach it from the manage screen exactly once, any time in the first {CREATOR_TIMELOCK_DAYS} days. Keeps the door open for late attendee lists.</span>
+                </span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-[border-color,background-color] duration-180 hover:border-teal-400/40 outline-none focus-within:ring-2 focus-within:ring-teal-400 ${allowlistChoice === "now" ? "border-teal-400/50 bg-teal-400/[0.08]" : "border-border/70 bg-background/45"}`}>
+                <input type="radio" name="invitation-list" checked={allowlistChoice === "now"} onChange={() => setAllowlistChoice("now")} className="mt-1 accent-teal-500" />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="text-sm font-medium">Attach one at registration (advanced)</span>
+                  <span className="text-xs leading-5 text-fg-secondary">Paste the 32-byte commitment for your list now. It can never be replaced, so the list must already be final.</span>
+                </span>
+              </label>
+              {allowlistChoice === "now" ? (
+                <label className="flex flex-col gap-2 pl-1 text-sm font-medium">List commitment
+                  <Input value={allowlistRootInput} onChange={(event) => setAllowlistRootInput(event.target.value)} placeholder="0x followed by 64 hexadecimal characters" spellCheck={false} className="font-mono text-xs" aria-invalid={Boolean(allowlistRootError)} />
+                  <span className={`text-xs font-normal ${allowlistRootError ? "text-red-600 dark:text-red-400" : "text-fg-tertiary"}`}>{allowlistRootError ?? "A 0x value, 32 bytes of hex, produced by the tool that built your list."}</span>
+                </label>
+              ) : null}
+            </div>
+          </fieldset>
+
+          <Button type="button" variant="outline" onClick={() => setStep(1)}><ArrowLeft aria-hidden="true" />Back to artwork and details</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="dashboard-panel col-span-12 xl:col-span-5">
+        <CardHeader><CardTitle>Review</CardTitle><CardDescription>Exactly what the registration will store, field by field.</CardDescription></CardHeader>
+        <CardContent className="flex flex-col gap-5">
+          <div className="flex items-center gap-4">
+            {/* Inline SVG data URL, which next/image cannot optimize. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={svgToDataUrl(artworkSource)} alt={name || "POAP artwork"} width={56} height={56} className="size-14 shrink-0 rounded-lg border border-border/70" />
+            <div className="flex min-w-0 flex-col">
+              <p className="truncate text-sm font-semibold">{name || "Untitled POAP"}</p>
+              <p className="text-xs text-fg-tertiary tabular-nums">{hasArtwork ? `${formatBytes(size.rawBytes)} raw · ${formatBytes(size.onchainBytes)} as stored onchain` : "No artwork"}</p>
+            </div>
+          </div>
+          <dl className="grid gap-2 text-sm">
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">Who can mint</dt><dd className="text-right font-medium">{isPublic ? "Anyone" : "Only invited wallets"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">Transfer</dt><dd className="text-right font-medium">{isSoulbound ? "Bound to the minting wallet" : "Free to move"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">Invitation list</dt><dd className="text-right font-medium">{allowlistChoice === "none" ? "None" : allowlistChoice === "later" ? `Attachable once, within ${CREATOR_TIMELOCK_DAYS} days` : "Commitment attached now"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">Event date</dt><dd className="text-right font-medium">{eventDate > 0n ? formatUtcDate(eventDate) : "Not set"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">Location</dt><dd className="text-right font-medium">{location || "Not set"}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-fg-tertiary">External link</dt><dd className="max-w-[60%] truncate text-right font-medium">{externalUrl || "Not set"}</dd></div>
+          </dl>
+          {size.level !== "ok" ? <p className={`rounded-lg border p-3 text-xs leading-5 ${sizeTone}`}>{size.message}</p> : null}
+          {reviewed ? (
+            <div className="flex flex-col gap-3">
+              <div className="rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300">
+                <p className="font-medium">The registration is prepared.</p>
+                <p className="mt-1">The artwork, the metadata and every choice above are what the contract will store. The two settings that lock on day {CREATOR_TIMELOCK_DAYS} are recorded with the same transaction.</p>
+              </div>
+              <Button type="button" variant="outline" onClick={() => setReviewed(false)}><ArrowLeft aria-hidden="true" />Back to choices</Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Button type="button" size="lg" disabled={!registrationReady} onClick={() => setReviewed(true)}><Plus aria-hidden="true" />Prepare registration</Button>
+              <p className="text-xs leading-5 text-fg-tertiary">No transaction is submitted from this screen. When the registration transaction is confirmed, the event number, the artwork and these choices land onchain together.</p>
+              {!registrationReady && allowlistRootError ? <p className="text-xs text-red-600 dark:text-red-400">{allowlistRootError}</p> : null}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+        </>
+      )}
     </div>
   );
 };

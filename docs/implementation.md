@@ -34,8 +34,8 @@ Two consequences worth stating plainly:
 
 | Needed for | Input | Status |
 |---|---|---|
-| Phase 1 | Hero section block from the project owner | awaited |
-| Phase 2 | Dashboard block from the project owner | awaited |
+| Phase 1 | Hero section block from the project owner | received |
+| Phase 2 | Dashboard block from the project owner | received, treated as a reference |
 | Phase 9 | Production domain + signed `accountAssociation` | awaited |
 | Phase 11 | Base Sepolia ETH in a test wallet | awaited |
 
@@ -317,9 +317,9 @@ This table is the summary.
 | ABI extracted | done, `contracts/abi/OnchainPOAPs.json` |
 | 0 Foundation | scaffold, theme tokens, theme switching, three-weight foreground tokens, shared reveal primitive and reduced-motion handling done; dashboard and docs shells outstanding |
 | 1 Landing page | done, all sections built; static OG route pending a production domain |
-| 2 Dashboard surface | blocked on dashboard block |
+| 2 Dashboard surface | home, two-step create wizard, created list, collection, explore, public POAP and claim pages built and live; manage screen `/app/created/[id]` outstanding |
 | 3 Documentation | not started |
-| 4 Chain layer | not started |
+| 4 Chain layer | wallet (AppKit + wagmi) and every read live against Base Sepolia through `lib/poap-contract.ts`; writes (registration, mints, creator controls) outstanding |
 | 5 Registration | not started |
 | 6 Minting | not started |
 | 7 Creator controls | not started |

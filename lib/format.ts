@@ -44,3 +44,12 @@ export function shortAddress(address: string): string {
 export function svgToDataUrl(svg: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
+
+/** Byte size with a KB step, for artwork and encoding projections. */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}

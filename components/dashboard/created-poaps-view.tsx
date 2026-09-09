@@ -1,6 +1,18 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, MapPin, Stamp, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  MapPin,
+  RefreshCw,
+  Stamp,
+  Users,
+  WifiOff,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,39 +20,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCount, formatUtcDate, svgToDataUrl } from "@/lib/format";
-import {
-  DASHBOARD_EVENTS,
-  DASHBOARD_STATS,
-  daysUntil,
-  freezeDeadline,
-  signatureDeadline,
-} from "@/lib/dashboard-data";
+import { useWallet } from "@/components/wallet/wallet-provider";
+import { useCreatedEvents } from "@/hooks/use-poap-reads";
+import { daysUntil, freezeDeadline, signatureDeadline } from "@/lib/deadlines";
 import {
   CREATOR_TIMELOCK_DAYS,
   type PoapEvent,
   ZERO_ROOT,
 } from "@/lib/poap-data";
 
-type CreatedRow = {
-  event: PoapEvent;
-  freezeAt: number;
-  daysLeft: number;
-};
-
-const CREATED_ROWS: CreatedRow[] = [...DASHBOARD_EVENTS]
-  .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
-  .map((event) => {
-    const freezeAt = freezeDeadline(event);
-
-    return { event, freezeAt, daysLeft: daysUntil(freezeAt) };
-  });
-
-const freezeLabel = (days: number) =>
-  days === 0 ? "Freezes today" : `${days} ${days === 1 ? "day" : "days"}`;
-
-const CreatedEventRow = ({ row }: { row: CreatedRow }) => {
-  const { event, freezeAt, daysLeft } = row;
+const CreatedEventRow = ({ event }: { event: PoapEvent }) => {
+  const freezeAt = freezeDeadline(event);
+  const daysLeft = daysUntil(freezeAt);
   const frozen = daysLeft < 0;
   const signatureEnd = signatureDeadline(event);
   const signatureOpen = daysUntil(signatureEnd) >= 0;
@@ -124,7 +117,11 @@ const CreatedEventRow = ({ row }: { row: CreatedRow }) => {
             variant={frozen ? "outline" : "accent"}
             className="w-fit tabular-nums"
           >
-            {frozen ? "Frozen" : freezeLabel(daysLeft)}
+            {frozen
+              ? "Frozen"
+              : daysLeft === 0
+                ? "Freezes today"
+                : `${daysLeft} ${daysLeft === 1 ? "day" : "days"}`}
           </Badge>
           <p className="text-xs leading-5 text-fg-secondary">
             {frozen
@@ -149,55 +146,108 @@ const CreatedEventRow = ({ row }: { row: CreatedRow }) => {
   );
 };
 
+const CreatedRowSkeleton = () => (
+  <Card className="dashboard-panel col-span-12 py-5">
+    <CardContent className="flex items-start gap-4">
+      <Skeleton className="size-14 rounded-lg" />
+      <div className="flex w-full flex-col gap-2">
+        <Skeleton className="h-5 w-2/3" />
+        <Skeleton className="h-3.5 w-1/3" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 /**
  * The "POAPs I created" view embedded in the dashboard shell. One row per
  * event this wallet registered, newest first: metadata and mint state on
  * the left, the day-30 freeze on the right via the shared deadline
  * helpers. Rows link out to the public event page.
  */
-const CreatedPoapsView = () => (
-  <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
-    <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
-      <p className="flex items-center gap-2 text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">
-        <Stamp aria-hidden="true" className="size-3.5" />
-        Creator library
-      </p>
-      <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-        POAPs I created
-      </h1>
-      <p className="max-w-xl text-sm leading-6 text-fg-secondary">
-        Every event registered by this wallet, newest first: artwork, mint
-        state, collectors, and the deadline each one freezes on.
-      </p>
-      <div className="mt-1 flex flex-wrap gap-2">
-        <Badge variant="outline" className="tabular-nums">
-          {DASHBOARD_STATS.created} events
-        </Badge>
-        <Badge variant="outline" className="tabular-nums">
-          {formatCount(DASHBOARD_STATS.collectors)} collectors
-        </Badge>
-        <Badge variant="outline" className="tabular-nums">
-          {DASHBOARD_STATS.openForPublicMint} open for public mint
-        </Badge>
-      </div>
-    </header>
+const CreatedPoapsView = () => {
+  const { address } = useWallet();
+  const { events, isLoading, isError, refetch } = useCreatedEvents(address);
 
-    {CREATED_ROWS.length > 0 ? (
-      CREATED_ROWS.map((row) => (
-        <CreatedEventRow key={row.event.eventId.toString()} row={row} />
-      ))
-    ) : (
-      <Card className="dashboard-panel col-span-12 py-5">
-        <CardHeader>
-          <CardTitle>Nothing created yet</CardTitle>
-          <CardDescription>
-            POAPs registered by this wallet appear here alongside their freeze
-            dates.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    )}
-  </div>
-);
+  const stats = useMemo(
+    () => ({
+      created: events.length,
+      collectors: events.reduce(
+        (total, event) => total + Number(event.collectors),
+        0
+      ),
+      openForPublicMint: events.filter((event) => event.isPublic).length,
+    }),
+    [events]
+  );
+
+  return (
+    <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
+      <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
+        <p className="flex items-center gap-2 text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">
+          <Stamp aria-hidden="true" className="size-3.5" />
+          Creator library
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+          POAPs I created
+        </h1>
+        <p className="max-w-xl text-sm leading-6 text-fg-secondary">
+          Every event registered by this wallet, newest first: artwork, mint
+          state, collectors, and the deadline each one freezes on.
+        </p>
+        {!isLoading ? (
+          <div className="mt-1 flex flex-wrap gap-2">
+            <Badge variant="outline" className="tabular-nums">
+              {stats.created} events
+            </Badge>
+            <Badge variant="outline" className="tabular-nums">
+              {formatCount(stats.collectors)} collectors
+            </Badge>
+            <Badge variant="outline" className="tabular-nums">
+              {stats.openForPublicMint} open for public mint
+            </Badge>
+          </div>
+        ) : null}
+      </header>
+
+      {isError ? (
+        <Card className="dashboard-panel col-span-12 py-5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <WifiOff aria-hidden="true" className="size-4 text-fg-tertiary" />
+              Your events could not be read
+            </CardTitle>
+            <CardDescription>
+              The Base Sepolia connection dropped while reading the contract.
+              Nothing was lost; try again.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button type="button" variant="outline" onClick={() => refetch()}>
+              <RefreshCw aria-hidden="true" />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      ) : isLoading ? (
+        Array.from({ length: 3 }, (_, index) => <CreatedRowSkeleton key={index} />)
+      ) : events.length > 0 ? (
+        events.map((event) => (
+          <CreatedEventRow key={event.eventId.toString()} event={event} />
+        ))
+      ) : (
+        <Card className="dashboard-panel col-span-12 py-5">
+          <CardHeader>
+            <CardTitle>Nothing created yet</CardTitle>
+            <CardDescription>
+              POAPs registered by this wallet appear here alongside their freeze
+              dates.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 export default CreatedPoapsView;
