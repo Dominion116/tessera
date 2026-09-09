@@ -193,6 +193,129 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Template artwork and palette upgrade
+
+The three canvas presets were rebuilt with far more geometric detail, icons and
+stamped text, and each template now carries three color palettes selectable
+from swatches on its card. Templates are defined as builder functions that
+take a palette and return shapes, so one template renders in any of its
+palettes and the loaded artwork is ordinary editable shapes.
+
+- The shape union grew a `polygon` type, optional `fill` on rectangles,
+  circles and polygons, and optional `size` and `anchor` on text. The
+  serializer, the canvas renderer and the template previews all render the
+  extended union through one shared `renderShape` function, and exported text
+  is XML-escaped so quotes and angle brackets survive the round trip.
+- **Mosaic tile**: a double-line frame, two filled and two framed tiles, two
+  inset squares, a filled center diamond, and "POAP" and "2026" stamps with
+  accent rules beneath them. Palettes: Tide, Violet dusk, Moss.
+- **Orbit seal**: two concentric rings, four compass ticks, a stroked emblem
+  with a filled core, a satellite on the inner ring, two four-point sparkles,
+  and "TESSERA", "IN ORBIT" and "SINCE 2026" stamps. Palettes: Aurora,
+  Nebula, Ember.
+- **Signal badge**: a framed badge with a lightning bolt, an "ON AIR" stamp,
+  a broadcast mast icon, four ascending bars with the tallest filled, a ruled
+  baseline with ticks, and a "MEETUP 2026" caption. Palettes: Pulse, Matrix,
+  Ruby.
+- Palette swatches are three-stripe gradient dots (accent, base, highlight)
+  with `aria-pressed`, focus rings and a teal ring on the active selection.
+  Loading a palette also sets the drawing color to that palette's accent, so
+  anything drawn afterwards matches.
+- Template stamps are placeholder words a creator is expected to replace.
+  They remain individual text shapes: select, restyle or delete them like any
+  drawn element.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Editable SVG artwork templates
+
+The Create view's canvas now opens with three vector presets above the drawing
+surface: a mosaic grid, an orbit mark and a signal-bars badge. Each preset is
+stored as the same shape union the drawing tools produce, so selecting one
+loads real editable shapes into the canvas rather than a flattened image.
+
+- `loadTemplate` copies the preset shapes into the editor, clears the history,
+  clears the imported-artwork state and marks the preset as selected.
+- The selected template carries a teal border and `aria-pressed`, and each
+  preset button renders a miniature vector preview.
+- An `Apply color` control recolors every visible shape using the active color
+  picker value, so a creator can restyle a preset without rebuilding it.
+- Drawing, deleting, importing or applying color after a template load exits
+  the template-selected state, because the artwork is now custom. Undo and
+  redo continue to work on template shapes like any other vector.
+- Template shapes export through the existing SVG serializer, so the exported
+  file is ordinary vector markup with the user's changes applied.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### SVG canvas pointer-event runtime fix
+
+The Create view's SVG canvas could throw `Cannot read properties of null
+(reading 'getBoundingClientRect')` while drawing. The coordinate helper was
+reading `event.currentTarget` after React had cleared the synthetic event's
+target reference.
+
+`components/dashboard/create-poap-view.tsx` now stores the SVG element in a
+persistent `canvasRef`. Coordinate conversion reads the ref, pointer capture
+uses the ref, and all pointer handlers return safely if the canvas is not
+available. Drawing behavior and the generated SVG format are unchanged.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### Direct Create route added
+
+`/app/create` now resolves instead of returning 404. It uses the existing
+`AppGate` and `DashboardShell` rather than introducing a second creation page:
+when the wallet is connected, `AppGate` passes `initialView="create"` and the
+shell renders the existing `CreatePoapView` beside the sidebar. When the wallet
+is disconnected, the route shows the same full-page wallet prompt as `/app`.
+
+The sidebar and mobile dock continue to switch Create locally, preserving the
+`/app` URL and mounted shell state. The direct route exists for links from the
+landing page and other entry points, while the dashboard controls remain
+in-place controls. `DashboardShell` now accepts an optional `initialView`, and
+`app/app/create/page.tsx` supplies the Create view without duplicating any
+form or canvas logic.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
+### In-shell POAP creation studio and SVG canvas
+
+The dashboard now includes Create as a local shell view. Selecting `Create a
+POAP` in the sidebar or `Create` in the mobile dock keeps the `/app` URL, wallet
+context and dashboard shell mounted, then renders `CreatePoapView` in the main
+content area alongside the existing Dashboard and Explore views.
+
+`components/dashboard/create-poap-view.tsx` combines the registration metadata
+inputs with a lightweight vector canvas. The canvas provides a freehand brush,
+rectangle, circle, line and text tools, configurable color and stroke width,
+pointer-based drawing, undo, redo, clear, SVG import and SVG export. Imported
+SVG markup is parsed in the browser and removes scripts, `foreignObject` nodes
+and inline event attributes before preview or export. Generated artwork uses a
+400 by 400 SVG viewBox and stays as vector markup rather than a rasterized
+image.
+
+The upload workflow and canvas workflow share the same artwork state boundary:
+importing an SVG replaces the drawn preview, drawing replaces imported
+artwork, and the Continue button requires both a name and an artwork source.
+The form currently captures name, description and location with the contract's
+128 and 512 character limits displayed beside the inputs. Public, soulbound,
+allowlist and event-date choices remain grouped for the registration workflow
+that follows this view. The UI does not submit a transaction.
+
+The existing standalone `/app/create` route remains absent. The local view is
+intentional, matching the dashboard Explore behavior and preventing navigation
+from resetting shell state. The visual is built from existing cards, buttons,
+badges, inputs and dashboard panel tokens, with the existing reduced-motion
+rules applying to its entrance and press feedback.
+
+`npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart from the two
+accepted hero `<img>` warnings, unchanged.
+
 ### Standalone Explore index removed
 
 The standalone `/poaps` gallery index has been removed because Explore now

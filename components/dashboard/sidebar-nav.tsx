@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export type DashboardView = "dashboard" | "explore";
+export type DashboardView = "dashboard" | "explore" | "create";
 
 type SidebarNavProps = {
   activeView: DashboardView;
@@ -47,10 +47,17 @@ const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
       <SidebarGroupContent>
         <SidebarMenu>
           {NAV_ITEMS.map((item) => {
-            const isLocalView = item.href === "/app" || item.href === "/poaps";
+            const isLocalView =
+              item.href === "/app" ||
+              item.href === "/poaps" ||
+              item.href === "/app/create";
             const active =
               isLocalView
-                ? (item.href === "/app" ? activeView === "dashboard" : activeView === "explore")
+                ? item.href === "/app"
+                  ? activeView === "dashboard"
+                  : item.href === "/poaps"
+                    ? activeView === "explore"
+                    : activeView === "create"
                 : pathname === item.href ||
                   pathname.startsWith(`${item.href}/`);
 
@@ -59,7 +66,15 @@ const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
                 {isLocalView ? (
                   <SidebarMenuButton
                     isActive={active}
-                    onClick={() => onViewChange(item.href === "/app" ? "dashboard" : "explore")}
+                    onClick={() =>
+                      onViewChange(
+                        item.href === "/app"
+                          ? "dashboard"
+                          : item.href === "/poaps"
+                            ? "explore"
+                            : "create"
+                      )
+                    }
                     className="transition-colors duration-180"
                   >
                     <item.icon aria-hidden="true" />
