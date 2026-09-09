@@ -3,18 +3,17 @@
  * the wallet modal supplied by AppKit. The WalletConnect project ID
  * comes from the environment; without one the adapter falls back to the
  * public development ID Reown documents for local use, which still
- * serves injected wallet connections. Transports read through
- * `NEXT_PUBLIC_RPC_URL` with the chain default as fallback, so a
- * deployment needs nothing but an RPC URL.
+ * serves injected wallet connections. Transports chain
+ * `NEXT_PUBLIC_RPC_URL` with public Base Sepolia endpoints, so a
+ * deployment needs nothing but an RPC URL and a rate-limited public
+ * endpoint fails over instead of failing requests.
  */
 
 import { cookieStorage, createStorage } from "@wagmi/core";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { baseSepolia } from "@reown/appkit/networks";
 import type { AppKitNetwork } from "@reown/appkit/networks";
-import { fallback, http } from "viem";
-
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL?.trim() || "";
+import { createBaseSepoliaTransports } from "./rpc";
 
 export const projectId =
   process.env.NEXT_PUBLIC_WC_PROJECT_ID?.trim() ||
@@ -28,7 +27,7 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
   transports: {
-    [baseSepolia.id]: RPC_URL ? fallback([http(RPC_URL), http()]) : http(),
+    [baseSepolia.id]: createBaseSepoliaTransports(),
   },
 });
 

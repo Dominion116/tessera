@@ -49,6 +49,21 @@ export function useAllEvents() {
   });
 }
 
+/**
+ * The search index behind the Explore search box: every registered event,
+ * fetched only once a query needs it. It shares the `all-events` cache with
+ * `useAllEvents`, so a later browse of created or collected POAPs never
+ * refetches what a search already loaded.
+ */
+export function useExploreSearchIndex(enabled: boolean) {
+  return useQuery({
+    queryKey: ["all-events"],
+    queryFn: readAllEvents,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
 /** Events the connected wallet registered, newest first. */
 export function useCreatedEvents(address: `0x${string}` | null) {
   const all = useAllEvents();

@@ -10,11 +10,10 @@
 
 import {
   createPublicClient,
-  fallback,
-  http,
   parseAbi,
 } from "viem";
 import { baseSepolia } from "viem/chains";
+import { createBaseSepoliaTransports } from "./rpc";
 import OnchainPOAPsAbi from "../contracts/abi/OnchainPOAPs.json";
 import {
   CONTRACT_ADDRESS,
@@ -43,15 +42,9 @@ const typedAbi = parseAbi([
 
 export const poapAbi = OnchainPOAPsAbi as unknown as typeof typedAbi;
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL?.trim() || "";
-
-const transports = RPC_URL
-  ? fallback([http(RPC_URL), http()])
-  : http();
-
 const publicClient = createPublicClient({
   chain: baseSepolia,
-  transport: transports,
+  transport: createBaseSepoliaTransports(),
 });
 
 export type PoapPublicClient = typeof publicClient;
@@ -73,18 +66,62 @@ export type PoapMetadata = {
   attributes?: unknown;
 };
 
+/** The namespace every renderable SVG root must declare. */
+const SVG_XMLNS = "http://www.w3.org/2000/svg";
+
+/**
+ * The contract builds `uri()` JSON with `abi.encodePacked`, which never
+ * escapes control characters in user text. A newline in a name or
+ * description lands raw inside a JSON string literal, where the spec
+ * forbids it, and `JSON.parse` rejects the whole document — taking the
+ * artwork down with it. Escaping raw control characters is always safe:
+ * valid JSON contains none, so this can only repair, never break.
+ */
+function repairJsonControlChars(json: string): string {
+  return json.replace(/[\u0000-\u001f]/g, (char) => {
+    const code = char.charCodeAt(0);
+    return `\\u${code.toString(16).padStart(4, "0")}`;
+  });
+}
+
+/**
+ * Repair the root namespace of a decoded SVG. Uploaded artwork can carry
+ * a malformed `xmlns` (for example `http://w3.org`), and a root outside
+ * the SVG namespace renders as nothing when the browser loads the SVG
+ * as an `<img>` document, even though inline previews look fine. Only
+ * the namespace the frontend renders is repaired; the bytes onchain are
+ * untouched.
+ */
+export function repairSvgNamespace(svg: string): string {
+  const openingTag = /<svg\b[^>]*>/.exec(svg);
+  if (!openingTag) return svg;
+  const tag = openingTag[0];
+  const existing = /\sxmlns\s*=\s*("[^"]*"|'[^']*')/.exec(tag);
+  if (existing) {
+    const value = existing[1].slice(1, -1);
+    if (value === SVG_XMLNS) return svg;
+    return svg.replace(
+      /\sxmlns\s*=\s*("[^"]*"|'[^']*')/,
+      ` xmlns="${SVG_XMLNS}"`
+    );
+  }
+  return svg.replace(
+    /<svg\b/,
+    `<svg xmlns="${SVG_XMLNS}"`
+  );
+}
+
 export function decodeUriMetadata(uri: string): PoapMetadata {
   const encoded = uri.slice("data:application/json;base64,".length);
   const json = decodeBase64(encoded);
-  return JSON.parse(json) as PoapMetadata;
+  return JSON.parse(repairJsonControlChars(json)) as PoapMetadata;
 }
 
-/** Raw SVG out of the metadata image field, which the contract stores base64-encoded. */
 export function decodeArtworkFromMetadata(metadata: PoapMetadata): string {
   const image = metadata.image ?? "";
   const prefix = "data:image/svg+xml;base64,";
   if (!image.startsWith(prefix)) return "";
-  return decodeBase64(image.slice(prefix.length));
+  return repairSvgNamespace(decodeBase64(image.slice(prefix.length)));
 }
 
 function decodeBase64(encoded: string): string {
@@ -227,7 +264,9 @@ export async function readEvents(ids: bigint[]): Promise<PoapEvent[]> {
 
       let artwork = "";
       try {
-        artwork = dataUrlToRawSvg(decodeUriMetadata(uriResult.result).image ?? "");
+        artwork = repairSvgNamespace(
+          dataUrlToRawSvg(decodeUriMetadata(uriResult.result).image ?? "")
+        );
       } catch {
         artwork = "";
       }

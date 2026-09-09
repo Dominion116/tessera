@@ -16,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useWallet } from "@/components/wallet/wallet-provider";
 
 const TITLE = "Connect a wallet";
 const LEAD =
@@ -28,30 +27,30 @@ type ConnectPromptProps = {
   variant: "modal" | "page";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onConnected?: () => void;
+  onConnect: () => void;
 };
 
 /**
  * One prompt, two presentations: the Dialog the Open App buttons trigger,
  * and the full-page card that gates /app. The words are shared constants,
  * so the connect story is the same wherever you meet it.
+ *
+ * The prompt is presentation only. `onConnect` comes from the host —
+ * `useConnectRedirect` — which opens the wallet picker and, once an
+ * address actually arrives, closes the prompt and lands the user on
+ * the landing page. Nothing navigates on the click itself: navigating
+ * before a wallet exists is what made /app surface its own connect
+ * prompt as if it opened on page load.
  */
 const ConnectPrompt = ({
   variant,
   open,
   onOpenChange,
-  onConnected,
+  onConnect,
 }: ConnectPromptProps) => {
-  const { connect } = useWallet();
-
-  const handleConnect = () => {
-    connect();
-    onConnected?.();
-  };
-
   const actions = (
     <div className="flex flex-col gap-4">
-      <Button size="lg" className="w-full" onClick={handleConnect}>
+      <Button size="lg" className="w-full" onClick={onConnect}>
         Connect wallet
         <ArrowUpRight aria-hidden="true" />
       </Button>

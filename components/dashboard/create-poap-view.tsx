@@ -36,6 +36,7 @@ import {
   utf8Bytes,
 } from "@/lib/registration";
 import { CREATOR_TIMELOCK_DAYS } from "@/lib/poap-data";
+import { repairSvgNamespace } from "@/lib/poap-contract";
 
 type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
 type Point = { x: number; y: number };
@@ -395,7 +396,11 @@ const CreatePoapView = () => {
     reader.onload = () => {
       const source = String(reader.result ?? "");
       if (source.includes("<svg")) {
-        setUploadedSvg(sanitizeSvg(source));
+        // Imported artwork with a missing or malformed root `xmlns` previews
+        // fine inline but renders blank once the browser loads it as an
+        // image document, so the namespace is repaired before the artwork
+        // can be registered onchain.
+        setUploadedSvg(sanitizeSvg(repairSvgNamespace(source)));
         setShapes([]);
         setHistory([]);
         setFuture([]);
