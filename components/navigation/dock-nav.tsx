@@ -14,8 +14,9 @@ const DOCK_ITEMS = [
 ] as const;
 
 type DockNavProps = {
-  activeView?: "dashboard" | "explore";
+  activeView?: "dashboard" | "explore" | "create";
   onExplore?: () => void;
+  onCreate?: () => void;
 };
 
 /**
@@ -23,7 +24,7 @@ type DockNavProps = {
  * primary navigation below `lg`, where the sidebar shell is hidden. Home
  * means the app home, not the landing page.
  */
-const DockNav = ({ activeView, onExplore }: DockNavProps = {}) => {
+const DockNav = ({ activeView, onExplore, onCreate }: DockNavProps = {}) => {
   const pathname = usePathname();
 
   return (
@@ -33,9 +34,13 @@ const DockNav = ({ activeView, onExplore }: DockNavProps = {}) => {
     >
       <ul className="mx-auto grid max-w-md grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {DOCK_ITEMS.map((item) => {
-          const isLocalExplore = item.href === "/poaps" && onExplore;
-          const active = isLocalExplore
-            ? activeView === "explore"
+          const isLocalView =
+            (item.href === "/poaps" && onExplore) ||
+            (item.href === "/app/create" && onCreate);
+          const active = isLocalView
+            ? item.href === "/poaps"
+              ? activeView === "explore"
+              : activeView === "create"
             : item.href === "/app" && activeView
               ? activeView === "dashboard"
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -43,10 +48,10 @@ const DockNav = ({ activeView, onExplore }: DockNavProps = {}) => {
 
           return (
             <li key={item.href}>
-              {isLocalExplore ? (
+              {isLocalView ? (
                 <button
                   type="button"
-                  onClick={onExplore}
+                  onClick={item.href === "/poaps" ? onExplore : onCreate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "press w-full min-h-14 flex-col items-center justify-center gap-1 px-1 pt-2 pb-3 text-xs outline-none transition-colors duration-180 focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-inset",
