@@ -245,6 +245,85 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Dock curve framing and labels corrected
+
+The first animated dock pass used a clipped background rectangle for the curve
+and exposed `TabItem.label` only through `aria-label`. That produced fragile
+curve rendering in browsers that resolve zero-sized external clip paths
+differently, allowed the wide curve to leave the viewport on narrow phones,
+and left the new dock without visible labels.
+
+- `components/ui/animated-tab-bar.tsx` now renders the supplied curve as a
+  filled SVG path. This removes the external `clipPath` dependency and keeps
+  the authored aspect ratio. Its position uses viewport rectangles on both
+  sides of the calculation and clamps the SVG box to the menu width, so Home
+  and Explore use the same coordinate system and the curve remains framed.
+- `app/globals.css` sizes the curve to an 8 rem by 1.75 rem SVG box and the
+  dock slots to 3.75 rem. The wider dock retains 60 px touch targets while
+  fitting five labelled slots on small screens through normal flex shrinking.
+  Labels use the existing inherited foreground tokens and sit below each
+  icon. The active lift is 1.25 rem, keeping the icon in the curve without
+  colliding with its label.
+- The old zero-size SVG helper and `menu-clip-path` identifier are removed,
+  eliminating duplicate-identifier and zero-sized-reference failure modes.
+
+Static checks: `npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart
+from the two accepted hero `<img>` warnings, unchanged.
+
+### Mobile dock replaced with the animated tab bar
+
+The dock below `lg`, shared with the mini-app view, is no longer the labelled
+button row. It is now the animated tab bar pattern: a floating pill whose wave
+swell rides the bar's top edge and glides to the active item, an icon that
+lifts into the swell and draws itself in stroke by stroke, and a per-item
+accent colour. The old dock's external contract is untouched.
+
+- `components/ui/animated-tab-bar.tsx` is the pattern as supplied, plus two
+  additions the integration needs: an optional `activeIndex` so the shell's
+  `DashboardView` state can drive the highlighted tab (the sidebar can change
+  the view while the dock is mounted, and an uncontrolled bar would desync),
+  and an optional `label` on `TabItem` that becomes the button's `aria-label`,
+  because the new dock is icon-only and the visible text labels are gone. The
+  swell positioning math and the `--timeOut` resize guard are unchanged:
+  resizes set `--timeOut` to `none`, which invalidates the border's transition
+  declaration at computed-value time and makes the reposition snap, and the
+  next click removes the property so the glide returns. The ref callback is a
+  block body because React 19 treats a returned element from a ref callback as
+  an error.
+- `app/globals.css` carries the pattern's styles: `@keyframes strok`, the
+  zero-size `.svg-container` that keeps the swell's `clipPath` rendered, and
+  the `.menu` block. Motion is paint-only (transform, colour,
+  stroke-dashoffset), press feedback, teal focus ring, token foregrounds, a
+  dark surface with the inset top highlight, and reduced-motion is already
+  disabled globally by the existing media block. The draw runs `reverse`, so
+  the dashoffset unwinds from 400 (invisible) to the resting 0. Two
+  deliberate section 6 deviations: the swell glide is 550 ms and the draw
+  600 ms, past the 400 ms interface ceiling, because the travelling wave is
+  the pattern's identity and house timings erase it. Both are single values
+  in the `.menu__border` transition and the draw rule if the owner wants
+  strict compliance. In dark mode the active accent is lightened through
+  `color-mix` so saturated colours like `#4343f5` stay readable on the card
+  surface.
+- `components/navigation/dock-nav.tsx` keeps `activeView` plus `onViewChange`
+  and the view semantics: items with a `DOCK_VIEWS` entry switch the in-shell
+  view when a handler exists, so the wallet-gated app never remounts, and the
+  rest (`/docs`) navigate by router instead of `Link`, since the pattern's
+  buttons own the click. The five items keep the sidebar's lucide icons and
+  take the pattern's five accents in tab order. The tab bar runs controlled;
+  a sidebar-only view like `created` maps to index -1, so no tab lights up,
+  matching the old dock's behaviour. Standalone use without a handler falls
+  back to pathname matching, as before. The shell's bottom padding still
+  clears the new bar (4.5 rem plus the safe-area inset against the existing
+  5.5 rem), so `dashboard-shell.tsx` is unchanged.
+- `components/demos/animated-tab-bar-demo.tsx` and the
+  `/demos/animated-tab-bar` route show the pattern standalone on its pastel
+  canvas, matching the showcase-route convention of `/cta-01` and `/hero-03`.
+  The demo forces the white bar surface in both themes (the rule sits after
+  `.dark .menu` for that reason); the dock follows the app theme instead.
+
+Static checks: `npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart
+from the two accepted hero `<img>` warnings, unchanged.
+
 ### Explore search and raster artwork uploads
 
 Two Explore-side gaps closed: the dashboard gallery can now be searched, and

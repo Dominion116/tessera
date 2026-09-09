@@ -276,6 +276,170 @@
   animation-delay: 210ms;
 }
 
+/* Animated tab bar, ui/animated-tab-bar.tsx. The wave swell (menu__border)
+   is a filled svg curve that rides the bar's top edge and glides to the
+   active item on a translate3d set from JS. It is drawn as a path, not a
+   clip of a background, so no external clip reference can fail or stretch
+   it out of shape. The box is 8 rem wide against a 18.5 rem bar, and the JS
+   clamps the travel to the menu's width, so the curve always stays framed
+   inside the bar on every screen width and every tab position. Resizes swap
+   --timeOut to none, which makes the border's transition declaration
+   invalid at computed-value time and therefore instant; the next click
+   removes the property so the glide returns. All motion is paint-only:
+   transform, color and stroke-dashoffset. The swell and draw timings exceed
+   the 400 ms interface ceiling deliberately, because the travelling wave is
+   the pattern's identity. */
+@keyframes strok {
+  100% {
+    stroke-dashoffset: 400;
+  }
+}
+
+.menu {
+  --menu-surface: oklch(1 0 0);
+  --menu-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 6%),
+    0 1px 2px oklch(0 0 0 / 6%),
+    0 12px 32px oklch(0 0 0 / 14%);
+  position: relative;
+  display: flex;
+  height: 3.75rem;
+  margin: 0;
+  padding-inline: 0.5rem;
+  background: var(--menu-surface);
+  border-radius: 1.25rem;
+  box-shadow: var(--menu-shadow);
+}
+
+.dark .menu {
+  --menu-surface: var(--card);
+  --menu-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 6%),
+    0 1px 2px oklch(0 0 0 / 36%),
+    0 12px 32px oklch(0 0 0 / 45%);
+}
+
+.menu__item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 3.75rem;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-tertiary);
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 0.75rem;
+  transition:
+    color 250ms ease,
+    transform 100ms ease-out;
+}
+
+@media (hover: hover) {
+  .menu__item:hover {
+    color: var(--fg-secondary);
+  }
+}
+
+.menu__item:active {
+  transform: scale(0.98);
+}
+
+.menu__item.active {
+  color: var(--bgColorItem);
+}
+
+.dark .menu__item.active {
+  color: color-mix(in oklab, var(--bgColorItem) 65%, white);
+}
+
+.menu__item:focus-visible {
+  outline: 2px solid oklch(0.779 0.146 169.525);
+  outline-offset: -2px;
+}
+
+.menu__item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu__item.active svg {
+  transform: translateY(-1.25rem);
+}
+
+.menu__label {
+  max-width: 100%;
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The strok keyframe runs reversed, so the dashoffset unwinds from 400
+   (invisible, dash fully shifted out) to the resting 0 and the icon draws
+   itself in. 400 dash units cover any 24px-viewBox path. */
+.menu__item.active svg :is(path, circle, ellipse, line, polyline, polygon, rect) {
+  stroke-dasharray: 400;
+  animation: strok 600ms cubic-bezier(0.6, 0, 0.35, 1) reverse both;
+}
+
+.menu__border {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  bottom: 100%;
+  width: 8rem;
+  height: 1.75rem;
+  display: block;
+  overflow: visible;
+  transform: translate3d(0, 0, 0);
+  transition: transform var(--timeOut, 550ms) cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+}
+
+.menu__border path {
+  fill: var(--menu-surface);
+}
+
+/* The standalone demo keeps the pattern's original white bar on its pastel
+   canvas in both themes, so it overrides the dark surface. This rule must
+   stay after .dark .menu, which it ties on specificity. */
+.demo-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1rem calc(1rem + env(safe-area-inset-bottom));
+  transition: background-color 400ms ease;
+}
+
+.demo-container .menu {
+  --menu-surface: oklch(1 0 0);
+  --menu-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 6%),
+    0 1px 2px oklch(0 0 0 / 8%),
+    0 16px 40px oklch(0 0 0 / 18%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
