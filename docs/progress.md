@@ -245,6 +245,44 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Explore search and raster artwork uploads
+
+Two Explore-side gaps closed: the dashboard gallery can now be searched, and
+the Create studio accepts raster artwork, not just SVG.
+
+**Explore search.** `components/explore/explore-search.tsx` is the search
+field: a controlled input with an icon, a drawn clear control, `role="search"`
+and an accessible label, kept mounted so typing never remounts the gallery.
+`components/dashboard/dashboard-explore-view.tsx` treats a non-empty query as
+search mode: `useExploreSearchIndex` in `hooks/use-poap-reads.ts` reads every
+registered event once (the same bounded `all-events` query the created and
+collection views already share, enabled only while a query exists) and the
+view filters it in the browser on name, description, location, external URL
+and event number, because the contract exposes no onchain text search. Results
+render through the same `ExploreCard` grid with the existing entrance
+animation; zero-match and first-search-loading and index-read error states
+each have their own card, and pagination returns untouched when the query
+clears. The header's live result line counts matches against the registered
+total.
+
+**Raster artwork uploads.** The contract still stores only raw SVG, so
+`lib/image-artwork.ts` frames an uploaded PNG, JPEG, GIF, WebP or AVIF file
+inside a square SVG envelope whose `<image>` element carries the raster as a
+data URL. The source is decoded (bitmap first for orientation handling, image
+element fallback), center-cropped to a square, and re-encoded at falling
+resolutions from 400 px down until the envelope fits the SVG byte ceiling;
+alpha is detected on a probe read so transparent artwork stays PNG, opaque
+artwork takes whichever of PNG or JPEG is smaller, and anything that never
+fits reports why in plain language. `create-poap-view.tsx` gained an Import
+image button beside Import SVG, a framed-image state label, and the whole
+downstream flow is unchanged: the envelope is ordinary SVG for the byte
+counters, the canvas preview, export and the registration review. Studio copy
+and the docs' artwork-safety section now state that image uploads register as
+the SVG the contract requires.
+
+Static checks: `npx tsc --noEmit` exits 0 and `npx eslint .` exits 0 apart
+from the two accepted hero `<img>` warnings, unchanged.
+
 ### Wallet connection and live reads (roadmap phase 2)
 
 The seams are live. `WalletProvider` now wraps Reown AppKit over wagmi while

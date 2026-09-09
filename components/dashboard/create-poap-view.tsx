@@ -37,6 +37,7 @@ import {
 } from "@/lib/registration";
 import { CREATOR_TIMELOCK_DAYS } from "@/lib/poap-data";
 import { repairSvgNamespace } from "@/lib/poap-contract";
+import { frameImageAsSvg } from "@/lib/image-artwork";
 
 type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
 type Point = { x: number; y: number };
@@ -255,6 +256,7 @@ type AllowlistChoice = "none" | "later" | "now";
 
 const CreatePoapView = () => {
   const svgInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<SVGSVGElement>(null);
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
@@ -277,6 +279,8 @@ const CreatePoapView = () => {
   const [draft, setDraft] = useState<Point[] | null>(null);
   const [start, setStart] = useState<Point | null>(null);
   const [uploadedSvg, setUploadedSvg] = useState<string | null>(null);
+  const [importedKind, setImportedKind] = useState<"svg" | "image" | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
 
@@ -285,6 +289,8 @@ const CreatePoapView = () => {
     setHistory([]);
     setFuture([]);
     setUploadedSvg(null);
+    setImportedKind(null);
+    setImportError(null);
     setSelectedTemplate(template.id);
     setSelectedPalette(palette.id);
     setColor(palette.accent);
@@ -305,6 +311,8 @@ const CreatePoapView = () => {
     setShapes(next);
     setFuture([]);
     setUploadedSvg(null);
+    setImportedKind(null);
+    setImportError(null);
     setSelectedTemplate(null);
     setSelectedPalette(null);
   };
@@ -358,6 +366,8 @@ const CreatePoapView = () => {
     setShapes(previous);
     setHistory((current) => current.slice(0, -1));
     setUploadedSvg(null);
+    setImportedKind(null);
+    setImportError(null);
   };
 
   const redo = () => {
@@ -367,6 +377,8 @@ const CreatePoapView = () => {
     setShapes(next);
     setFuture((current) => current.slice(1));
     setUploadedSvg(null);
+    setImportedKind(null);
+    setImportError(null);
   };
 
   const clear = () => {
@@ -401,6 +413,8 @@ const CreatePoapView = () => {
         // image document, so the namespace is repaired before the artwork
         // can be registered onchain.
         setUploadedSvg(sanitizeSvg(repairSvgNamespace(source)));
+        setImportedKind("svg");
+        setImportError(null);
         setShapes([]);
         setHistory([]);
         setFuture([]);
@@ -410,6 +424,30 @@ const CreatePoapView = () => {
     };
     reader.readAsText(file);
     event.target.value = "";
+  };
+
+  const importImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setImportError(null);
+    frameImageAsSvg(file)
+      .then((envelope) => {
+        setUploadedSvg(envelope.svg);
+        setImportedKind("image");
+        setShapes([]);
+        setHistory([]);
+        setFuture([]);
+        setSelectedTemplate(null);
+        setSelectedPalette(null);
+      })
+      .catch((error: unknown) => {
+        setImportError(
+          error instanceof Error
+            ? error.message
+            : "That image could not be framed into the onchain artwork."
+        );
+      });
   };
 
   const preview = uploadedSvg ? (
@@ -464,7 +502,7 @@ const CreatePoapView = () => {
       <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
         <p className="text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">Creator studio</p>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Create a POAP</h1>
-        <p className="max-w-xl text-sm leading-6 text-fg-secondary">Register an event and make its artwork here, or bring an SVG you already designed.</p>
+        <p className="max-w-xl text-sm leading-6 text-fg-secondary">Register an event and shape its artwork here: draw it, start from a preset, import an SVG, or upload a PNG, JPEG, GIF, WebP or AVIF image.</p>
         <ol className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-tertiary" aria-label="Registration steps">
           <li className={step === 1 ? "font-medium text-foreground" : ""}>
             <span className="tabular-nums">1</span>. Artwork and details
@@ -481,7 +519,7 @@ const CreatePoapView = () => {
       <Card className="dashboard-panel col-span-12 xl:col-span-7">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
-            <div><CardTitle>Artwork</CardTitle><CardDescription>Draw in vectors. The export stays SVG.</CardDescription></div>
+            <div><CardTitle>Artwork</CardTitle><CardDescription>Draw in vectors or frame an uploaded image. Either way the artwork the contract stores stays SVG.</CardDescription></div>
             <Badge variant="accent">400 × 400</Badge>
           </div>
         </CardHeader>
@@ -566,7 +604,7 @@ const CreatePoapView = () => {
           </div>
 
           <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border p-4 text-sm leading-6 ${sizeTone}`} aria-live="polite">
-            <p className="min-w-64 flex-1">{hasArtwork ? size.message : "No artwork yet. Draw, load a template, or import an SVG."}</p>
+            <p className="min-w-64 flex-1">{hasArtwork ? size.message : "No artwork yet. Draw, load a template, import an SVG, or upload an image."}</p>
             {hasArtwork ? (
               <Badge variant="outline" className="tabular-nums">
                 {formatBytes(size.rawBytes)} raw · {formatBytes(size.onchainBytes)} stored
@@ -574,12 +612,17 @@ const CreatePoapView = () => {
             ) : null}
           </div>
 
-          <div className="flex flex-wrap gap-2 border-t border-border/70 pt-4">
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/70 pt-4">
             <input ref={svgInputRef} type="file" accept="image/svg+xml,.svg" onChange={importSvg} className="sr-only" />
+            <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/avif" onChange={importImage} className="sr-only" />
             <Button type="button" variant="outline" onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
+            <Button type="button" variant="outline" onClick={() => imageInputRef.current?.click()}><FileImage aria-hidden="true" />Import image</Button>
             <Button type="button" variant="outline" onClick={exportSvg}><Download aria-hidden="true" />Export SVG</Button>
-            {uploadedSvg ? <Badge variant="accent" className="ml-auto self-center"><FileImage aria-hidden="true" />Imported artwork</Badge> : null}
+            {uploadedSvg ? <Badge variant="accent" className="ml-auto self-center"><FileImage aria-hidden="true" />{importedKind === "image" ? "Image framed as SVG" : "Imported SVG"}</Badge> : null}
           </div>
+          {importError ? (
+            <p role="alert" className="rounded-lg border border-red-400/30 bg-red-400/[0.06] px-3 py-2 text-xs leading-5 text-red-700 dark:text-red-300">{importError}</p>
+          ) : null}
         </CardContent>
       </Card>
 

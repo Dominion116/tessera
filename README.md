@@ -14,9 +14,10 @@ pinning service, no server that has to stay up for your token to keep working.
 
 ## What you can do
 
-**Create a POAP.** Name it, drop in an SVG, and choose how people get it. The
-artwork is optimized in your browser before it is stored, so you can see exactly
-what it will cost to put onchain.
+**Create a POAP.** Name it, draw the artwork, import an SVG, or upload a PNG,
+JPEG, GIF, WebP or AVIF image, then choose how people get it. Image uploads are
+framed to fit the onchain byte ceiling and the studio shows exactly what the
+artwork will cost to store.
 
 **Hand it out three ways.** Open it to the public so anyone can claim. Restrict
 it to a list of addresses. Or sign individual claims for the people actually in
