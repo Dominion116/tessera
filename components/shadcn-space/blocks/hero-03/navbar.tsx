@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import NavLink from "@/components/shadcn-space/blocks/hero-03/navlink";
 import OpenAppButton from "@/components/shadcn-space/button/button-01";
 import ThemeToggle from "@/components/theme-toggle";
@@ -13,6 +14,7 @@ import {
 import { Equal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, useInView, AnimatePresence } from "motion/react";
+import { useWallet } from "@/components/wallet/wallet-provider";
 
 type navData = {
   title: string;
@@ -23,11 +25,19 @@ type NavbarProps = {
   navigationData: navData[];
 };
 
+const isCurrentRoute = (pathname: string, href: string) =>
+  href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
 const Header = ({ navigationData }: NavbarProps) => {
+  const { isConnecting, walletError } = useWallet();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const isInView = useInView(headerRef, { once: true, amount: 0.1 });
+  const activeHref = navigationData
+    .filter((item) => isCurrentRoute(pathname, item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   const handleScroll = () => {
     setSticky(window.scrollY >= 80);
@@ -66,6 +76,15 @@ const Header = ({ navigationData }: NavbarProps) => {
           />
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
+          {isConnecting ? (
+            <span className="text-xs text-white/75" role="status" aria-live="polite">
+              Connecting wallet...
+            </span>
+          ) : walletError ? (
+            <span className="max-w-36 text-right text-xs text-red-200" role="alert">
+              {walletError}
+            </span>
+          ) : null}
           <div className="hidden sm:block">
             <OpenAppButton />
           </div>
@@ -111,10 +130,10 @@ const Header = ({ navigationData }: NavbarProps) => {
                 <hr className="border-border" />
                 {/* Navigation */}
                 <ul className="flex flex-col gap-4 pb-4">
-                  {navigationData.map((menuItem, index) => (
+                  {navigationData.map((menuItem) => (
                     <NavLink
-                      key={index}
-                      item={menuItem}
+                      key={menuItem.href}
+                      item={{ ...menuItem, isActive: menuItem.href === activeHref }}
                       onClick={() => setMenuOpen(false)}
                     />
                   ))}

@@ -63,7 +63,7 @@ const GallerySection = async () => {
         )}
       </Reveal>
 
-      <SectionFooter action={{ label: "See the full gallery", href: "/app" }} />
+      <SectionFooter action={{ label: "See the full gallery", href: "/app", requiresWallet: true }} />
     </Section>
   );
 };

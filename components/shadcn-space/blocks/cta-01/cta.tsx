@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import { motion } from "motion/react";
-import ArrowButton from "@/components/landing/arrow-button";
+import WalletActionButton from "@/components/wallet/wallet-action-button";
 import { CHAIN_ID } from "@/lib/poap-data";
 
 type CTAProps = {
@@ -39,7 +39,7 @@ const CTA = ({ className }: CTAProps) => {
                   plain language before you commit to it.
                 </p>
               </div>
-              <ArrowButton href="/app/create">Create a POAP</ArrowButton>
+              <WalletActionButton href="/app/create" label="Create a POAP" />
             </motion.div>
           </div>
         </div>

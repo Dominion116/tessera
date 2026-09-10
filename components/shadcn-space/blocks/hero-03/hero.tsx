@@ -1,12 +1,41 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { motion, useInView } from "motion/react";
 
 const HeroSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Some mobile browsers defer declarative autoplay until the media has
+    // loaded. Calling play after canplay keeps the poster from becoming a
+    // permanent mobile fallback while remaining muted and inline.
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    const playVideo = () => {
+      void video.play().catch(() => {
+        // Autoplay can still be blocked by a browser policy; the poster is
+        // intentionally retained as an accessible visual fallback.
+      });
+    };
+
+    video.addEventListener("canplay", playVideo);
+    video.addEventListener("loadeddata", playVideo);
+    playVideo();
+
+    return () => {
+      video.removeEventListener("canplay", playVideo);
+      video.removeEventListener("loadeddata", playVideo);
+    };
+  }, []);
 
   return (
     <section
@@ -15,17 +44,18 @@ const HeroSection: React.FC = () => {
     >
       {/* Background Video */}
       <video
+        ref={videoRef}
         className="absolute top-0 left-0 w-full h-full object-cover"
         loop
         autoPlay
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         poster="/nftbg-poster.jpg"
         aria-hidden="true"
         tabIndex={-1}
       >
-        <source src="/nftbg.mp4" type="video/mp4" />
+        <source src="/nftbg.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2" />
       </video>
 
       {/* Dark overlay to improve text readability and visual contrast,

@@ -9,6 +9,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { useTheme } from "next-themes";
+import { usePathname, useRouter } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit, useAppKit, useAppKitState, useAppKitTheme } from "@reown/appkit/react";
 import { baseSepolia } from "@reown/appkit/networks";
@@ -75,8 +76,21 @@ function WalletBridge({ children }: { children: ReactNode }) {
   const { address } = useAccount();
   const { open } = useAppKit();
   const appKitState = useAppKitState();
+  const pathname = usePathname();
+  const router = useRouter();
+  const previousAddress = React.useRef<`0x${string}` | null>(address ?? null);
   const [isDisconnecting, setIsDisconnecting] = React.useState(false);
   const [walletError, setWalletError] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    const previous = previousAddress.current;
+    previousAddress.current = address ?? null;
+
+    if (previous && !address) {
+      void queryClient.clear();
+      if (pathname !== "/") router.replace("/");
+    }
+  }, [address, pathname, router]);
 
   const connect = useCallback(() => {
     setWalletError(null);
@@ -132,7 +146,7 @@ export function WalletProvider({
   );
 
   return (
-    <WagmiProvider config={wagmiConfig as Config} initialState={initialState}>
+      <WagmiProvider config={wagmiConfig as Config} initialState={initialState} reconnectOnMount={false}>
       <QueryClientProvider client={queryClient}>
         <ThemeBridge>
           <WalletBridge>{children}</WalletBridge>

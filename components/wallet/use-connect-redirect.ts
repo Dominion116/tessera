@@ -8,16 +8,15 @@ import { useWallet } from "./wallet-provider";
  * The connect aftermath. `connect()` only opens the wallet picker; it
  * says nothing about whether a wallet arrived, so a surface that asks
  * for a connection arms this hook and waits for the address. When one
- * appears the hook disarms and lands the user on the landing page, as
- * the connect flow promises. Auto-reconnects never arm it, because a
- * reload with a remembered wallet is not a connection a screen asked
- * for — those keep whatever page they were on.
+ * appears the hook disarms and lands the user at the action's destination.
+ * Loading a page never arms it, so only an explicit button click can open
+ * the wallet picker or cause this navigation.
  *
  * The hook lives in the surviving host (the button, the /app gate),
  * never inside the prompt itself: the prompt unmounts the instant the
  * address appears, which would cancel its own pending work.
  */
-export function useConnectRedirect() {
+export function useConnectRedirect(destination = "/") {
   const { address, connect } = useWallet();
   const router = useRouter();
   const armed = useRef(false);
@@ -30,8 +29,8 @@ export function useConnectRedirect() {
   useEffect(() => {
     if (!armed.current || !address) return;
     armed.current = false;
-    router.push("/");
-  }, [address, router]);
+    router.push(destination);
+  }, [address, destination, router]);
 
   return { connectAndRedirect };
 }

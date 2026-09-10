@@ -9,11 +9,11 @@ import CTA from "@/components/shadcn-space/blocks/cta-01/cta";
 import SiteFooter from "@/components/landing/site-footer";
 
 const navigationData: NavLinkItem[] = [
-  { title: "Home", href: "/", isActive: true },
-  { title: "Explore", href: "/app", isActive: false },
-  { title: "Create", href: "/app/create", isActive: false },
-  { title: "Collection", href: "/app/collection", isActive: false },
-  { title: "Docs", href: "/docs", isActive: false },
+  { title: "Home", href: "/" },
+  { title: "Explore", href: "/app" },
+  { title: "Create", href: "/app/create" },
+  { title: "Collection", href: "/app/collection" },
+  { title: "Docs", href: "/docs" },
 ];
 
 /**

@@ -80,7 +80,7 @@ const HowItWorksSection = () => {
       </ol>
 
       <SectionFooter
-        action={{ label: "Create a POAP", href: "/app/create" }}
+        action={{ label: "Create a POAP", href: "/app/create", requiresWallet: true }}
       />
     </Section>
   );

@@ -63,9 +63,15 @@ const DockNav = ({ activeView, onViewChange }: DockNavProps = {}) => {
         (item) => DOCK_VIEWS[item.href] === activeView
       );
     }
-    return DOCK_ITEMS.findIndex(
-      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
-    );
+    const exactIndex = DOCK_ITEMS.findIndex((item) => pathname === item.href);
+    if (exactIndex >= 0) return exactIndex;
+
+    // Check the most specific prefix first so /app/create does not match the
+    // broader /app Home item before reaching its own tab.
+    return DOCK_ITEMS
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => b.item.href.length - a.item.href.length)
+      .find(({ item }) => pathname.startsWith(`${item.href}/`))?.index ?? -1;
   }, [activeView, onViewChange, pathname]);
 
   const handleTabChange = (index: number) => {

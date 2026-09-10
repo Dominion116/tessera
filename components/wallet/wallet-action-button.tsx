@@ -6,24 +6,24 @@ import ConnectPrompt from "@/components/wallet/connect-prompt";
 import { useConnectRedirect } from "@/components/wallet/use-connect-redirect";
 import { useWallet } from "@/components/wallet/wallet-provider";
 
-/**
- * Open App. Connected, it is the arrow pill linking to /app. Disconnected,
- * the same pill opens the connect prompt, whose `onConnect` opens the
- * wallet picker and enters the app once a wallet actually arrives. Both
- * navbar instances, desktop and dropdown, render this component.
- */
-const OpenAppButton = () => {
+type WalletActionButtonProps = {
+  href: string;
+  label: string;
+};
+
+/** An action that requires a wallet opens the modal only after a user click. */
+const WalletActionButton = ({ href, label }: WalletActionButtonProps) => {
   const { address, isConnecting, walletError } = useWallet();
-  const { connectAndRedirect } = useConnectRedirect("/app");
+  const { connectAndRedirect } = useConnectRedirect(href);
   const [open, setOpen] = useState(false);
 
   if (address) {
-    return <ArrowButton href="/app">Open App</ArrowButton>;
+    return <ArrowButton href={href}>{label}</ArrowButton>;
   }
 
   return (
     <>
-      <ArrowButton onClick={() => setOpen(true)}>Open App</ArrowButton>
+      <ArrowButton onClick={() => setOpen(true)}>{label}</ArrowButton>
       <ConnectPrompt
         variant="modal"
         open={open}
@@ -36,4 +36,4 @@ const OpenAppButton = () => {
   );
 };
 
-export default OpenAppButton;
+export default WalletActionButton;

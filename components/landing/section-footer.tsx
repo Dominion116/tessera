@@ -2,12 +2,13 @@ import { Asterisk } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Reveal from "@/components/landing/reveal";
 import ArrowButton from "@/components/landing/arrow-button";
+import WalletActionButton from "@/components/wallet/wallet-action-button";
 
 type SectionFooterProps = {
   /** Omitted where the cards above already carry every caveat worth stating. */
   note?: string;
   /** Omitted on sections whose next step is already covered by a neighbour. */
-  action?: { label: string; href: string };
+  action?: { label: string; href: string; requiresWallet?: boolean };
   className?: string;
 };
 
@@ -32,7 +33,11 @@ const SectionFooter = ({ note, action, className }: SectionFooterProps) => {
         </p>
       ) : null}
       {action ? (
-        <ArrowButton href={action.href}>{action.label}</ArrowButton>
+        action.requiresWallet ? (
+          <WalletActionButton href={action.href} label={action.label} />
+        ) : (
+          <ArrowButton href={action.href}>{action.label}</ArrowButton>
+        )
       ) : null}
     </Reveal>
   );
