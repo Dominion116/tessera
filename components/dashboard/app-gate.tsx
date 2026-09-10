@@ -2,10 +2,8 @@
 
 import ConnectPrompt from "@/components/wallet/connect-prompt";
 import DashboardShell from "@/components/dashboard/dashboard-shell";
-import DashboardPage from "@/components/dashboard/dashboard-page";
 import { useConnectRedirect } from "@/components/wallet/use-connect-redirect";
 import { useWallet } from "@/components/wallet/wallet-provider";
-import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 /**
  * The /app switch: the full-page connect prompt until a wallet is
@@ -15,18 +13,16 @@ import type { DashboardView } from "@/components/dashboard/sidebar-nav";
  * buttons run; the gate itself never navigates until a wallet exists,
  * and a reload with a remembered wallet goes straight to the dashboard.
  */
-const AppGate = ({ initialView = "dashboard" }: { initialView?: DashboardView }) => {
-  const { address } = useWallet();
+const AppGate = ({ children }: { children: React.ReactNode }) => {
+  const { address, isConnecting, walletError } = useWallet();
   const { connectAndRedirect } = useConnectRedirect();
 
   if (!address) {
-    return <ConnectPrompt variant="page" onConnect={connectAndRedirect} />;
+    return <ConnectPrompt variant="page" onConnect={connectAndRedirect} isConnecting={isConnecting} walletError={walletError} />;
   }
 
   return (
-    <DashboardShell initialView={initialView}>
-      <DashboardPage />
-    </DashboardShell>
+    <DashboardShell>{children}</DashboardShell>
   );
 };
 
