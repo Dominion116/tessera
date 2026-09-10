@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import AppGate from "@/components/dashboard/app-gate";
+import DashboardPage from "@/components/dashboard/dashboard-page";
 
 export const metadata: Metadata = {
   title: "Dashboard",
 };
 
-const AppPage = () => <AppGate />;
+const AppPage = () => <DashboardPage />;
 
 export default AppPage;

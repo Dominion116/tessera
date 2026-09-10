@@ -167,7 +167,7 @@ const CreatedRowSkeleton = () => (
  */
 const CreatedPoapsView = () => {
   const { address } = useWallet();
-  const { events, isLoading, isError, refetch } = useCreatedEvents(address);
+  const { events, isLoading, isFetching, isError, refetch } = useCreatedEvents(address);
 
   const stats = useMemo(
     () => ({
@@ -182,7 +182,7 @@ const CreatedPoapsView = () => {
   );
 
   return (
-    <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
+    <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6" aria-busy={isFetching}>
       <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
         <p className="flex items-center gap-2 text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">
           <Stamp aria-hidden="true" className="size-3.5" />
@@ -223,9 +223,9 @@ const CreatedPoapsView = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button type="button" variant="outline" onClick={() => refetch()}>
+            <Button type="button" variant="outline" disabled={isFetching} aria-busy={isFetching} onClick={() => void refetch()}>
               <RefreshCw aria-hidden="true" />
-              Try again
+              {isFetching ? "Reading..." : "Try again"}
             </Button>
           </CardContent>
         </Card>

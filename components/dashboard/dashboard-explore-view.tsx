@@ -44,7 +44,7 @@ const eventMatchesTerm = (event: PoapEvent, term: string) =>
     (field) => field.toLowerCase().includes(term)
   ) || event.eventId.toString().includes(term.replace(/^#/, ""));
 
-const ErrorCard = ({ refetch }: { refetch: () => void }) => (
+const ErrorCard = ({ refetch, pending = false }: { refetch: () => void; pending?: boolean }) => (
   <Card className="dashboard-panel col-span-12 py-5">
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
@@ -57,9 +57,9 @@ const ErrorCard = ({ refetch }: { refetch: () => void }) => (
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <Button type="button" variant="outline" onClick={() => refetch()}>
+      <Button type="button" variant="outline" disabled={pending} aria-busy={pending} onClick={refetch}>
         <RefreshCw aria-hidden="true" />
-        Try again
+        {pending ? "Reading..." : "Try again"}
       </Button>
     </CardContent>
   </Card>
@@ -130,7 +130,7 @@ const DashboardExploreView = () => {
 
       {searching ? (
         searchIndex.isError && !allEvents ? (
-          <ErrorCard refetch={searchIndex.refetch} />
+            <ErrorCard refetch={() => void searchIndex.refetch()} pending={searchIndex.isFetching} />
         ) : searchIndex.isLoading && !allEvents ? (
           <ExploreSkeleton />
         ) : allEvents && allEvents.length === 0 ? (
@@ -176,7 +176,7 @@ const DashboardExploreView = () => {
           </Card>
         )
       ) : isError ? (
-        <ErrorCard refetch={refetch} />
+         <ErrorCard refetch={() => void refetch()} pending={isFetching} />
       ) : isLoading ? (
         <ExploreSkeleton />
       ) : events.length === 0 ? (

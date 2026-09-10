@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -14,13 +13,8 @@ import {
 import Wordmark from "@/components/landing/wordmark";
 import DockNav from "@/components/navigation/dock-nav";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
-import DashboardExploreView from "@/components/dashboard/dashboard-explore-view";
-import CreatedPoapsView from "@/components/dashboard/created-poaps-view";
-import CollectionView from "@/components/dashboard/collection-view";
-import CreatePoapView from "@/components/dashboard/create-poap-view";
 import WalletChip from "@/components/wallet/wallet-chip";
 import ThemeToggle from "@/components/theme-toggle";
-import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 /**
  * The app frame. `lg` and up gets the sidebar shell with the content area
@@ -31,11 +25,9 @@ import type { DashboardView } from "@/components/dashboard/sidebar-nav";
  */
 type DashboardShellProps = {
   children: React.ReactNode;
-  initialView?: DashboardView;
 };
 
-const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellProps) => {
-  const [activeView, setActiveView] = useState<DashboardView>(initialView);
+const DashboardShell = ({ children }: DashboardShellProps) => {
 
   return (
   <SidebarProvider>
@@ -55,10 +47,7 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
-        <SidebarNav
-          activeView={activeView}
-          onViewChange={setActiveView}
-        />
+        <SidebarNav />
       </SidebarContent>
       <SidebarFooter>
         <WalletChip />
@@ -67,7 +56,7 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
     <SidebarInset>
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border bg-background/80 px-4 backdrop-blur-md lg:hidden">
         <Link
-          href="/app"
+          href="/"
           aria-label="Tessera dashboard, home"
           className="press rounded-md outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
         >
@@ -79,20 +68,10 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
         </div>
       </header>
       <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
-        {activeView === "explore" ? (
-          <DashboardExploreView />
-        ) : activeView === "created" ? (
-          <CreatedPoapsView />
-        ) : activeView === "collection" ? (
-          <CollectionView />
-        ) : activeView === "create" ? (
-          <CreatePoapView />
-        ) : (
-          children
-        )}
+         {children}
       </div>
     </SidebarInset>
-    <DockNav activeView={activeView} onViewChange={setActiveView} />
+     <DockNav />
   </SidebarProvider>
   );
 };

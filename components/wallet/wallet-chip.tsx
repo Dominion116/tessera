@@ -15,7 +15,7 @@ type WalletChipProps = {
  * mobile topbar below it.
  */
 const WalletChip = ({ className }: WalletChipProps) => {
-  const { address, disconnect } = useWallet();
+  const { address, disconnect, isDisconnecting, walletError } = useWallet();
 
   if (!address) {
     return null;
@@ -35,11 +35,14 @@ const WalletChip = ({ className }: WalletChipProps) => {
       <button
         type="button"
         onClick={disconnect}
+        disabled={isDisconnecting}
+        aria-busy={isDisconnecting}
         aria-label="Disconnect wallet"
         className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-fg-tertiary outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400"
       >
-        <LogOut aria-hidden="true" className="size-3.5" />
+         {isDisconnecting ? <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <LogOut aria-hidden="true" className="size-3.5" />}
       </button>
+      {walletError ? <span role="alert" className="sr-only">{walletError}</span> : null}
     </div>
   );
 };

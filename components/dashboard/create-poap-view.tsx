@@ -281,6 +281,9 @@ const CreatePoapView = () => {
   const [uploadedSvg, setUploadedSvg] = useState<string | null>(null);
   const [importedKind, setImportedKind] = useState<"svg" | "image" | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [importPending, setImportPending] = useState(false);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const importRequest = useRef(0);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
 
@@ -391,21 +394,30 @@ const CreatePoapView = () => {
   };
 
   const exportSvg = () => {
-    const source = uploadedSvg ?? toSvg(shapes);
-    const blob = new Blob([source], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "tessera-poap"}.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
+    if (!hasArtwork) return;
+    try {
+      const source = uploadedSvg ?? toSvg(shapes);
+      const blob = new Blob([source], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "tessera-poap"}.svg`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setExportMessage("SVG downloaded.");
+    } catch {
+      setExportMessage("The SVG could not be downloaded.");
+    }
   };
 
   const importSvg = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    const request = ++importRequest.current;
+    setImportPending(true);
     const reader = new FileReader();
     reader.onload = () => {
+      if (request !== importRequest.current) return;
       const source = String(reader.result ?? "");
       if (source.includes("<svg")) {
         // Imported artwork with a missing or malformed root `xmlns` previews
@@ -420,8 +432,13 @@ const CreatePoapView = () => {
         setFuture([]);
         setSelectedTemplate(null);
         setSelectedPalette(null);
+        setImportPending(false);
+      } else {
+        setImportError("That file does not contain a valid SVG document.");
+        setImportPending(false);
       }
     };
+    reader.onerror = () => { if (request === importRequest.current) { setImportPending(false); setImportError("The SVG could not be read."); } };
     reader.readAsText(file);
     event.target.value = "";
   };
@@ -430,9 +447,12 @@ const CreatePoapView = () => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    const request = ++importRequest.current;
+    setImportPending(true);
     setImportError(null);
     frameImageAsSvg(file)
       .then((envelope) => {
+        if (request !== importRequest.current) return;
         setUploadedSvg(envelope.svg);
         setImportedKind("image");
         setShapes([]);
@@ -440,8 +460,11 @@ const CreatePoapView = () => {
         setFuture([]);
         setSelectedTemplate(null);
         setSelectedPalette(null);
+        setImportPending(false);
       })
       .catch((error: unknown) => {
+        if (request !== importRequest.current) return;
+        setImportPending(false);
         setImportError(
           error instanceof Error
             ? error.message
@@ -615,9 +638,11 @@ const CreatePoapView = () => {
           <div className="flex flex-wrap items-center gap-2 border-t border-border/70 pt-4">
             <input ref={svgInputRef} type="file" accept="image/svg+xml,.svg" onChange={importSvg} className="sr-only" />
             <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/avif" onChange={importImage} className="sr-only" />
-            <Button type="button" variant="outline" onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
-            <Button type="button" variant="outline" onClick={() => imageInputRef.current?.click()}><FileImage aria-hidden="true" />Import image</Button>
-            <Button type="button" variant="outline" onClick={exportSvg}><Download aria-hidden="true" />Export SVG</Button>
+             <Button type="button" variant="outline" disabled={importPending} onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
+             <Button type="button" variant="outline" disabled={importPending} onClick={() => imageInputRef.current?.click()}><FileImage aria-hidden="true" />Import image</Button>
+             <Button type="button" variant="outline" disabled={!hasArtwork || importPending} onClick={exportSvg}><Download aria-hidden="true" />Export SVG</Button>
+             {importPending ? <span className="text-xs text-fg-tertiary" role="status">Reading artwork...</span> : null}
+             {exportMessage ? <span className="text-xs text-teal-700 dark:text-teal-300" role="status">{exportMessage}</span> : null}
             {uploadedSvg ? <Badge variant="accent" className="ml-auto self-center"><FileImage aria-hidden="true" />{importedKind === "image" ? "Image framed as SVG" : "Imported SVG"}</Badge> : null}
           </div>
           {importError ? (
