@@ -43,14 +43,15 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
       collapsible="none"
       className="hidden border-r border-sidebar-border lg:flex lg:sticky lg:top-0 lg:h-svh"
     >
-      <SidebarHeader>
+      <SidebarHeader className="flex-row items-center justify-between gap-2">
         <Link
           href="/"
           aria-label="Tessera, home"
-          className="press rounded-md px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          className="press min-w-0 rounded-md px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
         >
           <Wordmark />
         </Link>
+        <ThemeToggle className="h-9 w-9 bg-card text-foreground focus-visible:ring-offset-background" />
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
