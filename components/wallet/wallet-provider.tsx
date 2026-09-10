@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useTheme } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createAppKit, useAppKit, useAppKitTheme } from "@reown/appkit/react";
+import { createAppKit, useAppKit, useAppKitState, useAppKitTheme } from "@reown/appkit/react";
 import { baseSepolia } from "@reown/appkit/networks";
 import {
   cookieToInitialState,
@@ -30,6 +30,9 @@ type WalletContextValue = {
   address: `0x${string}` | null;
   connect: () => void;
   disconnect: () => void;
+  isConnecting: boolean;
+  isDisconnecting: boolean;
+  walletError: string | null;
 };
 
 /**
@@ -71,15 +74,21 @@ const WalletContext = createContext<WalletContextValue | null>(null);
 function WalletBridge({ children }: { children: ReactNode }) {
   const { address } = useAccount();
   const { open } = useAppKit();
+  const appKitState = useAppKitState();
+  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+  const [walletError, setWalletError] = React.useState<string | null>(null);
 
   const connect = useCallback(() => {
-    open();
+    setWalletError(null);
+    void open().catch((error: unknown) => setWalletError(error instanceof Error ? error.message : "Wallet connection was not completed."));
   }, [open]);
 
   const handleDisconnect = useCallback(() => {
-    void modal.disconnect().then(() => {
-      queryClient.clear();
-    });
+    setWalletError(null);
+    setIsDisconnecting(true);
+    void modal.disconnect().then(() => queryClient.clear()).catch((error: unknown) => {
+      setWalletError(error instanceof Error ? error.message : "Wallet could not be disconnected.");
+    }).finally(() => setIsDisconnecting(false));
   }, []);
 
   const value = useMemo(
@@ -87,8 +96,11 @@ function WalletBridge({ children }: { children: ReactNode }) {
       address: address ?? null,
       connect,
       disconnect: handleDisconnect,
+      isConnecting: appKitState.loading || appKitState.open,
+      isDisconnecting,
+      walletError,
     }),
-    [address, connect, handleDisconnect]
+    [address, connect, handleDisconnect, appKitState.loading, appKitState.open, isDisconnecting, walletError]
   );
 
   return (

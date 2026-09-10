@@ -46,7 +46,7 @@ const ClaimPage = ({ event, method }: { event: PoapEvent; method: string }) => {
             ) : claim.isError ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-4 text-sm leading-6 text-fg-secondary"><CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-300" /><p>The claim record for this wallet could not be read. The Base Sepolia connection dropped; the badge itself is unaffected.</p></div>
-                <Button variant="outline" onClick={() => claim.refetch()}>Read the claim record again</Button>
+                 <Button variant="outline" disabled={claim.isFetching} aria-busy={claim.isFetching} onClick={() => void claim.refetch()}>{claim.isFetching ? "Reading..." : "Read the claim record again"}</Button>
               </div>
             ) : claim.data ? (
               <div className="flex items-start gap-3 rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><p>This wallet already collected {event.name}. The contract refuses a second copy of the same badge, whichever route it arrives by.</p></div>

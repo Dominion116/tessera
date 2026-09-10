@@ -78,6 +78,7 @@ export function useCreatedEvents(address: `0x${string}` | null) {
   return {
     events,
     isLoading: all.isLoading,
+    isFetching: all.isFetching,
     isError: all.isError,
     refetch: all.refetch,
   };
@@ -295,6 +296,7 @@ export function useCollection(address: `0x${string}` | null) {
     items: withBlocks,
     isLoading: all.isLoading || balances.isLoading,
     isError: all.isError || balances.isError,
+    isFetching: all.isFetching || balances.isFetching || scan.isFetching,
     datesLoading: scan.isLoading,
     refetch: () => {
       void all.refetch();

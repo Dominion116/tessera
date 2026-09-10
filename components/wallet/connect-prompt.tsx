@@ -28,6 +28,8 @@ type ConnectPromptProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onConnect: () => void;
+  isConnecting?: boolean;
+  walletError?: string | null;
 };
 
 /**
@@ -47,13 +49,17 @@ const ConnectPrompt = ({
   open,
   onOpenChange,
   onConnect,
+  isConnecting = false,
+  walletError = null,
 }: ConnectPromptProps) => {
   const actions = (
     <div className="flex flex-col gap-4">
-      <Button size="lg" className="w-full" onClick={onConnect}>
+      <Button size="lg" className="w-full" onClick={onConnect} disabled={isConnecting} aria-busy={isConnecting}>
         Connect wallet
         <ArrowUpRight aria-hidden="true" />
       </Button>
+      {isConnecting ? <p className="text-xs text-fg-tertiary" role="status">Connecting...</p> : null}
+      {walletError ? <p className="text-xs text-red-600 dark:text-red-300" role="alert">{walletError}</p> : null}
       <p className="text-xs leading-5 text-fg-tertiary">{NOTE}</p>
     </div>
   );

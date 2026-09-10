@@ -1,6 +1,7 @@
 "use client";
 
 import { RefreshCw, WifiOff } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +14,8 @@ import PublicHeader from "@/components/explore/public-header";
 
 /** Read failure on a public POAP page: one sentence and a way forward. */
 export default function PoapError({ reset }: { reset: () => void }) {
+  const [pending, setPending] = useState(false);
+  const retry = () => { setPending(true); reset(); };
   return (
     <div className="min-h-svh bg-background">
       <PublicHeader />
@@ -29,9 +32,9 @@ export default function PoapError({ reset }: { reset: () => void }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button type="button" variant="outline" onClick={reset}>
+            <Button type="button" variant="outline" disabled={pending} aria-busy={pending} onClick={retry}>
               <RefreshCw aria-hidden="true" />
-              Try again
+              {pending ? "Reading..." : "Try again"}
             </Button>
           </CardContent>
         </Card>

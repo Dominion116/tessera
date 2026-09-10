@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Album,
   BookOpen,
@@ -27,13 +27,13 @@ export type DashboardView =
   | "create";
 
 type SidebarNavProps = {
-  activeView: DashboardView;
-  onViewChange: (view: DashboardView) => void;
+  activeView?: DashboardView;
+  onViewChange?: (view: DashboardView) => void;
 };
 
 const VIEW_BY_HREF: Record<string, DashboardView> = {
   "/app": "dashboard",
-  "/poaps": "explore",
+  "/app/explore": "explore",
   "/app/created": "created",
   "/app/collection": "collection",
   "/app/create": "create",
@@ -44,7 +44,7 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/app/create", label: "Create a POAP", icon: CirclePlus },
   { href: "/app/created", label: "POAPs I created", icon: Stamp },
   { href: "/app/collection", label: "My collection", icon: Album },
-  { href: "/poaps", label: "Explore", icon: Compass },
+  { href: "/app/explore", label: "Explore", icon: Compass },
   { href: "/docs", label: "Documentation", icon: BookOpen },
 ];
 
@@ -52,8 +52,11 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
  * Sidebar navigation for the dashboard. Exact match for /app so nested
  * routes do not light the Dashboard item up, prefix match otherwise.
  */
-const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
+const SidebarNav = ({ activeView }: SidebarNavProps = {}) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const routeView = Object.entries(VIEW_BY_HREF).find(([href]) => pathname === href)?.[1];
+  const currentView = routeView ?? activeView;
 
   return (
     <SidebarGroup>
@@ -62,7 +65,7 @@ const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
           {NAV_ITEMS.map((item) => {
             const localView = VIEW_BY_HREF[item.href];
             const active = localView
-              ? localView === activeView
+               ? localView === currentView
               : pathname === item.href ||
                 pathname.startsWith(`${item.href}/`);
 
@@ -71,7 +74,7 @@ const SidebarNav = ({ activeView, onViewChange }: SidebarNavProps) => {
                 {localView ? (
                   <SidebarMenuButton
                     isActive={active}
-                    onClick={() => onViewChange(localView)}
+                     onClick={() => router.push(item.href)}
                     className="transition-colors duration-180"
                   >
                     <item.icon aria-hidden="true" />

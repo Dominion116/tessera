@@ -9,7 +9,7 @@ import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 const DOCK_ITEMS = [
   { href: "/app", label: "Home", icon: House },
-  { href: "/poaps", label: "Explore", icon: Compass },
+  { href: "/app/explore", label: "Explore", icon: Compass },
   { href: "/app/create", label: "Create", icon: CirclePlus },
   { href: "/app/collection", label: "Collection", icon: Album },
   { href: "/docs", label: "Docs", icon: BookOpen },
@@ -17,7 +17,7 @@ const DOCK_ITEMS = [
 
 const DOCK_VIEWS: Record<string, DashboardView> = {
   "/app": "dashboard",
-  "/poaps": "explore",
+  "/app/explore": "explore",
   "/app/create": "create",
   "/app/collection": "collection",
 };
@@ -71,12 +71,7 @@ const DockNav = ({ activeView, onViewChange }: DockNavProps = {}) => {
   const handleTabChange = (index: number) => {
     const item = DOCK_ITEMS[index];
     if (!item) return;
-    const dockView = DOCK_VIEWS[item.href];
-    if (dockView && onViewChange) {
-      onViewChange(dockView);
-    } else {
-      router.push(item.href);
-    }
+    router.push(item.href);
   };
 
   return (
