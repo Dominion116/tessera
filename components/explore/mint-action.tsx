@@ -55,8 +55,8 @@ const MintAction = ({ eventName, eventId, method = "public" }: MintActionProps) 
             Sepolia connection dropped; the badge itself is unaffected.
           </p>
         </div>
-        <Button variant="outline" onClick={() => claim.refetch()}>
-          Read the claim record again
+         <Button variant="outline" disabled={claim.isFetching} aria-busy={claim.isFetching} onClick={() => void claim.refetch()}>
+           {claim.isFetching ? "Reading..." : "Read the claim record again"}
         </Button>
       </div>
     );

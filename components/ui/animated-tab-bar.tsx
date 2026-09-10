@@ -16,6 +16,7 @@ export interface AnimatedTabBarProps {
   /** Controlled active tab. Omit to let the bar manage its own state. */
   activeIndex?: number;
   onTabChange?: (index: number) => void;
+  pendingIndex?: number;
 }
 
 /**
@@ -35,6 +36,7 @@ export const AnimatedTabBar: React.FC<AnimatedTabBarProps> = ({
   defaultIndex = 0,
   activeIndex,
   onTabChange,
+  pendingIndex,
 }) => {
   const [internalIndex, setInternalIndex] = useState(defaultIndex);
   const active = activeIndex !== undefined ? activeIndex : internalIndex;
@@ -106,7 +108,9 @@ export const AnimatedTabBar: React.FC<AnimatedTabBarProps> = ({
           style={{ "--bgColorItem": item.color } as React.CSSProperties}
           onClick={() => handleItemClick(index)}
           aria-label={item.label ?? `Tab ${index + 1}`}
-          aria-current={active === index ? "page" : undefined}
+           aria-current={active === index ? "page" : undefined}
+           aria-busy={pendingIndex === index ? true : undefined}
+           disabled={pendingIndex !== undefined}
           >
             {item.icon}
             {item.label ? <span className="menu__label">{item.label}</span> : null}

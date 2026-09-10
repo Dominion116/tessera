@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import AppGate from "@/components/dashboard/app-gate";
+import CollectionView from "@/components/dashboard/collection-view";
 
 export const metadata: Metadata = {
   title: "My collection",
 };
 
-const CollectionRoute = () => <AppGate initialView="collection" />;
+const CollectionRoute = () => <CollectionView />;
 
 export default CollectionRoute;

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import AppGate from "@/components/dashboard/app-gate";
+import CreatePoapView from "@/components/dashboard/create-poap-view";
 
 export const metadata: Metadata = {
   title: "Create a POAP",
 };
 
-const CreatePoapRoute = () => <AppGate initialView="create" />;
+const CreatePoapRoute = () => <CreatePoapView />;
 
 export default CreatePoapRoute;
