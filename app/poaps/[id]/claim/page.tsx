@@ -3,10 +3,11 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import ClaimPage from "@/components/explore/claim-page";
 import { readEvent } from "@/lib/poap-contract";
+import { parseMerkleProof, parseSignature } from "@/lib/transaction-args";
 
 type ClaimRouteProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ method?: string }>;
+  searchParams: Promise<{ method?: string; proof?: string; signature?: string }>;
 };
 
 const loadEvent = cache(async (id: bigint) => readEvent(id));
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }: ClaimRouteProps): Promise<Met
 }
 
 export default async function ClaimRoute({ params, searchParams }: ClaimRouteProps) {
-  const [{ id }, { method = "signature" }] = await Promise.all([params, searchParams]);
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const method = query.method ?? "signature";
   const eventId = parseEventId(id);
 
   if (eventId === null) {
@@ -45,5 +47,5 @@ export default async function ClaimRoute({ params, searchParams }: ClaimRoutePro
     notFound();
   }
 
-  return <ClaimPage event={event} method={method} />;
+  return <ClaimPage event={event} method={method} proof={parseMerkleProof(query.proof)} signature={parseSignature(query.signature) ?? undefined} />;
 }

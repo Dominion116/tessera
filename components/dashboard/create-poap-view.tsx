@@ -1,6 +1,9 @@
 "use client";
 
-import { ChangeEvent, PointerEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, PointerEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { decodeEventLog } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import {
   ArrowLeft,
   ArrowRightLeft,
@@ -35,9 +38,10 @@ import {
   svgSizeStatus,
   utf8Bytes,
 } from "@/lib/registration";
-import { CREATOR_TIMELOCK_DAYS } from "@/lib/poap-data";
-import { repairSvgNamespace } from "@/lib/poap-contract";
+import { CONTRACT_ADDRESS, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
+import { poapAbi, repairSvgNamespace } from "@/lib/poap-contract";
 import { frameImageAsSvg } from "@/lib/image-artwork";
+import { registerEventArgs } from "@/lib/transaction-args";
 
 type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
 type Point = { x: number; y: number };
@@ -255,6 +259,9 @@ const renderShape = (shape: Shape, index: number) => {
 type AllowlistChoice = "none" | "later" | "now";
 
 const CreatePoapView = () => {
+  const router = useRouter();
+  const { writeContract, data: transactionHash, isPending: isWalletPending, error: writeError } = useWriteContract();
+  const receipt = useWaitForTransactionReceipt({ hash: transactionHash });
   const svgInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<SVGSVGElement>(null);
@@ -286,6 +293,56 @@ const CreatePoapView = () => {
   const importRequest = useRef(0);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!receipt.isSuccess) return;
+
+    const eventLog = receipt.data.logs.find((log) => {
+      try {
+        return decodeEventLog({ abi: poapAbi, ...log }).eventName === "NewEvent";
+      } catch {
+        return false;
+      }
+    });
+
+    if (!eventLog) {
+      window.setTimeout(() => setRegistrationError("The transaction was confirmed, but no new event ID was found in its receipt."), 0);
+      return;
+    }
+
+    try {
+      const decoded = decodeEventLog({ abi: poapAbi, ...eventLog });
+      const eventId = (decoded.args as { eventId: bigint }).eventId;
+      router.push(`/poaps/${eventId.toString()}`);
+    } catch {
+      window.setTimeout(() => setRegistrationError("The transaction was confirmed, but its event ID could not be decoded."), 0);
+    }
+  }, [receipt.data, receipt.isSuccess, router]);
+
+  const submitRegistration = () => {
+    if (!registrationReady) return;
+    setRegistrationError(null);
+    writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: poapAbi,
+      functionName: "registerEvent",
+      args: registerEventArgs({
+        name,
+        description,
+        eventDate,
+        location,
+        allowlistRoot: allowlistChoice === "now" ? parseAllowlistRoot(allowlistRootInput)! : ZERO_ROOT,
+        artwork: artworkSource,
+        externalUrl,
+        isSoulbound,
+        isPublic,
+      }),
+    });
+  };
+
+  const transactionError = registrationError ?? writeError?.message ?? receipt.error?.message ?? null;
+  const transactionPending = isWalletPending || receipt.isLoading;
 
   const loadTemplate = (template: ArtworkTemplate, palette: TemplatePalette) => {
     setShapes(template.build(palette));
@@ -484,7 +541,7 @@ const CreatePoapView = () => {
 
   const artworkSource = uploadedSvg ?? (shapes.length ? toSvg(shapes) : "");
   const hasArtwork = artworkSource.length > 0;
-  const size = useMemo(() => svgSizeStatus(artworkSource), [artworkSource]);
+  const size = svgSizeStatus(artworkSource);
   const nameError = fieldError(name, FIELD_RULES.name);
   const descriptionError = fieldError(description, FIELD_RULES.description);
   const locationError = fieldError(location, FIELD_RULES.location);
@@ -781,16 +838,21 @@ const CreatePoapView = () => {
           {size.level !== "ok" ? <p className={`rounded-lg border p-3 text-xs leading-5 ${sizeTone}`}>{size.message}</p> : null}
           {reviewed ? (
             <div className="flex flex-col gap-3">
-              <div className="rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300">
-                <p className="font-medium">The registration is prepared.</p>
-                <p className="mt-1">The artwork, the metadata and every choice above are what the contract will store. The two settings that lock on day {CREATOR_TIMELOCK_DAYS} are recorded with the same transaction.</p>
+              <div className="rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300" role="status" aria-live="polite">
+                <p className="font-medium">{transactionPending ? (isWalletPending ? "Waiting for wallet confirmation..." : "Registration submitted. Waiting for chain confirmation...") : "Registration is ready to submit."}</p>
+                <p className="mt-1">The artwork, metadata and every choice above will be stored by the contract. The two settings that lock on day {CREATOR_TIMELOCK_DAYS} are recorded with the same transaction.</p>
               </div>
-              <Button type="button" variant="outline" onClick={() => setReviewed(false)}><ArrowLeft aria-hidden="true" />Back to choices</Button>
+              {transactionError ? <p role="alert" className="rounded-lg border border-red-400/30 bg-red-400/[0.06] p-3 text-xs leading-5 text-red-700 dark:text-red-300">{transactionError}</p> : null}
+              {transactionHash ? <p className="break-all text-xs text-fg-tertiary">Transaction: {transactionHash}</p> : null}
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="lg" disabled={transactionPending} onClick={submitRegistration} aria-busy={transactionPending}><Plus aria-hidden="true" />{isWalletPending ? "Confirm in wallet" : receipt.isLoading ? "Confirming..." : "Register onchain"}</Button>
+                <Button type="button" variant="outline" disabled={transactionPending} onClick={() => setReviewed(false)}><ArrowLeft aria-hidden="true" />Back to choices</Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <Button type="button" size="lg" disabled={!registrationReady} onClick={() => setReviewed(true)}><Plus aria-hidden="true" />Prepare registration</Button>
-              <p className="text-xs leading-5 text-fg-tertiary">No transaction is submitted from this screen. When the registration transaction is confirmed, the event number, the artwork and these choices land onchain together.</p>
+              <p className="text-xs leading-5 text-fg-tertiary">Reviewing does not submit a transaction. The wallet confirmation button appears next, and the event number, artwork and choices land onchain together after confirmation.</p>
               {!registrationReady && allowlistRootError ? <p className="text-xs text-red-600 dark:text-red-400">{allowlistRootError}</p> : null}
             </div>
           )}

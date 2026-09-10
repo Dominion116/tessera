@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { ArrowLeft, Check, CircleAlert, KeyRound, WalletCards } from "lucide-react";
 import { useWallet } from "@/components/wallet/wallet-provider";
+import { useEffect, useState } from "react";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { CONTRACT_ADDRESS } from "@/lib/poap-data";
+import { poapAbi } from "@/lib/poap-contract";
+import { allowlistMintArgs, signatureMintArgs } from "@/lib/transaction-args";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,10 +16,24 @@ import { type PoapEvent } from "@/lib/poap-data";
 import { useHasClaimed } from "@/hooks/use-poap-reads";
 import PublicHeader from "@/components/explore/public-header";
 
-const ClaimPage = ({ event, method }: { event: PoapEvent; method: string }) => {
+const ClaimPage = ({ event, method, proof = [], signature }: { event: PoapEvent; method: string; proof?: `0x${string}`[]; signature?: `0x${string}` }) => {
   const { address, connect } = useWallet();
   const claim = useHasClaimed(event.eventId, address);
   const isKnownMethod = method === "allowlist" || method === "signature";
+  const queryClient = useQueryClient();
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const receipt = useWaitForTransactionReceipt({ hash });
+  const [submitted, setSubmitted] = useState(false);
+  const claimError = error?.message ?? (receipt.error as Error | null)?.message;
+  useEffect(() => {
+    if (receipt.isSuccess) void queryClient.invalidateQueries({ queryKey: ["has-claimed", event.eventId.toString()] });
+  }, [event.eventId, queryClient, receipt.isSuccess]);
+
+  const submit = () => {
+    setSubmitted(true);
+    if (method === "allowlist") writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "allowlistMint", args: allowlistMintArgs(event.eventId, proof) });
+    if (method === "signature" && signature) writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mintWithSignature", args: signatureMintArgs(event.eventId, signature) });
+  };
 
   return (
     <div className="min-h-svh bg-background">
@@ -50,10 +70,16 @@ const ClaimPage = ({ event, method }: { event: PoapEvent; method: string }) => {
               </div>
             ) : claim.data ? (
               <div className="flex items-start gap-3 rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><p>This wallet already collected {event.name}. The contract refuses a second copy of the same badge, whichever route it arrives by.</p></div>
-            ) : isKnownMethod ? (
-              <div className="flex items-start gap-3 rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><p>Wallet connected, and no copy held yet: one {method} claim is available. This screen does not submit transactions.</p></div>
+             ) : isKnownMethod ? (
+               <div className="flex flex-col gap-3">
+                 <div className="flex items-start gap-3 rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><p>Wallet connected, and no copy held yet: one {method} claim is available.</p></div>
+                 {claimError ? <p role="alert" className="text-xs text-red-600 dark:text-red-300">{claimError}</p> : null}
+                 {submitted && !signature && method === "signature" ? <p role="alert" className="text-xs text-red-600 dark:text-red-300">This claim link does not contain a recipient signature.</p> : null}
+                 <Button size="lg" onClick={submit} disabled={isPending || receipt.isLoading || receipt.isSuccess || (method === "signature" && !signature) || (method === "allowlist" && proof.length === 0)} aria-busy={isPending || receipt.isLoading}>{isPending ? "Confirm in wallet" : receipt.isLoading ? "Confirming..." : receipt.isSuccess ? "Claim confirmed" : "Submit claim"}</Button>
+                 {hash ? <p className="break-all text-xs text-fg-tertiary">Transaction: {hash}</p> : null}
+               </div>
             ) : null}
-            <p className="text-xs leading-5 text-fg-tertiary">This page checks the connected address against the claim record on the contract and does not submit or simulate a blockchain transaction.</p>
+             <p className="text-xs leading-5 text-fg-tertiary">This page checks the connected address against the claim record before submitting the selected claim transaction.</p>
           </CardContent>
         </Card>
       </main>

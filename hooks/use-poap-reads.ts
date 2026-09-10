@@ -160,6 +160,18 @@ export function useHasClaimed(eventId: bigint, address: `0x${string}` | null) {
   });
 }
 
+/** One live event for creator controls and post-write refreshes. */
+export function useEvent(eventId: bigint) {
+  const all = useAllEvents();
+  return {
+    event: all.data?.find((event) => event.eventId === eventId) ?? null,
+    isLoading: all.isLoading,
+    isFetching: all.isFetching,
+    isError: all.isError,
+    refetch: all.refetch,
+  };
+}
+
 /**
  * Mint logs from the earliest timestamp a caller cares about, chunked
  * across the block range. `recipient` narrows the scan to one wallet

@@ -1,22 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { Check, CircleAlert, WalletCards } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/components/wallet/wallet-provider";
 import { useHasClaimed } from "@/hooks/use-poap-reads";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { CONTRACT_ADDRESS } from "@/lib/poap-data";
+import { poapAbi } from "@/lib/poap-contract";
+import { mintArgs } from "@/lib/transaction-args";
+import { useQueryClient } from "@tanstack/react-query";
 
 type MintActionProps = {
   eventName: string;
   eventId: bigint;
-  method?: "public" | "allowlist" | "signature";
 };
 
-const MintAction = ({ eventName, eventId, method = "public" }: MintActionProps) => {
+const MintAction = ({ eventName, eventId }: MintActionProps) => {
   const { address, connect } = useWallet();
   const claim = useHasClaimed(eventId, address);
-  const [prepared, setPrepared] = useState(false);
+  const queryClient = useQueryClient();
+  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
+  const receipt = useWaitForTransactionReceipt({ hash });
+
+  useEffect(() => {
+    if (!receipt.isSuccess) return;
+    void queryClient.invalidateQueries({ queryKey: ["has-claimed", eventId.toString()] });
+    void queryClient.invalidateQueries({ queryKey: ["all-events"] });
+  }, [eventId, queryClient, receipt.isSuccess]);
 
   if (!address) {
     return (
@@ -74,20 +86,20 @@ const MintAction = ({ eventName, eventId, method = "public" }: MintActionProps) 
     );
   }
 
-  if (prepared) {
+  if (isPending || receipt.isLoading || receipt.isSuccess || hash || writeError) {
     return (
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3 rounded-lg border border-teal-400/30 bg-teal-400/10 p-4 text-sm leading-6 text-teal-700 dark:text-teal-300">
           <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <p>
-            This {method} mint is ready for {eventName}. The connected wallet
-            holds no copy, so one badge is available to it.
+            {isPending ? "Confirm the mint in your wallet." : receipt.isLoading ? "Mint submitted. Waiting for confirmation..." : receipt.isSuccess ? `Mint confirmed for ${eventName}.` : writeError ? "The mint was not submitted." : `Mint transaction submitted for ${eventName}.`}
           </p>
         </div>
+        {hash ? <p className="break-all text-xs text-fg-tertiary">Transaction: {hash}</p> : null}
+        {writeError || receipt.error ? <p role="alert" className="text-xs text-red-600 dark:text-red-300">{writeError?.message ?? receipt.error?.message}</p> : null}
         <p className="flex items-start gap-2 text-xs leading-5 text-fg-tertiary">
           <CircleAlert aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-          No transaction is submitted from this screen. The claim record is
-          re-checked on the contract before any mint runs.
+          The claim record was checked before the transaction was submitted.
         </p>
       </div>
     );
@@ -95,8 +107,8 @@ const MintAction = ({ eventName, eventId, method = "public" }: MintActionProps) 
 
   return (
     <div className="flex flex-col gap-3">
-      <Button onClick={() => setPrepared(true)} size="lg" className="w-full">
-        Prepare {method} mint
+      <Button onClick={() => writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mint", args: mintArgs(eventId) })} size="lg" className="w-full" disabled={isPending} aria-busy={isPending}>
+         Mint this POAP
       </Button>
       <p className="flex items-start gap-2 text-xs leading-5 text-fg-tertiary">
         <CircleAlert aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />

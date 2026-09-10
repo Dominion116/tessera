@@ -82,3 +82,4 @@ contracts/lib/
 /.kilo
 
 ROADMAP.md
+!/docs/ROADMAP.md

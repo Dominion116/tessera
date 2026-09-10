@@ -28,16 +28,24 @@ import {
  * calls, so the cast below asserts the two stay aligned.
  */
 const typedAbi = parseAbi([
+  "event NewEvent(uint256 indexed eventId, string name, address indexed creator)",
+  "event NewMint(uint256 indexed eventId, address indexed recipient)",
   "function totalEvents() view returns (uint256)",
   "function totalSupply() view returns (uint256)",
   "function events(uint256) view returns (string, string, uint256, string, bytes32, address, address, uint256, string, bool, bool)",
   "function uri(uint256) view returns (string)",
   "function totalSupply(uint256) view returns (uint256)",
   "function hasClaimed(uint256, address) view returns (bool)",
+  "function mint(uint256)",
+  "function mintWithSignature(uint256, bytes)",
+  "function allowlistMint(uint256, bytes32[])",
+  "function creatorMint(uint256, address[])",
   "function balanceOfBatch(address[], uint256[]) view returns (uint256[])",
   "function exists(uint256) view returns (bool)",
   "function getMultichainEventId(uint256) view returns (string)",
   "function registerEvent(string, string, uint256, string, bytes32, string, string, uint8) returns (uint256)",
+  "function updateAllowlistRoot(uint256, bytes32)",
+  "function updateEventPublic(uint256, bool)",
 ]);
 
 export const poapAbi = OnchainPOAPsAbi as unknown as typeof typedAbi;

@@ -110,6 +110,7 @@ const CreatedEventRow = ({ event }: { event: PoapEvent }) => {
           </div>
         </Link>
         <div className="flex flex-col gap-2 border-t border-border/70 pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+          <Link href={`/app/created/${event.eventId.toString()}`} className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">Manage event</Link>
           <p className="text-[11px] font-medium tracking-[0.14em] text-fg-tertiary uppercase">
             Day {CREATOR_TIMELOCK_DAYS} freeze
           </p>

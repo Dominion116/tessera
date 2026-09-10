@@ -55,7 +55,9 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
 const SidebarNav = ({ activeView }: SidebarNavProps = {}) => {
   const pathname = usePathname();
   const router = useRouter();
-  const routeView = Object.entries(VIEW_BY_HREF).find(([href]) => pathname === href)?.[1];
+  const routeView = Object.entries(VIEW_BY_HREF)
+    .sort(([a], [b]) => b.length - a.length)
+    .find(([href]) => pathname === href || pathname.startsWith(`${href}/`))?.[1];
   const currentView = routeView ?? activeView;
 
   return (
