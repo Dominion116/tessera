@@ -43,6 +43,16 @@ const FooterMeta = () => {
             <BookOpen size={13} aria-hidden="true" />
           </Link>
         </li>
+        <li>
+          <Link href="/terms" className={PILL_CLASSES}>
+            Terms of Service
+          </Link>
+        </li>
+        <li>
+          <Link href="/privacy" className={PILL_CLASSES}>
+            Privacy Policy
+          </Link>
+        </li>
       </ul>
     </div>
   );

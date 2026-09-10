@@ -245,6 +245,41 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Legal page framing and footer flow
+
+The legal routes now keep the former header's 4 rem vertical footprint without
+rendering a header. A top-left Back to Home link with an arrow occupies that
+space, so removing the brand header does not pull the legal content upward.
+The shared footer accepts a `sticky` prop: the landing page keeps its existing
+sticky presentation, while `/terms` and `/privacy` pass `false` so the footer
+remains in normal document flow and scrolls with the legal content.
+
+### Legal routes, mobile controls, and hero media
+
+The landing hero now loads a 960 by 540, video-only H.264 asset at roughly
+135 KB instead of the original 1280 by 720, 2.58 MB file. `hero.tsx` uses
+`preload="metadata"` and a local poster so the first paint has a still frame
+without requiring the full video download. The source asset keeps the same
+eight-second loop and visual crop.
+
+- `/terms` and `/privacy` are separate route segments with shared presentation
+  in `components/legal/legal-page.tsx`. Their links exist only in
+  `footer-meta.tsx`; the primary and public navigation do not expose them.
+  The copy explains wallet custody, public blockchain records, submitted
+  artwork, technical information, and service availability without implying
+  that onchain data can be removed.
+- The mobile dashboard header places the existing `ThemeToggle` immediately
+  before `WalletChip`, with a card-colored compact button that follows the
+  shell theme. Desktop sidebar behavior is unchanged.
+- `docs-shell.tsx` no longer places Back to app inside the section navigation.
+  It now renders between the article boundary and breadcrumbs on every docs
+  page, so mobile and desktop readers encounter the control in the same
+  document position.
+
+Static checks: `npx tsc --noEmit` and `npx eslint .` remain the required checks;
+the two existing hero `<img>` warnings are unchanged. No build or dev server
+was run.
+
 ### Dock curve framing and labels corrected
 
 The first animated dock pass used a clipped background rectangle for the curve

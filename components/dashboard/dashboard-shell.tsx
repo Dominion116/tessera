@@ -19,6 +19,7 @@ import CreatedPoapsView from "@/components/dashboard/created-poaps-view";
 import CollectionView from "@/components/dashboard/collection-view";
 import CreatePoapView from "@/components/dashboard/create-poap-view";
 import WalletChip from "@/components/wallet/wallet-chip";
+import ThemeToggle from "@/components/theme-toggle";
 import type { DashboardView } from "@/components/dashboard/sidebar-nav";
 
 /**
@@ -71,7 +72,10 @@ const DashboardShell = ({ children, initialView = "dashboard" }: DashboardShellP
         >
           <Wordmark className="h-7 w-auto" />
         </Link>
-        <WalletChip className="w-auto" />
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="h-9 w-9 bg-card text-foreground focus-visible:ring-offset-background" />
+          <WalletChip className="w-auto" />
+        </div>
       </header>
       <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         {activeView === "explore" ? (

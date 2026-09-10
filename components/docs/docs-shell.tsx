@@ -15,6 +15,16 @@ export function DocsBreadcrumbs({ page }: { page: DocPage }) {
   );
 }
 
+const BackToAppLink = () => (
+  <Link
+    href="/app"
+    className="inline-flex items-center gap-2 rounded-lg text-sm font-medium text-fg-secondary transition-[color,transform] duration-180 hover:translate-x-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 dark:hover:text-teal-300"
+  >
+    <ArrowLeft aria-hidden="true" className="size-4" />
+    Back to app
+  </Link>
+);
+
 export function DocsSidebar({ currentSlug }: { currentSlug: string }) {
   const sectionLinks = (
     <nav aria-label="Documentation sections" className="mt-2 flex flex-col gap-1">
@@ -37,16 +47,6 @@ export function DocsSidebar({ currentSlug }: { currentSlug: string }) {
     </nav>
   );
 
-  const backToApp = (
-    <Link
-      href="/app"
-      className="mt-3 flex items-center gap-2 rounded-lg border-t border-border/70 px-3 pt-3 text-sm font-medium text-fg-secondary transition-[color,transform] duration-180 hover:translate-x-0.5 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 dark:hover:text-teal-300"
-    >
-      <ArrowLeft aria-hidden="true" className="size-4" />
-      Back to app
-    </Link>
-  );
-
   return (
     <aside className="min-w-0 lg:sticky lg:top-6 lg:h-[calc(100svh-3rem)]">
       <div className="hidden rounded-xl border border-border/70 bg-card/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0_/_5%),0_8px_24px_oklch(0_0_0_/_4%)] lg:block">
@@ -55,7 +55,6 @@ export function DocsSidebar({ currentSlug }: { currentSlug: string }) {
           Documentation
         </div>
         {sectionLinks}
-        {backToApp}
       </div>
 
       <details className="group rounded-xl border border-border/70 bg-card/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0_/_5%),0_8px_24px_oklch(0_0_0_/_4%)] lg:hidden">
@@ -71,7 +70,6 @@ export function DocsSidebar({ currentSlug }: { currentSlug: string }) {
           Documentation
         </div>
         <div className="group-open:block hidden">{sectionLinks}</div>
-        <div className="group-open:block hidden">{backToApp}</div>
       </details>
     </aside>
   );
@@ -104,6 +102,9 @@ export function DocsPagination({ currentSlug }: { currentSlug: string }) {
 export function DocsArticle({ page }: { page: DocPage }) {
   return (
     <article className="docs-article">
+      <div className="mb-5">
+        <BackToAppLink />
+      </div>
       <DocsBreadcrumbs page={page} />
       <header className="mt-8 border-b border-border/70 pb-8">
         <p className="text-xs font-medium tracking-[0.16em] text-teal-600 uppercase dark:text-teal-300">{page.section}</p>

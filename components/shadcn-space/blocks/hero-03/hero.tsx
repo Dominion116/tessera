@@ -20,6 +20,8 @@ const HeroSection: React.FC = () => {
         autoPlay
         muted
         playsInline
+        preload="metadata"
+        poster="/nftbg-poster.jpg"
         aria-hidden="true"
         tabIndex={-1}
       >

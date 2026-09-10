@@ -3,9 +3,17 @@ import FooterMeta from "@/components/landing/footer-meta";
 import FooterNav from "@/components/landing/footer-nav";
 import FooterWordmark from "@/components/landing/footer-wordmark";
 
-const SiteFooter = () => {
+type SiteFooterProps = {
+  sticky?: boolean;
+};
+
+const SiteFooter = ({ sticky = true }: SiteFooterProps) => {
   return (
-    <footer className="relative overflow-hidden bg-teal-950 lg:sticky lg:bottom-0 lg:z-0">
+    <footer
+      className={`relative overflow-hidden bg-teal-950 ${
+        sticky ? "lg:sticky lg:bottom-0 lg:z-0" : ""
+      }`}
+    >
       <div className="relative z-10">
         <div className="mx-auto flex max-w-7xl flex-col px-4 pt-14 sm:pt-20 xl:px-16">
           <div className="grid gap-12 lg:grid-cols-[1.5fr_2fr] lg:items-start">
