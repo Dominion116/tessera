@@ -1,20 +1,12 @@
 import Navbar from "@/components/shadcn-space/blocks/hero-03/navbar";
-import { NavLinkItem } from "@/components/shadcn-space/blocks/hero-03/navlink";
 import HeroSection from "@/components/shadcn-space/blocks/hero-03/hero";
+import { MARKETING_NAV_ITEMS } from "@/components/navigation/marketing-nav";
 import WhatItIsSection from "@/components/landing/what-it-is-section";
 import HowItWorksSection from "@/components/landing/how-it-works-section";
 import GallerySection from "@/components/landing/gallery-section";
 import FAQ1 from "@/components/ui/faq-monocrhome";
 import CTA from "@/components/shadcn-space/blocks/cta-01/cta";
 import SiteFooter from "@/components/landing/site-footer";
-
-const navigationData: NavLinkItem[] = [
-  { title: "Home", href: "/" },
-  { title: "Explore", href: "/app" },
-  { title: "Create", href: "/app/create" },
-  { title: "Collection", href: "/app/collection" },
-  { title: "Docs", href: "/docs" },
-];
 
 /**
  * The landing page in reading order: what a POAP is, how one is made and
@@ -30,7 +22,7 @@ const LandingPage = () => {
       >
         Skip to content
       </a>
-      <Navbar navigationData={navigationData} />
+      <Navbar navigationData={MARKETING_NAV_ITEMS} />
       <main id="main" className="relative z-10 -mt-20 bg-background">
         <HeroSection />
         <WhatItIsSection />

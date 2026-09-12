@@ -4,7 +4,7 @@ const COLUMNS = [
   {
     heading: "Explore",
     links: [
-      { label: "All POAPs", href: "/app" },
+      { label: "All POAPs", href: "/app/explore" },
       { label: "My collection", href: "/app/collection" },
       { label: "Dashboard", href: "/app" },
     ],

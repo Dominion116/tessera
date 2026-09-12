@@ -3,6 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Hides a scrollbar on any scroll container without disabling scrolling. Use
+ * it alongside an overflow utility, e.g. `overflow-y-auto scrollbar-hidden`.
+ */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -132,6 +147,26 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /*
+   * Hide the document scrollbar while keeping the page scrollable.
+   * `scrollbar-width` covers Firefox, `-ms-overflow-style` covers legacy Edge,
+   * and the WebKit pseudo-element covers Chrome, Edge (Chromium) and Safari.
+   * Both html and body are targeted because Safari can keep the body's bar when
+   * only html is styled.
+   */
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   h1,
