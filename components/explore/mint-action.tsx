@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/components/wallet/wallet-provider";
 import { useHasClaimed } from "@/hooks/use-poap-reads";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { CONTRACT_ADDRESS } from "@/lib/poap-data";
+import { CHAIN_ID, CONTRACT_ADDRESS } from "@/lib/poap-data";
 import { poapAbi } from "@/lib/poap-contract";
 import { mintArgs } from "@/lib/transaction-args";
 import { useQueryClient } from "@tanstack/react-query";
@@ -107,7 +107,7 @@ const MintAction = ({ eventName, eventId }: MintActionProps) => {
 
   return (
     <div className="flex flex-col gap-3">
-      <Button onClick={() => writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mint", args: mintArgs(eventId) })} size="lg" className="w-full" disabled={isPending} aria-busy={isPending}>
+      <Button onClick={() => writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mint", args: mintArgs(eventId) })} size="lg" className="w-full" disabled={isPending} aria-busy={isPending}>
          Mint this POAP
       </Button>
       <p className="flex items-start gap-2 text-xs leading-5 text-fg-tertiary">

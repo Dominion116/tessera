@@ -5,7 +5,7 @@ import { ArrowLeft, Check, CircleAlert, KeyRound, WalletCards } from "lucide-rea
 import { useWallet } from "@/components/wallet/wallet-provider";
 import { useEffect, useState } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { CONTRACT_ADDRESS } from "@/lib/poap-data";
+import { CHAIN_ID, CONTRACT_ADDRESS } from "@/lib/poap-data";
 import { poapAbi } from "@/lib/poap-contract";
 import { allowlistMintArgs, signatureMintArgs } from "@/lib/transaction-args";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,8 +31,8 @@ const ClaimPage = ({ event, method, proof = [], signature }: { event: PoapEvent;
 
   const submit = () => {
     setSubmitted(true);
-    if (method === "allowlist") writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "allowlistMint", args: allowlistMintArgs(event.eventId, proof) });
-    if (method === "signature" && signature) writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mintWithSignature", args: signatureMintArgs(event.eventId, signature) });
+    if (method === "allowlist") writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "allowlistMint", args: allowlistMintArgs(event.eventId, proof) });
+    if (method === "signature" && signature) writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "mintWithSignature", args: signatureMintArgs(event.eventId, signature) });
   };
 
   return (

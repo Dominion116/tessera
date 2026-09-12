@@ -38,7 +38,7 @@ import {
   svgSizeStatus,
   utf8Bytes,
 } from "@/lib/registration";
-import { CONTRACT_ADDRESS, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
+import { CHAIN_ID, CONTRACT_ADDRESS, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
 import { poapAbi, repairSvgNamespace } from "@/lib/poap-contract";
 import { frameImageAsSvg } from "@/lib/image-artwork";
 import { registerEventArgs } from "@/lib/transaction-args";
@@ -324,6 +324,7 @@ const CreatePoapView = () => {
     if (!registrationReady) return;
     setRegistrationError(null);
     writeContract({
+      chainId: CHAIN_ID,
       address: CONTRACT_ADDRESS,
       abi: poapAbi,
       functionName: "registerEvent",

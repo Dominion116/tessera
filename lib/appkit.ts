@@ -34,11 +34,12 @@ export const wagmiAdapter = new WagmiAdapter({
 export const wagmiConfig = wagmiAdapter.wagmiConfig;
 
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
+const origin = typeof window !== "undefined" ? window.location.origin : APP_URL;
 
 export const appKitMetadata = {
   name: "Tessera",
   description:
     "Create onchain POAPs, hand them out at real events, and collect them.",
-  url: APP_URL,
-  icons: [`${APP_URL}/tessera-mark.svg`],
+  url: origin,
+  icons: [`${origin}/tessera-mark.svg`],
 };

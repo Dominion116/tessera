@@ -59,6 +59,14 @@ const modal = createAppKit({
   networks,
   defaultNetwork: baseSepolia,
   metadata: appKitMetadata,
+  enableWallets: true,
+  allWallets: "SHOW",
+  featuredWalletIds: [
+    "c57ca95b47569778a828d1a8783e4d90ccd2ec88be00c7097e2f17215aa0cd64", // MetaMask
+    "ecc4036f814562b41a5268ada86c804a380e837b00681f3f3b450397b105c721", // Zerion
+    "4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0", // Trust
+    "fd20dc426fb3704d1f62d8280cb2653bee3905c34e80cefa1279ee8105d5da84", // Coinbase
+  ],
   features: {
     analytics: false,
     email: false,
@@ -146,7 +154,7 @@ export function WalletProvider({
   );
 
   return (
-      <WagmiProvider config={wagmiConfig as Config} initialState={initialState} reconnectOnMount={false}>
+    <WagmiProvider config={wagmiConfig as Config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <ThemeBridge>
           <WalletBridge>{children}</WalletBridge>

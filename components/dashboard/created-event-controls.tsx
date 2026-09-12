@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useWallet } from "@/components/wallet/wallet-provider";
 import { useEvent } from "@/hooks/use-poap-reads";
 import { poapAbi } from "@/lib/poap-contract";
-import { CONTRACT_ADDRESS, CREATOR_MINT_BATCH_LIMIT, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
+import { CHAIN_ID, CONTRACT_ADDRESS, CREATOR_MINT_BATCH_LIMIT, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
 import { allowlistControlArgs, creatorMintArgs, parseRecipientAddresses, publicControlArgs } from "@/lib/transaction-args";
 
 const CreatedEventControls = ({ eventId }: { eventId: bigint }) => {
@@ -36,15 +36,15 @@ const CreatedEventControls = ({ eventId }: { eventId: bigint }) => {
     setLocalError(null);
     setAction(name);
     if (name === "public") {
-      writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "updateEventPublic", args: publicControlArgs(eventId, !event.isPublic) });
+      writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "updateEventPublic", args: publicControlArgs(eventId, !event.isPublic) });
     } else if (name === "allowlist") {
       const args = allowlistControlArgs(eventId, rootInput);
       if (!args) { setLocalError("Enter a 0x-prefixed 32-byte allowlist root."); return; }
-      writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "updateAllowlistRoot", args });
+      writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "updateAllowlistRoot", args });
     } else {
       const recipients = parseRecipientAddresses(recipientsInput, CREATOR_MINT_BATCH_LIMIT);
       if (!recipients) { setLocalError(`Enter between 1 and ${CREATOR_MINT_BATCH_LIMIT} valid recipient addresses.`); return; }
-      writeContract({ address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "creatorMint", args: creatorMintArgs(eventId, recipients) });
+      writeContract({ chainId: CHAIN_ID, address: CONTRACT_ADDRESS, abi: poapAbi, functionName: "creatorMint", args: creatorMintArgs(eventId, recipients) });
     }
   };
 

@@ -11,8 +11,8 @@ import { fallback, http, type Transport } from "viem";
 
 /** Public Base Sepolia endpoints, both serving CORS to browsers. */
 const PUBLIC_RPC_URLS = [
-  "https://sepolia.base.org",
   "https://base-sepolia-rpc.publicnode.com",
+  "https://sepolia.base.org",
 ] as const;
 
 /**
