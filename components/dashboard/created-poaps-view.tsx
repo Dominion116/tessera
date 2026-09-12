@@ -7,6 +7,7 @@ import {
   CalendarDays,
   MapPin,
   RefreshCw,
+  Settings2,
   Stamp,
   Users,
   WifiOff,
@@ -109,8 +110,17 @@ const CreatedEventRow = ({ event }: { event: PoapEvent }) => {
             </div>
           </div>
         </Link>
-        <div className="flex flex-col gap-2 border-t border-border/70 pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
-          <Link href={`/app/created/${event.eventId.toString()}`} className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">Manage event</Link>
+        <div className="flex flex-col gap-3 border-t border-border/70 pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+          <Button
+            asChild
+            size="lg"
+            className="w-full bg-teal-500 text-white hover:bg-teal-600 focus-visible:ring-teal-400 dark:bg-teal-400 dark:text-black dark:hover:bg-teal-300"
+          >
+            <Link href={`/app/created/${event.eventId.toString()}`}>
+              <Settings2 aria-hidden="true" />
+              Manage event
+            </Link>
+          </Button>
           <p className="text-[11px] font-medium tracking-[0.14em] text-fg-tertiary uppercase">
             Day {CREATOR_TIMELOCK_DAYS} freeze
           </p>

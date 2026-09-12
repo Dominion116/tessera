@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Album,
-  BookOpen,
-  CirclePlus,
-  Compass,
-  LayoutDashboard,
-  Stamp,
-  type LucideIcon,
-} from "lucide-react";
+import { APP_NAV_ITEMS } from "@/components/navigation/app-nav";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -39,18 +31,11 @@ const VIEW_BY_HREF: Record<string, DashboardView> = {
   "/app/create": "create",
 };
 
-const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/app/create", label: "Create a POAP", icon: CirclePlus },
-  { href: "/app/created", label: "POAPs I created", icon: Stamp },
-  { href: "/app/collection", label: "My collection", icon: Album },
-  { href: "/app/explore", label: "Explore", icon: Compass },
-  { href: "/docs", label: "Documentation", icon: BookOpen },
-];
-
 /**
- * Sidebar navigation for the dashboard. Exact match for /app so nested
- * routes do not light the Dashboard item up, prefix match otherwise.
+ * Sidebar navigation for the dashboard. Items and order come from the shared
+ * nav config, so the sidebar and the mobile dock stay identical. Exact match
+ * for /app so nested routes do not light the Dashboard item up, prefix match
+ * otherwise.
  */
 const SidebarNav = ({ activeView }: SidebarNavProps = {}) => {
   const pathname = usePathname();
@@ -64,7 +49,7 @@ const SidebarNav = ({ activeView }: SidebarNavProps = {}) => {
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {NAV_ITEMS.map((item) => {
+          {APP_NAV_ITEMS.map((item) => {
             const localView = VIEW_BY_HREF[item.href];
             const active = localView
                ? localView === currentView
