@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { type PoapEvent } from "@/lib/poap-data";
 import { useHasClaimed } from "@/hooks/use-poap-reads";
 import PublicHeader from "@/components/explore/public-header";
+import ShareCastButton from "@/components/farcaster/share-cast-button";
 
 const ClaimPage = ({ event, method, proof = [], signature }: { event: PoapEvent; method: string; proof?: `0x${string}`[]; signature?: `0x${string}` }) => {
   const { address, connect } = useWallet();
@@ -77,6 +78,7 @@ const ClaimPage = ({ event, method, proof = [], signature }: { event: PoapEvent;
                  {submitted && !signature && method === "signature" ? <p role="alert" className="text-xs text-red-600 dark:text-red-300">This claim link does not contain a recipient signature.</p> : null}
                  <Button size="lg" onClick={submit} disabled={isPending || receipt.isLoading || receipt.isSuccess || (method === "signature" && !signature) || (method === "allowlist" && proof.length === 0)} aria-busy={isPending || receipt.isLoading}>{isPending ? "Confirm in wallet" : receipt.isLoading ? "Confirming..." : receipt.isSuccess ? "Claim confirmed" : "Submit claim"}</Button>
                  {hash ? <p className="break-all text-xs text-fg-tertiary">Transaction: {hash}</p> : null}
+                 {receipt.isSuccess ? <ShareCastButton text={`I claimed ${event.name} on Base Sepolia.`} path={`/poaps/${event.eventId.toString()}`} /> : null}
                </div>
             ) : null}
              <p className="text-xs leading-5 text-fg-tertiary">This page checks the connected address against the claim record before submitting the selected claim transaction.</p>

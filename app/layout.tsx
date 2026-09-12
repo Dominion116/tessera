@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
+import { FarcasterProvider } from "@/components/farcaster/farcaster-provider";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
 import "./globals.css";
 
@@ -58,7 +59,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <WalletProvider cookies={cookies}>{children}</WalletProvider>
+          <FarcasterProvider>
+            <WalletProvider cookies={cookies}>{children}</WalletProvider>
+          </FarcasterProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -5,6 +5,7 @@ import { Check, CircleAlert, WalletCards } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/components/wallet/wallet-provider";
+import ShareCastButton from "@/components/farcaster/share-cast-button";
 import { useHasClaimed } from "@/hooks/use-poap-reads";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { CHAIN_ID, CONTRACT_ADDRESS } from "@/lib/poap-data";
@@ -96,6 +97,12 @@ const MintAction = ({ eventName, eventId }: MintActionProps) => {
           </p>
         </div>
         {hash ? <p className="break-all text-xs text-fg-tertiary">Transaction: {hash}</p> : null}
+        {receipt.isSuccess ? (
+          <ShareCastButton
+            text={`I just collected ${eventName} on Base Sepolia.`}
+            path={`/poaps/${eventId.toString()}`}
+          />
+        ) : null}
         {writeError || receipt.error ? <p role="alert" className="text-xs text-red-600 dark:text-red-300">{writeError?.message ?? receipt.error?.message}</p> : null}
         <p className="flex items-start gap-2 text-xs leading-5 text-fg-tertiary">
           <CircleAlert aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />

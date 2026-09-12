@@ -3,12 +3,16 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import ClaimPage from "@/components/explore/claim-page";
 import { readEvent } from "@/lib/poap-contract";
+import { absoluteUrl, resolveAppOrigin } from "@/lib/farcaster/config";
+import { buildEmbedMetadata } from "@/lib/farcaster/embeds";
 import { parseMerkleProof, parseSignature } from "@/lib/transaction-args";
 
 type ClaimRouteProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ method?: string; proof?: string; signature?: string }>;
 };
+
+const origin = resolveAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
 
 const loadEvent = cache(async (id: bigint) => readEvent(id));
 
@@ -25,10 +29,25 @@ export async function generateMetadata({ params }: ClaimRouteProps): Promise<Met
   const { id } = await params;
   const eventId = parseEventId(id);
   const event = eventId === null ? null : await loadEvent(eventId);
+  const title = event ? `Claim ${event.name}` : "Claim POAP";
+  const description =
+    "A claim destination for an onchain proof-of-attendance token.";
 
   return {
-    title: event ? `Claim ${event.name}` : "Claim POAP",
-    description: "A claim destination for an onchain proof-of-attendance token.",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/poaps/${id}/claim`,
+      images: [{ url: `/poaps/${id}/claim/opengraph-image` }],
+    },
+    other: buildEmbedMetadata({
+      origin,
+      imageUrl: absoluteUrl(origin, `/poaps/${id}/claim/opengraph-image`),
+      title,
+      launchPath: `/poaps/${id}/claim`,
+    }),
   };
 }
 

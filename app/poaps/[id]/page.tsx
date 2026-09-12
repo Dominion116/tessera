@@ -3,10 +3,14 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import PoapDetailPage from "@/components/explore/poap-detail-page";
 import { readEvent } from "@/lib/poap-contract";
+import { absoluteUrl, resolveAppOrigin } from "@/lib/farcaster/config";
+import { buildEmbedMetadata } from "@/lib/farcaster/embeds";
 
 type PoapRouteProps = {
   params: Promise<{ id: string }>;
 };
+
+const origin = resolveAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
 
 const loadEvent = cache(async (id: bigint) => readEvent(id));
 
@@ -26,12 +30,26 @@ export async function generateMetadata({ params }: PoapRouteProps): Promise<Meta
   const { id } = await params;
   const eventId = parseEventId(id);
   const event = eventId === null ? null : await loadEvent(eventId);
+  const name = event?.name ?? "POAP";
+  const description =
+    event?.description ||
+    "An onchain proof-of-attendance token on Base Sepolia.";
 
   return {
-    title: event?.name ?? "POAP",
-    description:
-      event?.description ||
-      "An onchain proof-of-attendance token on Base Sepolia.",
+    title: name,
+    description,
+    openGraph: {
+      title: name,
+      description,
+      url: `/poaps/${id}`,
+      images: [{ url: `/poaps/${id}/opengraph-image` }],
+    },
+    other: buildEmbedMetadata({
+      origin,
+      imageUrl: absoluteUrl(origin, `/poaps/${id}/opengraph-image`),
+      title: `Open ${name}`,
+      launchPath: `/poaps/${id}`,
+    }),
   };
 }
 

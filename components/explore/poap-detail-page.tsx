@@ -6,6 +6,7 @@ import { formatCount, formatUtcDate, shortAddress, svgToDataUrl } from "@/lib/fo
 import { CHAIN_ID, CONTRACT_ADDRESS, type PoapEvent, ZERO_ROOT } from "@/lib/poap-data";
 import PublicHeader from "@/components/explore/public-header";
 import MintAction from "@/components/explore/mint-action";
+import ShareCastButton from "@/components/farcaster/share-cast-button";
 
 const PoapDetailPage = ({ event }: { event: PoapEvent }) => (
   <div className="min-h-svh bg-background">
@@ -65,6 +66,11 @@ const PoapDetailPage = ({ event }: { event: PoapEvent }) => (
             <a href={`https://sepolia.basescan.org/address/${CONTRACT_ADDRESS}#code`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">View contract <ExternalLink aria-hidden="true" className="size-4" /></a>
             <Link href={`/poaps/${event.eventId.toString()}/claim`} className="inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">Open claim page <ArrowUpRight aria-hidden="true" className="size-4" /></Link>
           </div>
+          <ShareCastButton
+            text={`${event.name} — an onchain POAP on Base Sepolia.`}
+            path={`/poaps/${event.eventId.toString()}`}
+            className="w-full sm:w-auto"
+          />
           <p className="font-mono text-xs text-fg-tertiary">Base Sepolia · chain {CHAIN_ID} · contract {shortAddress(CONTRACT_ADDRESS)} · {event.allowlistRoot === ZERO_ROOT ? "no invitation list" : "invitation list enabled"}</p>
         </div>
       </div>

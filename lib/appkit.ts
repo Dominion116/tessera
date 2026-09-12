@@ -13,6 +13,7 @@ import { cookieStorage, createStorage } from "@wagmi/core";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { baseSepolia } from "@reown/appkit/networks";
 import type { AppKitNetwork } from "@reown/appkit/networks";
+import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { createBaseSepoliaTransports } from "./rpc";
 
 export const projectId =
@@ -26,6 +27,9 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   projectId,
   networks,
+  // The Farcaster Miniapp connector rides alongside the AppKit connectors and
+  // is only ever selected from an explicit wallet action inside a host.
+  connectors: [farcasterMiniApp()],
   transports: {
     [baseSepolia.id]: createBaseSepoliaTransports(),
   },

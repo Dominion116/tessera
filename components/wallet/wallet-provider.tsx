@@ -16,6 +16,8 @@ import { baseSepolia } from "@reown/appkit/networks";
 import {
   cookieToInitialState,
   useAccount,
+  useConnect,
+  useDisconnect,
   WagmiProvider,
   type Config,
 } from "wagmi";
@@ -26,6 +28,7 @@ import {
   wagmiAdapter,
   wagmiConfig,
 } from "@/lib/appkit";
+import { useFarcaster } from "@/components/farcaster/farcaster-provider";
 
 type WalletContextValue = {
   address: `0x${string}` | null;
@@ -53,7 +56,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const modal = createAppKit({
+createAppKit({
   adapters: [wagmiAdapter],
   projectId,
   networks,
@@ -84,6 +87,9 @@ function WalletBridge({ children }: { children: ReactNode }) {
   const { address } = useAccount();
   const { open } = useAppKit();
   const appKitState = useAppKitState();
+  const { transport } = useFarcaster();
+  const { connectAsync, connectors, isPending: isConnectPending } = useConnect();
+  const { disconnectAsync } = useDisconnect();
   const pathname = usePathname();
   const router = useRouter();
   const previousAddress = React.useRef<`0x${string}` | null>(address ?? null);
@@ -102,27 +108,57 @@ function WalletBridge({ children }: { children: ReactNode }) {
 
   const connect = useCallback(() => {
     setWalletError(null);
-    void open().catch((error: unknown) => setWalletError(error instanceof Error ? error.message : "Wallet connection was not completed."));
-  }, [open]);
+
+    // Inside a confirmed Farcaster host an explicit action uses the native
+    // connector; everywhere else keeps the AppKit modal.
+    if (transport === "farcaster") {
+      const connector = connectors.find((item) => item.id === "farcaster");
+      if (connector) {
+        void connectAsync({ connector }).catch((error: unknown) =>
+          setWalletError(
+            error instanceof Error
+              ? error.message
+              : "The Farcaster wallet request was not completed."
+          )
+        );
+        return;
+      }
+    }
+
+    void open().catch((error: unknown) =>
+      setWalletError(
+        error instanceof Error
+          ? error.message
+          : "Wallet connection was not completed."
+      )
+    );
+  }, [transport, connectors, connectAsync, open]);
 
   const handleDisconnect = useCallback(() => {
     setWalletError(null);
     setIsDisconnecting(true);
-    void modal.disconnect().then(() => queryClient.clear()).catch((error: unknown) => {
-      setWalletError(error instanceof Error ? error.message : "Wallet could not be disconnected.");
-    }).finally(() => setIsDisconnecting(false));
-  }, []);
+    void disconnectAsync()
+      .then(() => queryClient.clear())
+      .catch((error: unknown) => {
+        setWalletError(
+          error instanceof Error
+            ? error.message
+            : "Wallet could not be disconnected."
+        );
+      })
+      .finally(() => setIsDisconnecting(false));
+  }, [disconnectAsync]);
 
   const value = useMemo(
     () => ({
       address: address ?? null,
       connect,
       disconnect: handleDisconnect,
-      isConnecting: appKitState.loading || appKitState.open,
+      isConnecting: appKitState.loading || appKitState.open || isConnectPending,
       isDisconnecting,
       walletError,
     }),
-    [address, connect, handleDisconnect, appKitState.loading, appKitState.open, isDisconnecting, walletError]
+    [address, connect, handleDisconnect, appKitState.loading, appKitState.open, isConnectPending, isDisconnecting, walletError]
   );
 
   return (
@@ -154,7 +190,7 @@ export function WalletProvider({
   );
 
   return (
-    <WagmiProvider config={wagmiConfig as Config} initialState={initialState}>
+    <WagmiProvider config={wagmiConfig as Config} initialState={initialState} reconnectOnMount={false}>
       <QueryClientProvider client={queryClient}>
         <ThemeBridge>
           <WalletBridge>{children}</WalletBridge>
