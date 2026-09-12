@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildFarcasterManifest } from "@/lib/farcaster/manifest";
+import { MINIAPP_ASSET_PATHS } from "@/lib/farcaster/config";
 
 const ORIGIN = "https://tesserapoap.vercel.app";
 
@@ -63,5 +64,27 @@ describe("farcaster manifest", () => {
       expect(value.length).toBeGreaterThan(0);
     }
     expect(miniapp.tags.length).toBeGreaterThan(0);
+  });
+
+  it("honours the documented field limits", () => {
+    const { miniapp } = manifest;
+    expect(miniapp.name.length).toBeLessThanOrEqual(32);
+    expect(miniapp.subtitle.length).toBeLessThanOrEqual(30);
+    expect(miniapp.description.length).toBeLessThanOrEqual(170);
+    expect(miniapp.tagline.length).toBeLessThanOrEqual(30);
+    expect(miniapp.ogTitle.length).toBeLessThanOrEqual(30);
+    expect(miniapp.ogDescription.length).toBeLessThanOrEqual(100);
+    expect(miniapp.tags.length).toBeLessThanOrEqual(5);
+    for (const tag of miniapp.tags) {
+      expect(tag.length).toBeLessThanOrEqual(20);
+      expect(tag).toBe(tag.toLowerCase());
+      expect(tag).not.toMatch(/\s/);
+    }
+  });
+
+  it("points hero images at the 1.91:1 asset and the deprecated imageUrl at 3:2", () => {
+    expect(manifest.miniapp.heroImageUrl).toContain(MINIAPP_ASSET_PATHS.hero);
+    expect(manifest.miniapp.ogImageUrl).toContain(MINIAPP_ASSET_PATHS.hero);
+    expect(manifest.miniapp.imageUrl).toContain(MINIAPP_ASSET_PATHS.share);
   });
 });

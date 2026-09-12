@@ -36,7 +36,7 @@ Two consequences worth stating plainly:
 |---|---|---|
 | Phase 1 | Hero section block from the project owner | received |
 | Phase 2 | Dashboard block from the project owner | received, treated as a reference |
-| Phase 9 | Production domain + signed `accountAssociation` | awaited |
+| Phase 9 | Production domain + signed `accountAssociation` | domain fixed (`tesserapoap.vercel.app`); manifest, PNG assets, embeds, runtime adapter and share control implemented; signed association still awaited |
 | Phase 11 | Base Sepolia ETH in a test wallet | awaited |
 
 Phases 0 and 3 have no blocking inputs and can proceed immediately.
@@ -253,21 +253,35 @@ Ownership is verifiable onchain from the UI.
 
 ## Phase 9: Farcaster Mini App
 
-Blocked on the production domain.
+Awaiting only the signed `accountAssociation` for the production domain. The
+runtime surface is implemented.
 
 - `/.well-known/farcaster.json` with `accountAssociation` and the full `miniapp`
-  object including discovery fields.
-- `sdk.actions.ready()` called when the interface is genuinely ready.
-- Mini App detection and auto-connect via the Farcaster connector, bypassing the
-  wallet modal; standard flow retained on the web.
+  object including discovery fields, served as cacheable JSON from the canonical
+  origin with no trailing slash.
+- PNG assets sized to the Farcaster contract: 1024×1024 icon, 200×200 splash,
+  1200×630 hero/OG (1.91:1), 1200×800 share image (3:2).
+- A client-only runtime adapter detects the host by SDK and host capabilities,
+  never by URL or query heuristics, and calls `sdk.actions.ready()` exactly once
+  after the interface is renderable. It no-ops on the website and never opens a
+  wallet.
+- The native Farcaster connector rides alongside the AppKit adapter but is
+  selected only from an explicit wallet action inside a confirmed host; AppKit
+  remains the web fallback. No auto-connect, no reconnect on mount, wallet-only
+  authorization.
 - `fc:miniapp` embeds (mirrored to `fc:frame`) on the landing page, POAP pages
-  and claim pages, backed by dynamic 3:2 PNG OG routes with sane cache headers.
-- `composeCast` sharing after a mint or a registration.
-- Safe-area insets, Farcaster back navigation, touch-first spacing.
+  and claim pages, backed by dynamic 3:2 PNG OG routes and static manifest
+  assets, each with a non-zero `max-age`.
+- An explicit `composeCast` share control after a successful mint or claim, with
+  a copy-link fallback when the composer is unavailable.
+- Host back navigation through a narrow adapter that stays inert when the host
+  does not advertise `back`. No second layout, route tree or mobile shell.
+- No Farcaster notifications, no FID accounts, no server session.
 
 **Exit criteria.** The Mini App launches in Farcaster with no infinite splash,
-connects without a modal, and completes a real mint. Embeds render correctly in
-the embed debugger. The same build still works as a plain website.
+completes a real mint through the native connector or the AppKit fallback, and
+renders embeds correctly in the embed debugger. The same build still works as a
+plain website.
 
 ---
 
@@ -324,6 +338,6 @@ This table is the summary.
 | 6 Minting | not started |
 | 7 Creator controls | not started |
 | 8 Collection | not started |
-| 9 Farcaster Mini App | blocked on domain |
+| 9 Farcaster Mini App | manifest, PNG assets, embeds, runtime adapter, explicit share control and unit tests implemented; signed account association and host acceptance outstanding |
 | 10 Polish | not started |
 | 11 Ship | not started |

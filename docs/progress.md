@@ -25,8 +25,16 @@ wallets connect through Reown AppKit over wagmi, and every screen reads the
 OnchainPOAPs contract on Base Sepolia directly, batched through Multicall3,
 with no mock or placeholder data source left. The create funnel runs two
 steps, artwork and details then registration choices, with byte-accurate
-validation and the SVG size ceiling enforced. No screen submits a
-transaction yet.
+validation and the SVG size ceiling enforced. Registration, public, allowlist
+and signature mints, and the creator controls all submit transactions.
+
+The same build also serves as a Farcaster Mini App. A client-only runtime
+adapter detects the host and calls `ready()` once, the native connector handles
+explicit wallet actions inside the host while AppKit remains the web fallback,
+and the manifest, PNG assets, `fc:miniapp`/`fc:frame` embeds and an explicit
+share control are served from the existing route tree. The mobile surface is
+unchanged. Only the signed account association and host acceptance remain; see
+`docs/farcaster.md`.
 
 Superseded, see the FAQ block log entry: application files are committed now
 (`c33b38e`, `5cf5135` and `75176d0` landed after the documentation commit
@@ -48,6 +56,11 @@ boundaries. Light and dark themes both work, the toggle switches them, and
 the AppKit modal follows the site theme. The dashboard's Open App entry
 points (navbar and mobile dropdown) open the AppKit modal when disconnected
 and link to `/app` when connected.
+
+The Farcaster surface serves the same landing, POAP and claim routes as Mini
+App routes, plus `/.well-known/farcaster.json`, the
+`/miniapp-assets/{icon,splash,hero,share}` PNGs, and the 3:2 `opengraph-image`
+routes for the event and claim share cards.
 
 ### Verification standard
 
@@ -80,6 +93,19 @@ app/poaps/[id]/page.tsx       public POAP page, server-side live read, 60 s
 app/poaps/[id]/claim/page.tsx claim destination, server-side live read
 app/poaps/[id]/loading.tsx    skeleton matching the detail layout
 app/poaps/[id]/error.tsx      read failure with a retry
+app/.well-known/farcaster.json/route.ts   Mini App manifest, cacheable JSON
+app/miniapp-assets/[kind]/route.tsx       PNG icon, splash, hero and share assets
+app/poaps/[id]/opengraph-image.tsx        3:2 PNG event share card
+app/poaps/[id]/claim/opengraph-image.tsx  3:2 PNG claim share card
+lib/farcaster/config.ts       canonical origin, asset paths, sizes, capabilities
+lib/farcaster/runtime.ts      host detection, ready-once, back adapter, transport
+lib/farcaster/manifest.ts     manifest builder with the field limits
+lib/farcaster/embeds.ts       fc:miniapp and fc:frame payload builders
+components/farcaster/farcaster-provider.tsx   host context at the root
+components/farcaster/share-cast-button.tsx    explicit cast or copy share
+components/farcaster/brand-og.tsx             shared PNG share-card layout
+tests/farcaster-{runtime,embeds,manifest}.test.ts  26 tests
+docs/farcaster.md             Mini App operational notes
 components/shadcn-space/blocks/hero-03/{index,hero,navbar,navlink}.tsx
 components/shadcn-space/button/button-01.tsx    Open App, gated by the wallet
 components/shadcn-space/badge/badge-01.tsx      Badge usage at the block path
@@ -163,10 +189,13 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   real footage or a different treatment before this ships. Content decision.
 - In light mode the dropdown panel goes light while the nav still sits over dark
   video. Not yet reconciled.
-- No screen submits a transaction: registration, all three mint routes, the
-  allowlist update, the public toggle and batch drops all end at
-  prepared-but-not-submitted states, matching the mint surfaces' honest copy.
-  That wiring is the transactions phase of the roadmap.
+- The Farcaster Mini App is complete except for the signed `accountAssociation`
+  for the production domain and acceptance in a real Farcaster client. The
+  manifest, assets, embeds and connector selection are verified locally; a real
+  host run still has to happen. See `docs/farcaster.md`.
+- Automated end-to-end coverage is still missing. The Playwright pass for
+  connect, dashboard, explore, claim and the Mini App host flows is the
+  remaining testing milestone.
 - `/app/created/[id]`, the manage screen with the allowlist builder, the
   public toggle and the batch drop and signature panels, does not exist yet.
 - The landing page reads the chain during static generation: a build without
@@ -244,6 +273,49 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Farcaster Mini App
+
+Shipped the Mini App surface from the existing route tree, following the
+Farcaster roadmap. No second layout, no route duplication, and no change to the
+frozen mobile composition.
+
+- `lib/farcaster/runtime.ts` detects the host from `isInMiniApp` and
+  `getCapabilities` only. Farcaster's own publishing guide calls path and query
+  markers a best-effort hint and not proof, so they are never trusted. It calls
+  `ready()` exactly once after mount and swallows failures, so a broken
+  handshake can never block rendering.
+- The native connector (`@farcaster/miniapp-wagmi-connector` 2.0.0) is added to
+  the shared wagmi config through the AppKit adapter's `connectors` option,
+  which the adapter spreads straight into `createConfig`. It is selected only
+  from an explicit wallet action inside a confirmed host; AppKit stays the web
+  fallback. The roadmap forbids auto-connect, so `reconnectOnMount={false}` was
+  restored. This supersedes the older auto-connect wording that used to sit in
+  `docs/agent.md` §8.
+- Manifest, assets and embeds all derive from one canonical origin with no
+  trailing slash, because the account association is domain-bound.
+  `/.well-known/farcaster.json` is a cacheable route handler, and
+  `next.config.ts` pins JSON content type and cache headers for it and the share
+  images so no rewrite can turn it into HTML.
+- Manifest assets are sized to the Farcaster contract: icon 1024x1024, splash
+  200x200, hero/OG 1200x630, and a 1200x800 3:2 share image. The first pass used
+  512 and 1200x800 for every slot and would have failed validation. The field
+  limits (name 32, subtitle 30, description 170, tagline 30, ogTitle 30,
+  ogDescription 100, up to five tags of 20) are enforced in the builder and
+  covered by tests.
+- Pages emit both `fc:miniapp` and `fc:frame`. `composeCast` sits behind an
+  explicit share button with a copy-link fallback and never fires
+  automatically. Back navigation goes through a narrow adapter that stays inert
+  when the host does not advertise `back`.
+- No notifications, no FID accounts, no server session, per the roadmap.
+  Farcaster context is host context only; the connected wallet stays the sole
+  contract authorization identity.
+
+Verification: `npx tsc --noEmit` clean, `npx eslint .` 0 errors, 43 unit tests
+pass (26 new), production build clean. Runtime checks confirmed the manifest
+JSON and content type, PNG content types and dimensions, non-zero `max-age` on
+the share images, and `fc:miniapp`/`fc:frame` tags on the landing and event
+pages. The signed `accountAssociation` and a real host run remain.
 
 ### Legal page framing and footer flow
 
@@ -1595,11 +1667,12 @@ function had already been exercised on Base Sepolia.
 
 Ordering lives in `docs/implementation.md`. Immediately actionable:
 
-- Documentation section. No blocking inputs, can run in parallel.
-- Chain layer, which retires `lib/poap-data.ts` and
-  `lib/dashboard-data.ts` in favour of real `totalEvents()` and `events(id)`
-  reads through Multicall3, and replaces the mock wallet provider's
-  internals with @reown/appkit. The placeholder types already match, so the
-  gallery and the dashboard should only need their data sources swapped.
+- Generate the Farcaster `accountAssociation` for `tesserapoap.vercel.app`, set
+  the three `FARCASTER_ACCOUNT_ASSOCIATION_*` variables on Vercel, deploy, and
+  validate the manifest and embeds with Farcaster developer tooling.
+- Run the Mini App in a real Farcaster host: launch, explicit connect,
+  registration, all three mint routes, claim, share, back and disconnect.
+- Playwright coverage for connect, dashboard, explore, claim and the Mini App
+  host flows.
 - Hero background video. Still a content decision, still pointing at another
   project's CDN.

@@ -26,6 +26,7 @@ export type FarcasterManifestInput = {
   subtitle?: string;
   description?: string;
   tagline?: string;
+  ogDescription?: string;
   primaryCategory?: string;
   tags?: string[];
   buttonTitle?: string;
@@ -67,7 +68,11 @@ export function buildFarcasterManifest(
   const description =
     input.description ??
     "Create onchain POAPs, hand them out at real events, and collect them. Artwork and metadata live entirely onchain.";
+  const ogDescription =
+    input.ogDescription ??
+    "Create onchain POAPs, hand them out at real events, and collect them.";
   const heroUrl = absoluteUrl(origin, MINIAPP_ASSET_PATHS.hero);
+  const shareUrl = absoluteUrl(origin, MINIAPP_ASSET_PATHS.share);
 
   return {
     accountAssociation: {
@@ -80,18 +85,18 @@ export function buildFarcasterManifest(
       name,
       iconUrl: absoluteUrl(origin, MINIAPP_ASSET_PATHS.icon),
       homeUrl: origin,
-      imageUrl: heroUrl,
+      imageUrl: shareUrl,
       buttonTitle: input.buttonTitle ?? "Open Tessera",
       splashImageUrl: absoluteUrl(origin, MINIAPP_ASSET_PATHS.splash),
       splashBackgroundColor: MINIAPP_SPLASH_BACKGROUND,
       subtitle: input.subtitle ?? "Onchain POAPs",
       description,
-      tagline: input.tagline ?? "Proof you were there, stored onchain.",
+      tagline: input.tagline ?? "Proof you were there onchain.",
       primaryCategory: input.primaryCategory ?? "social",
       tags: input.tags ?? ["poap", "onchain", "base", "events"],
       heroImageUrl: heroUrl,
       ogTitle: name,
-      ogDescription: description,
+      ogDescription,
       ogImageUrl: heroUrl,
       requiredChains: [...FARCASTER_REQUIRED_CHAINS],
       requiredCapabilities: [...FARCASTER_REQUIRED_CAPABILITIES],

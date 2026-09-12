@@ -140,8 +140,11 @@ the collective verification phase.
 
 ## Long-term backlog
 
-- **Farcaster mini-app:** `dock-nav.tsx` was built to be shared with the
-  mini-app view; the in-shell view pattern is the reuse point.
+- **Farcaster mini-app:** implemented. The runtime adapter, manifest, PNG
+  assets, `fc:miniapp`/`fc:frame` embeds and an explicit share control ship from
+  the same route tree, and the native connector is explicit-action only with
+  AppKit as the web fallback. Only the signed `accountAssociation` and host
+  acceptance remain. See `docs/farcaster.md`.
 - **Base mainnet:** keep chain constants centralized in `poap-data.ts` so
   migration stays a config change.
 - **Event indexing:** the mint-activity and route-mix charts need

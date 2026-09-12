@@ -81,7 +81,7 @@ export function buildEmbedMetadata(config: EmbedConfig): Record<string, string> 
   };
 }
 
-/** The default share image for a page that has no event-specific artwork. */
+/** The default 3:2 share image for a page that has no event-specific artwork. */
 export function defaultEmbedConfig(
   origin: string,
   title: string,
@@ -89,7 +89,7 @@ export function defaultEmbedConfig(
 ): EmbedConfig {
   return {
     origin,
-    imageUrl: absoluteUrl(origin, MINIAPP_ASSET_PATHS.hero),
+    imageUrl: absoluteUrl(origin, MINIAPP_ASSET_PATHS.share),
     title,
     launchPath,
   };

@@ -35,9 +35,10 @@ wallet connection.
 | Path | Purpose |
 | --- | --- |
 | `/.well-known/farcaster.json` | Manifest (JSON, cacheable) |
-| `/miniapp-assets/icon` | 512×512 PNG icon |
-| `/miniapp-assets/splash` | 1200×800 PNG splash |
-| `/miniapp-assets/hero` | 1200×800 PNG hero / OG |
+| `/miniapp-assets/icon` | 1024×1024 PNG icon (opaque) |
+| `/miniapp-assets/splash` | 200×200 PNG splash |
+| `/miniapp-assets/hero` | 1200×630 PNG hero / OG (1.91:1) |
+| `/miniapp-assets/share` | 1200×800 PNG default embed image (3:2) |
 | `/poaps/[id]/opengraph-image` | Event share card (PNG, 3:2) |
 | `/poaps/[id]/claim/opengraph-image` | Claim share card (PNG, 3:2) |
 
@@ -58,6 +59,49 @@ FARCASTER_ACCOUNT_ASSOCIATION_SIGNATURE=<public>
 
 The account association is domain-bound. Do not switch between apex and `www`,
 and do not use a preview URL as the permanent identity.
+
+## Generating the account association
+
+Verification is a signed message carried in `accountAssociation`, generated for
+one exact domain.
+
+1. Open the Mini App Manifest Tool in Farcaster:
+   `https://farcaster.xyz/~/developers/new`
+2. Enter the domain exactly as deployed, for example
+   `tesserapoap.vercel.app`. The domain you host the manifest on must match it
+   exactly.
+3. Copy `header`, `payload` and `signature` into the three
+   `FARCASTER_ACCOUNT_ASSOCIATION_*` environment variables and redeploy.
+
+Farcaster can also host the manifest for you. Create it at
+`https://farcaster.xyz/~/developers/mini-apps/manifest`, then redirect
+`/.well-known/farcaster.json` to
+`https://api.farcaster.xyz/miniapps/hosted-manifest/<id>` with a `307`. With a
+hosted manifest the environment variables are unused.
+
+All three association values are public manifest data. Never put a private key
+or signing secret in any environment variable.
+
+## Manifest field limits
+
+Enforced in `lib/farcaster/manifest.ts` and covered by tests: name ≤ 32,
+subtitle ≤ 30, description ≤ 170, tagline ≤ 30, ogTitle ≤ 30, ogDescription
+≤ 100, and up to five lowercase tags of ≤ 20 characters. Asset sizes are the
+ones in the table above.
+
+## Opening it in Farcaster
+
+1. Deploy with the association set.
+2. Confirm the manifest from an external request:
+   `curl -s https://tesserapoap.vercel.app/.well-known/farcaster.json`
+3. Post a cast containing `https://tesserapoap.vercel.app`. The
+   `fc:miniapp`/`fc:frame` embed renders with the Open Tessera button; tapping
+   it launches the Mini App.
+4. Once the manifest validates, the app is discoverable in Farcaster app search.
+
+Localhost cannot be opened in a Farcaster client. Clients only load public HTTPS
+URLs and the association is bound to the domain, so testing needs the deployed
+origin.
 
 ## Release order
 

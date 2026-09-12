@@ -108,7 +108,10 @@ works without one. Testnet ETH comes from any Base Sepolia faucet.
 | `NEXT_PUBLIC_POAP_ADDRESS` | no | Contract address. Defaults to the Base Sepolia deployment. |
 | `NEXT_PUBLIC_RPC_URL` | recommended | Defaults to the public Base Sepolia endpoint, which is rate-limited. Point it at your own provider for real use. |
 | `NEXT_PUBLIC_WC_PROJECT_ID` | no | Reown Cloud project ID for the wallet modal. Without one, a shared development ID is used and browser-injected wallets still connect. |
-| `NEXT_PUBLIC_APP_URL` | for deployment | Your canonical URL. Used for share embeds and the Mini App manifest. |
+| `NEXT_PUBLIC_APP_URL` | for deployment | Your canonical URL, with no trailing slash. Used for share embeds and the Mini App manifest. |
+| `FARCASTER_ACCOUNT_ASSOCIATION_HEADER` | for Mini App | Public manifest value, signed for your exact domain. |
+| `FARCASTER_ACCOUNT_ASSOCIATION_PAYLOAD` | for Mini App | Public manifest value. |
+| `FARCASTER_ACCOUNT_ASSOCIATION_SIGNATURE` | for Mini App | Public manifest value. |
 
 No API keys are needed for the core experience. The app reads everything it needs
 straight from the contract, so there is no indexer or backend to run.
@@ -121,6 +124,7 @@ npm run build      # production build
 npm run start      # serve the production build
 npm run lint       # lint
 npm run typecheck  # types
+npm test           # unit tests
 ```
 
 ## Deploying your own
@@ -133,13 +137,29 @@ built and tested on Vercel.
    your own RPC endpoint.
 3. Deploy.
 
-To run it as a Farcaster Mini App as well, you additionally need to serve a
-manifest at `/.well-known/farcaster.json` containing an account association
-signed for your exact domain. Generate that signature with the
-[Farcaster manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest).
+### Farcaster Mini App
+
+The same build serves the website and the Mini App. It already hosts the
+manifest at `/.well-known/farcaster.json`, the PNG assets the manifest points
+at, `fc:miniapp` and `fc:frame` embeds on the landing, POAP and claim pages, and
+an explicit share action after a mint or claim. Farcaster context never grants
+creation or mint rights: the connected wallet stays the only authorization
+identity.
+
+To publish it, add the signed account association for your exact domain:
+
+1. Generate it with the
+   [Farcaster manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
+   for the domain you will deploy to.
+2. Set `FARCASTER_ACCOUNT_ASSOCIATION_HEADER`, `..._PAYLOAD` and
+   `..._SIGNATURE` from its output.
+3. Redeploy, then verify `https://<your-domain>/.well-known/farcaster.json`.
 
 Pick your domain carefully. A Mini App is identified by its domain permanently,
-and `www.example.com` counts as a different app from `example.com`.
+and `www.example.com` counts as a different app from `example.com`. These three
+values are public manifest data, so never put a private key or signing secret in
+any environment variable. Asset sizes, the release order and rollback are
+documented in [`docs/farcaster.md`](./docs/farcaster.md).
 
 ## Project structure
 

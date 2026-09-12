@@ -583,6 +583,7 @@ Node 22.11+ is required by the Farcaster SDK.
 tessera/
 ├── docs/
 │   ├── agent.md              this file
+│   ├── farcaster.md          Mini App manifest, assets, embeds, deploy notes
 │   ├── implementation.md     build ordering
 │   └── progress.md           running record of what is built and why
 ├── contracts/                vendored upstream reference, READ ONLY
@@ -596,6 +597,8 @@ tessera/
 │   ├── foundry.toml, foundry.lock, remappings.txt, .gitmodules
 │   └── .env.example, .gitignore, README.md
 ├── app/, components/, lib/, public/    the Next.js application
+│   ├── lib/farcaster/        runtime adapter, manifest and embed builders
+│   └── components/farcaster/ host provider and share control
 ├── README.md
 └── .gitignore
 ```
@@ -708,8 +711,10 @@ an inline explainer, or a link to the docs. Depth on demand, never up front.
 /app/collection            my collection
 /app/collection/[id]       one owned POAP with onchain ownership proof
 /docs, /docs/[...slug]     MDX documentation
-/api/og/*                  dynamic 3:2 PNG images for Farcaster embeds
-/.well-known/farcaster.json
+/.well-known/farcaster.json            Mini App manifest, cacheable JSON
+/miniapp-assets/[kind]                 PNG icon, splash, hero and share assets
+/poaps/[id]/opengraph-image            3:2 PNG event share card
+/poaps/[id]/claim/opengraph-image      3:2 PNG claim share card
 ```
 
 The dashboard sits behind a wallet connection. The landing page, explore, public
@@ -723,30 +728,52 @@ organiser holding a list of attendee addresses. Ship it.
 
 ## 8. Farcaster Mini App
 
+The full operational detail lives in `docs/farcaster.md`. The rules that must
+hold in this codebase:
+
+- **Wallet-only authorization.** Farcaster context is host context only. Never
+  use an FID as an account identifier, never create a server session, and never
+  let host context grant creator or mint permission. The connected address is
+  the only contract authorization identity.
+- **No automatic connection.** The native connector is selected only from an
+  explicit user action (Open App, Create a POAP, See the full gallery, mint,
+  claim, creator controls) inside a confirmed host; AppKit remains the web
+  fallback. There is no reconnect on mount and no wallet request during load.
+- **Host detection is capability-based.** Use the SDK's `isInMiniApp` and
+  `getCapabilities`, never a path or query hint as proof. The runtime adapter
+  lives in `lib/farcaster/runtime.ts` and no-ops on the website.
+- **`sdk.actions.ready()` is called exactly once**, after the interface is
+  renderable, and never blocks rendering on failure. Skipping it leaves users on
+  an infinite splash screen; calling it on the wrong signal causes the same bug.
 - Manifest at `/.well-known/farcaster.json`, containing `accountAssociation`
   (signed via Farcaster developer tools for the exact production domain) and the
   `miniapp` object: `version: "1"`, `name`, `iconUrl`, `homeUrl`,
   `splashImageUrl`, `splashBackgroundColor`, plus the discovery fields
   `subtitle`, `description`, `primaryCategory`, `tags`, `heroImageUrl`,
-  `tagline`, `ogTitle`, `ogDescription`, `ogImageUrl`, `screenshotUrls`.
-- **`sdk.actions.ready()` must be called once the interface is genuinely ready.**
-  Skipping it leaves users on an infinite splash screen. This is the most common
-  Mini App bug.
+  `tagline`, `ogTitle`, `ogDescription`, `ogImageUrl`.
+- Manifest assets are sized to the contract: **icon 1024×1024** PNG, **splash
+  200×200**, **hero/OG 1200×630** (1.91:1). Field limits are enforced in
+  `lib/farcaster/manifest.ts` and covered by tests: name ≤ 32, subtitle ≤ 30,
+  description ≤ 170, tagline ≤ 30, ogTitle ≤ 30, ogDescription ≤ 100, up to five
+  lowercase tags of ≤ 20 characters.
 - Per-page share embeds via a `fc:miniapp` meta tag holding stringified JSON
   (`version`, `imageUrl`, `button.title`, `button.action.type: "launch_miniapp"`,
   `button.action.url`). Mirror it to `fc:frame` for backward compatibility.
 - Embed images: **PNG**, 3:2, 600×400 minimum, 3000×2000 maximum, under 10 MB,
   URL ≤ 1024 characters. SVG may render in preview tools but is unreliable in
-  production clients. Cache dynamic images with a non-zero `max-age`.
-- Detect the Mini App context and auto-connect through
-  `@farcaster/miniapp-wagmi-connector`, bypassing the RainbowKit modal entirely.
-  Fall back to the standard connect flow on the web. Treat path or query hints as
-  heuristics for lazy-loading, never as proof of context.
+  production clients. Cache them with a non-zero `max-age`.
 - Use `composeCast` so a fresh mint or a new POAP can be shared straight back
-  into the feed. Respect Farcaster's back-navigation and safe-area insets.
+  into the feed, only ever after an explicit click, with a copy-link fallback
+  when the composer is unavailable. Host back navigation goes through a narrow
+  adapter that stays inert when the host does not advertise `back`.
+- No notification permission, no notification tokens or webhooks, and no
+  Sign in with Farcaster in this release.
 - Domain choice is permanent, because a Mini App is identified by its domain and
   `www.` counts as a different app. Pick once, then use it identically in the
   manifest, the `accountAssociation`, and every embed URL.
+- The mobile surface is frozen: no second layout, route tree or mobile shell,
+  and no changes to the dock, menu composition, spacing or CTA placement beyond
+  additive status and share controls.
 
 ---
 
@@ -754,9 +781,9 @@ organiser holding a list of attendee addresses. Ship it.
 
 - Read before writing. The contract in `contracts/src/Poap.sol` is the authority
   on behaviour; this document summarises it, but the source wins.
-- After any code change, run the static checks: `npx tsc --noEmit` and the
-  linter. Fix what breaks before reporting done. Do not run a build or dev server
-  locally, per instruction 12.
+- After any code change, run the static checks: `npx tsc --noEmit`, the linter,
+  and `npm test`. Fix what breaks before reporting done. Do not run a build or
+  dev server locally, per instruction 12.
 - Test the things that are easy to get silently wrong: Merkle leaf and root
   construction against the contract's exact scheme, the signature digest, byte
   length validation, JSON-unsafe character rejection, and every deadline

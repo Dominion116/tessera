@@ -66,7 +66,7 @@ describe("farcaster embeds", () => {
 
   it("builds a PNG default image for pages without artwork", () => {
     const cfg = defaultEmbedConfig(ORIGIN, "Open Tessera", "/");
-    expect(cfg.imageUrl).toBe(`${ORIGIN}${MINIAPP_ASSET_PATHS.hero}`);
+    expect(cfg.imageUrl).toBe(`${ORIGIN}${MINIAPP_ASSET_PATHS.share}`);
     expect(cfg.launchPath).toBe("/");
   });
 });

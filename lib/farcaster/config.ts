@@ -8,13 +8,23 @@ export const FARCASTER_MINIAPP_VERSION = "1" as const;
 
 export const DEFAULT_APP_URL = "http://localhost:3000";
 
-/** The web-standard share size Farcaster embeds expect: PNG at 3:2, at least 600x400. */
+/** Embed share images: PNG at 3:2, at least 600x400. */
 export const EMBED_IMAGE_SIZE = { width: 1200, height: 800 } as const;
+
+/** Manifest icon: 1024x1024 PNG, fully opaque. */
+export const ICON_SIZE = { width: 1024, height: 1024 } as const;
+
+/** Manifest splash image: 200x200 PNG. */
+export const SPLASH_SIZE = { width: 200, height: 200 } as const;
+
+/** Manifest promotional / OG image: 1200x630 PNG (1.91:1). */
+export const HERO_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 
 export const MINIAPP_ASSET_PATHS = {
   icon: "/miniapp-assets/icon",
   splash: "/miniapp-assets/splash",
   hero: "/miniapp-assets/hero",
+  share: "/miniapp-assets/share",
 } as const;
 
 export const MINIAPP_SPLASH_BACKGROUND = "#0a0a0a";
