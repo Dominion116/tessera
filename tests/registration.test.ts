@@ -5,6 +5,7 @@ import {
   FIELD_RULES,
   parseAllowlistRoot,
   registrationFlags,
+  svgSizeStatus,
   utf8Bytes,
 } from "@/lib/registration";
 
@@ -34,5 +35,19 @@ describe("registration input rules", () => {
     const root = `0x${"ab".repeat(32)}` as const;
     expect(parseAllowlistRoot(root)).toBe(root);
     expect(parseAllowlistRoot("0x1234")).toBeNull();
+  });
+
+  it("gates artwork at the contract's single SSTORE2 deployment ceiling", () => {
+    // 18,429 raw bytes encode to 24,572 stored bytes; with SSTORE2's
+    // one-byte prefix the deployed contract is 24,573 bytes, the largest
+    // code that fits EIP-170's 24,576-byte cap. Verified against the
+    // deployed contract on Base Sepolia: 18,429 registers, 18,430
+    // reverts with DeploymentFailed.
+    const largest = svgSizeStatus("a".repeat(18_429));
+    expect(largest.level).not.toBe("over");
+    expect(largest.onchainBytes).toBe(24_572);
+    expect(largest.onchainBytes + 1).toBeLessThanOrEqual(24_576);
+    expect(svgSizeStatus("a".repeat(18_430)).level).toBe("over");
+    expect(svgSizeStatus("a".repeat(80_000)).level).toBe("over");
   });
 });

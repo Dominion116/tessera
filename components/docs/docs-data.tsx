@@ -140,7 +140,7 @@ const docs: DocPage[] = [
         title: "Artwork and metadata safety",
         content: (
           <>
-            <p>The artwork the contract stores must be a non-empty raw SVG. The Create studio accepts editable SVG and drawn vectors directly, and frames PNG, JPEG, GIF, WebP and AVIF uploads inside a square SVG envelope, so any raster artwork still registers as the SVG the contract requires. The studio shows the raw and projected onchain byte counts and warns as the storage size approaches the practical limit near 100 KB. Base64 encoding increases the stored representation by roughly one third, and SSTORE2 writes the result into contract bytecode.</p>
+            <p>The artwork the contract stores must be a non-empty raw SVG. The Create studio accepts editable SVG and drawn vectors directly, and frames PNG, JPEG, GIF, WebP and AVIF uploads inside a square SVG envelope, so any raster artwork still registers as the SVG the contract requires. The studio shows the raw and projected onchain byte counts and refuses artwork past the storage ceiling of 18,429 raw bytes. Base64 encoding increases the stored representation by roughly one third, and SSTORE2 writes the result into the bytecode of a single deployed contract, which EVM code-size rules cap at 24,576 bytes — larger artwork reverts at registration no matter how much gas is paid.</p>
             <p>The contract interpolates name, description, location and external URL directly into JSON without escaping. Reject quotation marks, backslashes, control characters and newlines before a transaction is prepared. Count bytes with <InlineCode>TextEncoder</InlineCode>, not JavaScript string length, because accented characters and emoji consume more than one byte.</p>
           </>
         ),

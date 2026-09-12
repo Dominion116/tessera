@@ -508,11 +508,12 @@ constraint, not a guess.
     `POAP__InvalidValue("eventId")`. Validate IDs before fetching. Note that
     `uri()` does not revert for unminted-but-registered IDs, only out-of-range
     ones.
-11. **SVG size is bounded by gas and by SSTORE2.** SSTORE2 writes data as
-    contract bytecode, and the base64 encoding inflates the raw SVG by ~4/3
-    before storage. Upstream recommends staying under ~100 KB raw with a
-    practical ceiling near 120 KB. Optimize aggressively, show the projected
-    onchain size, and warn as it climbs.
+11. **SVG size is bounded by SSTORE2 and EIP-170, not by gas.** SSTORE2 writes
+    the base64-inflated (~4/3) SVG as the bytecode of one deployed contract,
+    and EIP-170 caps deployed code at 24,576 bytes. The largest raw SVG that
+    can ever register is 18,429 bytes (24,572 stored); anything larger reverts
+    with `DeploymentFailed` no matter the gas offered. Optimize aggressively,
+    show the projected onchain size, and refuse anything past the ceiling.
 12. **`registerEvent` returns `eventId` as a return value, not just an event.**
     A `NewEvent` log is emitted; parse the receipt logs to learn the new ID after
     a wallet transaction, since return values are not available from a mined

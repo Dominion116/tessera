@@ -91,10 +91,11 @@ export type SvgSizeStatus = {
 };
 
 /**
- * Artwork size against the onchain encoding ceiling. Under the soft
- * limit is comfortable; between soft and hard it still registers but
- * the gas and SSTORE2 costs climb; over the hard limit the registration
- * is refused before it can cost anything.
+ * Artwork size against the onchain storage ceiling. Under the soft
+ * limit is comfortable; between soft and hard it still registers; over
+ * the hard limit the contract's single SSTORE2 deployment cannot hold
+ * the encoded artwork, so the registration would revert onchain and is
+ * refused here before it can cost anything.
  */
 export function svgSizeStatus(artwork: string): SvgSizeStatus {
   const rawBytes = utf8Bytes(artwork);
@@ -105,7 +106,7 @@ export function svgSizeStatus(artwork: string): SvgSizeStatus {
       level: "over",
       rawBytes,
       onchainBytes,
-      message: `Artwork is ${rawBytes.toLocaleString()} bytes, past the ${Math.round(SVG_HARD_LIMIT_BYTES / 1024)} KB practical ceiling for what the contract stores. Simplify or optimize the SVG before registering.`,
+      message: `Artwork is ${rawBytes.toLocaleString()} bytes, past the ${Math.round(SVG_HARD_LIMIT_BYTES / 1024)} KB the contract can store in a single onchain write. The registration would revert. Simplify or optimize the SVG before registering.`,
     };
   }
   if (rawBytes > SVG_SOFT_LIMIT_BYTES) {
@@ -113,7 +114,7 @@ export function svgSizeStatus(artwork: string): SvgSizeStatus {
       level: "warn",
       rawBytes,
       onchainBytes,
-      message: `Artwork is ${rawBytes.toLocaleString()} bytes. It still registers, but the stored encoding grows past ${Math.round(SVG_SOFT_LIMIT_BYTES / 1024)} KB and the registration costs climb with it. Trimming here saves gas.`,
+      message: `Artwork is ${rawBytes.toLocaleString()} bytes. It still registers, but the onchain ceiling is ${Math.round(SVG_HARD_LIMIT_BYTES / 1024)} KB, so trimming here leaves safety margin.`,
     };
   }
 

@@ -39,10 +39,15 @@ export const SIGNATURE_WINDOW_DAYS = 37;
 export const CREATOR_MINT_BATCH_LIMIT = 101;
 
 /**
- * Upstream's raw-SVG guidance: stay under ~100 KB before the base64
- * inflation, with a practical ceiling near 120 KB where gas and SSTORE2
- * write costs become punishing.
+ * Artwork ceilings measured against what the deployed contract can
+ * actually store. SSTORE2 writes the base64-encoded SVG as the runtime
+ * code of one deployed contract, and EIP-170 caps deployed code at
+ * 24,576 bytes. The stored encoding is ceil(rawBytes / 3) * 4 plus a
+ * one-byte prefix, so the largest raw SVG that can ever register is
+ * 18,429 bytes (24,572 stored). Anything larger reverts onchain with
+ * `DeploymentFailed` regardless of the gas offered. Verified against
+ * the deployed contract on Base Sepolia.
  */
-export const SVG_SOFT_LIMIT_BYTES = 100 * 1024;
+export const SVG_SOFT_LIMIT_BYTES = 16 * 1024;
 
-export const SVG_HARD_LIMIT_BYTES = 120 * 1024;
+export const SVG_HARD_LIMIT_BYTES = 18_429;
