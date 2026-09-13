@@ -570,6 +570,13 @@ progress renders inline in accessible live regions, and the documentation is
 typed React data rather than MDX. Adopt one of the named libraries only as part
 of a refactor that uses it, and update this table in the same change.
 
+**The `@x402/*` packages stay installed.** `@x402/core`, `@x402/evm`,
+`@x402/extensions` and `@x402/svm` are not imported by this codebase, but
+`@coinbase/cdp-sdk`, reached through `@wagmi/connectors` (Base Account) and the
+Reown AppKit wagmi adapter, imports their `client` subpaths dynamically.
+Turbopack resolves those specifiers at build time, so removing the packages
+fails `next build` with `Module not found`. Keep them pinned at 2.25.0.
+
 **wagmi stays on 2.x.** wagmi 3 exists but the Reown AppKit wagmi adapter
 1.8.23 peer-requires `wagmi >=2.19.5` and `@wagmi/core >=2.21.2`, and
 `@farcaster/miniapp-wagmi-connector` 2.0.0 peer-requires

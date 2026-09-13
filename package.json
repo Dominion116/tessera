@@ -7,9 +7,9 @@
     "node": ">=22.11.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && next dev",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
@@ -23,6 +23,10 @@
     "@tanstack/react-query": "5.102.8",
     "@wagmi/connectors": "6.2.0",
     "@wagmi/core": "2.22.1",
+    "@x402/core": "2.25.0",
+    "@x402/evm": "2.25.0",
+    "@x402/extensions": "2.25.0",
+    "@x402/svm": "2.25.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.39.0",
