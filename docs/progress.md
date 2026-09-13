@@ -291,7 +291,14 @@ Audited the whole repository against the standing instructions in
   now records that react-hook-form, zod, sonner, vaul, `@next/mdx` and shiki
   are deliberately not used. `package.json` pins the three new libraries and
   the two Farcaster packages to exact versions.
-- The unused `@x402/*` direct dependencies were removed. Nothing imported them.
+- The `@x402/*` direct dependencies were briefly removed, then restored and
+  pinned at 2.25.0 after the Vercel build failed. They are not imported by
+  application code, but `@coinbase/cdp-sdk`, reached through
+  `@wagmi/connectors` (Base Account) and the Reown AppKit wagmi adapter,
+  dynamically imports `@x402/core/client`, `@x402/evm`, `@x402/evm/exact/client`,
+  `@x402/evm/upto/client` and `@x402/svm/exact/client`. Turbopack resolves those
+  specifiers at build time even though the code path never runs here, so the
+  packages must stay installed. See `docs/agent.md` section 4.
 - New `lib/allowlist.ts` builds the contract's exact leaf
   (`keccak256(abi.encodePacked(address))`) with `SimpleMerkleTree` over
   pre-hashed leaves, plus recipient parsing, per-wallet proofs, claim links and
