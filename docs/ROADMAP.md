@@ -136,7 +136,9 @@ the collective verification phase.
 - [x] Vitest: deadline arithmetic (`freezeDeadline`, `daysUntil`,
       `upcomingFreezes`) — the awkward fixtures already exist
 - [x] Vitest: registration validation and transaction argument builders
-- [ ] Playwright: connect, dashboard, explore, claim paths
+- [ ] Playwright: connect, dashboard, explore and claim paths. The suite and
+      its injected-wallet fixture are in place; a first green run against the
+      live contract is pending
 
 ## Long-term backlog
 

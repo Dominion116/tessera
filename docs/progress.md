@@ -193,9 +193,12 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   for the production domain and acceptance in a real Farcaster client. The
   manifest, assets, embeds and connector selection are verified locally; a real
   host run still has to happen. See `docs/farcaster.md`.
-- Automated end-to-end coverage is still missing. The Playwright pass for
-  connect, dashboard, explore, claim and the Mini App host flows is the
-  remaining testing milestone.
+- Automated end-to-end coverage now exists as a Playwright suite in `e2e/`
+  covering the landing page, documentation, the public POAP page, the claim
+  destination, the wallet connection and dashboard, and the Farcaster manifest
+  and assets. It has not been run here, because instruction 12 rules out a dev
+  server on this machine; the first run and any adjustment belong to the owner.
+  Mini App host flows inside a real Farcaster client are still to be covered.
 - `/app/created/[id]`, the manage screen with the allowlist builder, the
   public toggle and the batch drop and signature panels, does not exist yet.
 - The landing page reads the chain during static generation: a build without
@@ -273,6 +276,42 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 ---
 
 ## Log
+
+### Playwright end-to-end suite
+
+Added the browser suite the roadmap has been carrying as the remaining testing
+milestone. `@playwright/test` 1.63 is a devDependency, `npm run e2e` runs the
+suite, and `playwright.config.ts` starts `next dev` itself unless
+`PLAYWRIGHT_BASE_URL` points at an origin that is already up. `PLAYWRIGHT_PORT`
+moves the default port. The runner is serial and single-worker on purpose: the
+public Base Sepolia RPC is rate-limited, and the wallet tests share one dev
+server.
+
+- `e2e/support/mock-wallet.ts` installs `window.ethereum` with
+  `page.addInitScript`, before any application script, and answers only the
+  account and chain calls a connection needs. AppKit's injected connector
+  surfaces it in the wallet modal, and the fixture selects it through AppKit's
+  own `data-testid="wallet-selector-injected"`. Reads never travel through the
+  mock: wagmi serves them over the Base Sepolia transport, so `npm test`'s
+  no-mocked-contract-responses rule still holds. `connectMockWallet` waits for
+  the disconnect control, which only renders once an address exists.
+- `e2e/public.spec.ts` covers the landing page and the documentation index.
+  `e2e/explore.spec.ts` covers the live public POAP page at `/poaps/1` and the
+  out-of-range 404 through the `uri()` range check. `e2e/claim.spec.ts` covers
+  the signature claim gate, the unsupported-method state and a non-numeric
+  404. `e2e/dashboard.spec.ts` connects the injected wallet, asserts the live
+  dashboard, and opens Explore in the shell. `e2e/miniapp.spec.ts` asserts the
+  manifest content type and body and the four PNG asset routes.
+- `vitest.config.ts` now excludes `e2e/**`, so `npm test` stays unit-only.
+  `tsconfig.json` still typechecks the suite, and it lints like the rest of the
+  repository.
+
+Not run here. Instruction 12 forbids a build or dev server on the owner's
+machine, and this suite needs a running application. `npx playwright install
+chromium` downloads the browser once, then `npm run e2e` starts the server,
+runs the suite and writes the HTML report. Expect the AppKit modal steps to
+need adjustment on the first real run; the connector test id and the flow are
+based on AppKit 1.8.23's connector list markup, not on a live run.
 
 ### Farcaster Mini App
 
@@ -1672,7 +1711,9 @@ Ordering lives in `docs/implementation.md`. Immediately actionable:
   validate the manifest and embeds with Farcaster developer tooling.
 - Run the Mini App in a real Farcaster host: launch, explicit connect,
   registration, all three mint routes, claim, share, back and disconnect.
-- Playwright coverage for connect, dashboard, explore, claim and the Mini App
-  host flows.
+- Run the Playwright suite once on a machine with RPC access
+  (`npx playwright install chromium` then `npm run e2e`) and fix whatever the
+  AppKit modal steps need on the first real run.
+- Playwright coverage for Mini App host flows inside a real Farcaster client.
 - Hero background video. Still a content decision, still pointing at another
   project's CDN.
