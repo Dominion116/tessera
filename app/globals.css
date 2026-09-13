@@ -321,9 +321,8 @@
    --timeOut to none, which makes the border's transition declaration
    invalid at computed-value time and therefore instant; the next click
    removes the property so the glide returns. All motion is paint-only:
-   transform, color and stroke-dashoffset. The swell and draw timings exceed
-   the 400 ms interface ceiling deliberately, because the travelling wave is
-   the pattern's identity. */
+   transform, color and stroke-dashoffset. The swell and draw timings stay
+   inside the 400 ms interface ceiling. */
 @keyframes strok {
   100% {
     stroke-dashoffset: 400;
@@ -433,7 +432,7 @@
    itself in. 400 dash units cover any 24px-viewBox path. */
 .menu__item.active svg :is(path, circle, ellipse, line, polyline, polygon, rect) {
   stroke-dasharray: 400;
-  animation: strok 600ms cubic-bezier(0.6, 0, 0.35, 1) reverse both;
+  animation: strok 380ms cubic-bezier(0.6, 0, 0.35, 1) reverse both;
 }
 
 .menu__border {
@@ -446,7 +445,7 @@
   display: block;
   overflow: visible;
   transform: translate3d(0, 0, 0);
-  transition: transform var(--timeOut, 550ms) cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform var(--timeOut, 380ms) cubic-bezier(0.65, 0, 0.35, 1);
   pointer-events: none;
 }
 

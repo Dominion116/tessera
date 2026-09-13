@@ -19,6 +19,7 @@ import {
   Pencil,
   Plus,
   Redo2,
+  Sparkles,
   Square,
   Type,
   Undo2,
@@ -41,6 +42,7 @@ import {
 import { CHAIN_ID, CONTRACT_ADDRESS, CREATOR_TIMELOCK_DAYS, ZERO_ROOT } from "@/lib/poap-data";
 import { poapAbi, repairSvgNamespace } from "@/lib/poap-contract";
 import { frameImageAsSvg } from "@/lib/image-artwork";
+import { optimizeSvgArtwork } from "@/lib/svg-optimize";
 import { registerEventArgs } from "@/lib/transaction-args";
 
 type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
@@ -290,6 +292,8 @@ const CreatePoapView = () => {
   const [importError, setImportError] = useState<string | null>(null);
   const [importPending, setImportPending] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [optimizeMessage, setOptimizeMessage] = useState<string | null>(null);
+  const [optimizePending, setOptimizePending] = useState(false);
   const importRequest = useRef(0);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
@@ -465,6 +469,25 @@ const CreatePoapView = () => {
       setExportMessage("SVG downloaded.");
     } catch {
       setExportMessage("The SVG could not be downloaded.");
+    }
+  };
+
+  const optimizeArtwork = async () => {
+    if (!uploadedSvg) return;
+    setOptimizeMessage(null);
+    setOptimizePending(true);
+    try {
+      const result = await optimizeSvgArtwork(uploadedSvg);
+      if (result.improved) {
+        setUploadedSvg(result.svg);
+        setOptimizeMessage(`Optimized from ${formatBytes(result.before)} to ${formatBytes(result.after)}.`);
+      } else {
+        setOptimizeMessage("SVGO found nothing safe to remove. The artwork is already lean.");
+      }
+    } catch {
+      setOptimizeMessage("This SVG could not be optimized. It may use markup SVGO cannot parse.");
+    } finally {
+      setOptimizePending(false);
     }
   };
 
@@ -688,7 +711,7 @@ const CreatePoapView = () => {
             <p className="min-w-64 flex-1">{hasArtwork ? size.message : "No artwork yet. Draw, load a template, import an SVG, or upload an image."}</p>
             {hasArtwork ? (
               <Badge variant="outline" className="tabular-nums">
-                {formatBytes(size.rawBytes)} raw · {formatBytes(size.onchainBytes)} stored
+                {formatBytes(size.rawBytes)} raw, {formatBytes(size.onchainBytes)} stored
               </Badge>
             ) : null}
           </div>
@@ -699,8 +722,11 @@ const CreatePoapView = () => {
              <Button type="button" variant="outline" disabled={importPending} onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
              <Button type="button" variant="outline" disabled={importPending} onClick={() => imageInputRef.current?.click()}><FileImage aria-hidden="true" />Import image</Button>
              <Button type="button" variant="outline" disabled={!hasArtwork || importPending} onClick={exportSvg}><Download aria-hidden="true" />Export SVG</Button>
+             <Button type="button" variant="outline" disabled={!uploadedSvg || importPending || optimizePending} aria-busy={optimizePending} onClick={optimizeArtwork}><Sparkles aria-hidden="true" />Optimize SVG</Button>
              {importPending ? <span className="text-xs text-fg-tertiary" role="status">Reading artwork...</span> : null}
+             {hasArtwork && !uploadedSvg ? <span className="text-xs text-fg-tertiary">Drawn artwork is already minimal. Import an SVG or image to shrink it further.</span> : null}
              {exportMessage ? <span className="text-xs text-teal-700 dark:text-teal-300" role="status">{exportMessage}</span> : null}
+             {optimizeMessage ? <span className="text-xs text-teal-700 dark:text-teal-300" role="status">{optimizeMessage}</span> : null}
             {uploadedSvg ? <Badge variant="accent" className="ml-auto self-center"><FileImage aria-hidden="true" />{importedKind === "image" ? "Image framed as SVG" : "Imported SVG"}</Badge> : null}
           </div>
           {importError ? (
@@ -825,7 +851,7 @@ const CreatePoapView = () => {
             <img src={svgToDataUrl(artworkSource)} alt={name || "POAP artwork"} width={56} height={56} className="size-14 shrink-0 rounded-lg border border-border/70" />
             <div className="flex min-w-0 flex-col">
               <p className="truncate text-sm font-semibold">{name || "Untitled POAP"}</p>
-              <p className="text-xs text-fg-tertiary tabular-nums">{hasArtwork ? `${formatBytes(size.rawBytes)} raw · ${formatBytes(size.onchainBytes)} as stored onchain` : "No artwork"}</p>
+              <p className="text-xs text-fg-tertiary tabular-nums">{hasArtwork ? `${formatBytes(size.rawBytes)} raw, ${formatBytes(size.onchainBytes)} as stored onchain` : "No artwork"}</p>
             </div>
           </div>
           <dl className="grid gap-2 text-sm">

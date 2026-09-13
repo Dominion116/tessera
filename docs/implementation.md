@@ -327,17 +327,17 @@ This table is the summary.
 
 | Phase | State |
 |---|---|
-| Contract reference vendored and verified | done, 25 files byte-identical to upstream `c313c856` |
+| Contract reference vendored and verified | done, byte-identical to upstream `c313c856` |
 | ABI extracted | done, `contracts/abi/OnchainPOAPs.json` |
-| 0 Foundation | scaffold, theme tokens, theme switching, three-weight foreground tokens, shared reveal primitive and reduced-motion handling done; dashboard and docs shells outstanding |
+| 0 Foundation | done; theme tokens, shells, dashboard and docs navigation shipped |
 | 1 Landing page | done, all sections built; static OG route pending a production domain |
-| 2 Dashboard surface | home, two-step create wizard, created list, collection, explore, public POAP and claim pages built and live; manage screen `/app/created/[id]` outstanding |
-| 3 Documentation | not started |
-| 4 Chain layer | wallet (AppKit + wagmi) and every read live against Base Sepolia through `lib/poap-contract.ts`; writes (registration, mints, creator controls) outstanding |
-| 5 Registration | not started |
-| 6 Minting | not started |
-| 7 Creator controls | not started |
-| 8 Collection | not started |
+| 2 Dashboard surface | done; home, two-step create wizard, created list, manage screen, collection, explore, public POAP and claim pages all live |
+| 3 Documentation | done; eight articles including QR codes and live events |
+| 4 Chain layer | done; reads batched through Multicall3 and every write shipped |
+| 5 Registration | done; two-step funnel with SVGO optimization and byte-accurate validation |
+| 6 Minting | done; public, allowlist and signature mints with claim links and QR codes |
+| 7 Creator controls | done; public toggle, one-time allowlist builder with proofs and QR, batch airdrop, signature studio |
+| 8 Collection | done; balanceOfBatch grid with an onchain ownership proof |
 | 9 Farcaster Mini App | manifest, PNG assets, embeds, runtime adapter, explicit share control and unit tests implemented; signed account association and host acceptance outstanding |
-| 10 Polish | not started |
-| 11 Ship | not started |
+| 10 Polish | audit pass done; accessibility and motion sweeps continue |
+| 11 Ship | deploy, cast and claim outstanding |

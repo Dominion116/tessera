@@ -19,6 +19,7 @@ export const DOCS_NAV = [
   { slug: "getting-started", label: "Getting started" },
   { slug: "creating", label: "Creating a POAP" },
   { slug: "distribution", label: "Distribution methods" },
+  { slug: "qr-codes", label: "QR codes and live events" },
   { slug: "deadlines", label: "Deadlines and permissions" },
   { slug: "contract", label: "Contract reference" },
   { slug: "verification", label: "Verification" },
@@ -53,7 +54,7 @@ const docs: DocPage[] = [
               Tessera is a Next.js App Router frontend for onchain proof-of-attendance tokens. A creator registers an event with an SVG image and metadata, chooses how attendees may mint, and then shares the resulting event through a public link, an address list or recipient-specific signatures. The contract stores the artwork and assembles the metadata on read, so the token does not depend on IPFS, a pinning service or a Tessera server.
             </p>
             <p>
-              The public site can be read without a wallet. Creator controls and collection views sit behind the dashboard gate because those actions identify a wallet and, once chain wiring is enabled, may submit transactions.
+              The public site can be read without a wallet. Creator controls and collection views sit behind the dashboard gate because those actions identify a wallet and submit transactions.
             </p>
           </>
         ),
@@ -140,7 +141,7 @@ const docs: DocPage[] = [
         title: "Artwork and metadata safety",
         content: (
           <>
-            <p>The artwork the contract stores must be a non-empty raw SVG. The Create studio accepts editable SVG and drawn vectors directly, and frames PNG, JPEG, GIF, WebP and AVIF uploads inside a square SVG envelope, so any raster artwork still registers as the SVG the contract requires. The studio shows the raw and projected onchain byte counts and refuses artwork past the storage ceiling of 18,429 raw bytes. Base64 encoding increases the stored representation by roughly one third, and SSTORE2 writes the result into the bytecode of a single deployed contract, which EVM code-size rules cap at 24,576 bytes — larger artwork reverts at registration no matter how much gas is paid.</p>
+            <p>The artwork the contract stores must be a non-empty raw SVG. The Create studio accepts editable SVG and drawn vectors directly, and frames PNG, JPEG, GIF, WebP and AVIF uploads inside a square SVG envelope, so any raster artwork still registers as the SVG the contract requires. The studio shows the raw and projected onchain byte counts and refuses artwork past the storage ceiling of 18,429 raw bytes. Base64 encoding increases the stored representation by roughly one third, and SSTORE2 writes the result into the bytecode of a single deployed contract, which EVM code-size rules cap at 24,576 bytes, so larger artwork reverts at registration no matter how much gas is paid. The Create studio runs SVGO in the browser on imported artwork and reports the before and after sizes.</p>
             <p>The contract interpolates name, description, location and external URL directly into JSON without escaping. Reject quotation marks, backslashes, control characters and newlines before a transaction is prepared. Count bytes with <InlineCode>TextEncoder</InlineCode>, not JavaScript string length, because accented characters and emoji consume more than one byte.</p>
           </>
         ),
@@ -168,11 +169,11 @@ const docs: DocPage[] = [
       },
       {
         title: "Allowlist mint",
-        content: <p><strong>Allowlist mint</strong> restricts eligibility to addresses represented by the event&apos;s non-zero root. The attendee submits <InlineCode>allowlistMint(eventId, merkleProof)</InlineCode>. The root can be set once during the creator window if it was zero at registration, and the resulting route has no time limit. The creator-facing interface should describe this as an invitation list; the proof construction belongs behind an advanced explanation.</p>,
+        content: <p><strong>Allowlist mint</strong> restricts eligibility to addresses represented by the event&apos;s non-zero root. The attendee submits <InlineCode>allowlistMint(eventId, merkleProof)</InlineCode>. The manage screen builds the root and a proof per wallet from a pasted recipient list, so a creator never has to construct a tree by hand, and it warns when a rebuilt list does not match the commitment already registered. The root can be set once during the creator window if it was zero at registration, and the resulting route has no time limit. See QR codes and live events for distributing the per-wallet claim links.</p>,
       },
       {
         title: "Signature mint",
-        content: <p><strong>Signature mint</strong> uses <InlineCode>mintWithSignature(eventId, signature)</InlineCode> during the first {SIGNATURE_WINDOW_DAYS} days. The signed digest includes the event ID, chain ID and recipient address, so a signature is valid for one wallet only. A shared QR code containing one signature cannot authorize a crowd. Practical options are pre-signed per-recipient claim links, a creator-operated signing service that signs for the connected attendee, or public minting when individual authorization is unnecessary.</p>,
+        content: <p><strong>Signature mint</strong> uses <InlineCode>mintWithSignature(eventId, signature)</InlineCode> during the first {SIGNATURE_WINDOW_DAYS} days. The signed digest includes the event ID, chain ID and recipient address, so a signature is valid for one wallet only. A shared QR code containing one signature cannot authorize a crowd. The manage screen signs each recipient from the creator wallet and returns a per-wallet claim link and QR; practical alternatives are a creator-operated signing service that signs for the connected attendee, or public minting when individual authorization is unnecessary.</p>,
       },
       {
         title: "Creator airdrop",
@@ -181,6 +182,34 @@ const docs: DocPage[] = [
       {
         title: "One claim across every route",
         content: <p>All four routes share the contract&apos;s <InlineCode>hasClaimed</InlineCode> record. Check it before showing a mint action. A wallet that used a public, allowlist, signature or creator route cannot claim the same event through another route.</p>,
+      },
+    ],
+  },
+  {
+    slug: "qr-codes",
+    section: "Creator workflows",
+    title: "QR codes and live events",
+    description: "Turn claim links into codes you can print or show, and understand what a code can and cannot authorise.",
+    sections: [
+      {
+        title: "What a claim code contains",
+        content: <p>A claim code is a QR rendering of an ordinary claim link. The link carries the method and an attendee-specific payload: a proof for an invitation-list claim, or a recipient-bound signature for a signature claim. Scanning it opens the event claim page with that payload already in the URL, so the attendee only connects a wallet and confirms.</p>,
+      },
+      {
+        title: "Signature codes at the door",
+        content: <p>Open the manage screen and use Signature codes. Enter the wallets to admit, one per line, and sign. Each signature covers the event ID, the chain ID and one recipient address, and only the wallet that registered the event produces a valid one. The studio recovers the signer locally before showing a code, so a wrong-wallet signature is caught before an attendee spends gas on a rejected transaction.</p>,
+      },
+      {
+        title: "Invitation-list codes",
+        content: <p>For an invitation-list event, paste the recipient wallets into the Invitation list panel. The builder computes the commitment the contract stores and a proof for every wallet, then shows a claim link and QR per wallet. Build the codes from the same final list you commit; a code built from a different list is rejected onchain, and the panel warns when the built list does not match the registered commitment.</p>,
+      },
+      {
+        title: "Printing a sheet",
+        content: <p>Both panels can show a QR per wallet and open a printable sheet with one code per wallet and its shortened address. Print it, cut it up, or put the whole sheet behind a registration desk. The same rows are available as a CSV of addresses and claim links.</p>,
+      },
+      {
+        title: "Why one code cannot be shared",
+        content: <p>The contract records one claim per wallet per event and binds every proof and signature to a single address. A code meant for one attendee cannot be reused by another wallet, and no master code admits a crowd. For an open room, use public minting instead of codes.</p>,
       },
     ],
   },

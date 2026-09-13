@@ -81,7 +81,7 @@ const SVG_XMLNS = "http://www.w3.org/2000/svg";
  * The contract builds `uri()` JSON with `abi.encodePacked`, which never
  * escapes control characters in user text. A newline in a name or
  * description lands raw inside a JSON string literal, where the spec
- * forbids it, and `JSON.parse` rejects the whole document — taking the
+ * forbids it, and `JSON.parse` rejects the whole document, taking the
  * artwork down with it. Escaping raw control characters is always safe:
  * valid JSON contains none, so this can only repair, never break.
  */

@@ -27,7 +27,7 @@ const faqs: Faq[] = [
   {
     question: "How large can the artwork be?",
     answer:
-      "Aim below roughly 100 KB of SVG. Files are optimized in your browser before registration and the projected onchain size is shown while you work, so you find out before you pay rather than after.",
+      "Aim below roughly 100 KB of SVG. Run the in-browser optimizer before registration and watch the projected onchain size while you work, so you find out before you pay rather than after.",
     meta: "Artwork",
   },
   {

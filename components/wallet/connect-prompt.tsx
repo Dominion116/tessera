@@ -37,8 +37,8 @@ type ConnectPromptProps = {
  * and the full-page card that gates /app. The words are shared constants,
  * so the connect story is the same wherever you meet it.
  *
- * The prompt is presentation only. `onConnect` comes from the host —
- * `useConnectRedirect` — which opens the wallet picker and, once an
+ * The prompt is presentation only. `onConnect` comes from the host
+ * (`useConnectRedirect`), which opens the wallet picker and, once an
  * address actually arrives, closes the prompt and lands the user on
  * the landing page. Nothing navigates on the click itself: navigating
  * before a wallet exists is what made /app surface its own connect

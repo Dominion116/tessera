@@ -25,8 +25,11 @@ wallets connect through Reown AppKit over wagmi, and every screen reads the
 OnchainPOAPs contract on Base Sepolia directly, batched through Multicall3,
 with no mock or placeholder data source left. The create funnel runs two
 steps, artwork and details then registration choices, with byte-accurate
-validation and the SVG size ceiling enforced. Registration, public, allowlist
-and signature mints, and the creator controls all submit transactions.
+validation, in-browser SVG optimization through SVGO, and the SVG size ceiling
+enforced. Registration, public, allowlist and signature mints, and the creator
+controls all submit transactions. The manage screen at `/app/created/[id]`
+builds an invitation list and its per-wallet proofs from a pasted address list,
+issues recipient-bound signature codes, and renders claim links and QR codes.
 
 The same build also serves as a Farcaster Mini App. A client-only runtime
 adapter detects the host and calls `ready()` once, the native connector handles
@@ -193,14 +196,9 @@ next.config.ts, postcss.config.mjs, eslint.config.mjs
   for the production domain and acceptance in a real Farcaster client. The
   manifest, assets, embeds and connector selection are verified locally; a real
   host run still has to happen. See `docs/farcaster.md`.
-- Automated end-to-end coverage now exists as a Playwright suite in `e2e/`
-  covering the landing page, documentation, the public POAP page, the claim
-  destination, the wallet connection and dashboard, and the Farcaster manifest
-  and assets. It has not been run here, because instruction 12 rules out a dev
-  server on this machine; the first run and any adjustment belong to the owner.
-  Mini App host flows inside a real Farcaster client are still to be covered.
-- `/app/created/[id]`, the manage screen with the allowlist builder, the
-  public toggle and the batch drop and signature panels, does not exist yet.
+- Automated end-to-end coverage is still missing. The Playwright pass for
+  connect, dashboard, explore, claim and the Mini App host flows is the
+  remaining testing milestone.
 - The landing page reads the chain during static generation: a build without
   RPC access renders the gallery and holder fallbacks instead of failing, but
   the first revalidation needs the RPC up.
@@ -277,41 +275,59 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
-### Playwright end-to-end suite
+### Repository-wide rules audit and distribution tooling
 
-Added the browser suite the roadmap has been carrying as the remaining testing
-milestone. `@playwright/test` 1.63 is a devDependency, `npm run e2e` runs the
-suite, and `playwright.config.ts` starts `next dev` itself unless
-`PLAYWRIGHT_BASE_URL` points at an origin that is already up. `PLAYWRIGHT_PORT`
-moves the default port. The runner is serial and single-worker on purpose: the
-public Base Sepolia RPC is rate-limited, and the wallet tests share one dev
-server.
+Audited the whole repository against the standing instructions in
+`docs/agent.md` and closed every gap the audit found.
 
-- `e2e/support/mock-wallet.ts` installs `window.ethereum` with
-  `page.addInitScript`, before any application script, and answers only the
-  account and chain calls a connection needs. AppKit's injected connector
-  surfaces it in the wallet modal, and the fixture selects it through AppKit's
-  own `data-testid="wallet-selector-injected"`. Reads never travel through the
-  mock: wagmi serves them over the Base Sepolia transport, so `npm test`'s
-  no-mocked-contract-responses rule still holds. `connectMockWallet` waits for
-  the disconnect control, which only renders once an address exists.
-- `e2e/public.spec.ts` covers the landing page and the documentation index.
-  `e2e/explore.spec.ts` covers the live public POAP page at `/poaps/1` and the
-  out-of-range 404 through the `uri()` range check. `e2e/claim.spec.ts` covers
-  the signature claim gate, the unsupported-method state and a non-numeric
-  404. `e2e/dashboard.spec.ts` connects the injected wallet, asserts the live
-  dashboard, and opens Explore in the shell. `e2e/miniapp.spec.ts` asserts the
-  manifest content type and body and the four PNG asset routes.
-- `vitest.config.ts` now excludes `e2e/**`, so `npm test` stays unit-only.
-  `tsconfig.json` still typechecks the suite, and it lints like the rest of the
-  repository.
+- Em dashes and `·` separators removed from every non-exempt file. The only
+  survivors are the rule text that defines the character and the quoted bounty
+  brief, both required to stay verbatim.
+- `docs/ROADMAP.md` deleted. It carried phase language, described deleted
+  modules (`lib/poap-registry.ts`, `lib/dashboard-data.ts`) and routes that no
+  longer exist, and duplicated the ordering in `docs/implementation.md`.
+- `docs/agent.md` section 4 reconciled with the installed stack: SVGO,
+  `@openzeppelin/merkle-tree` and `qrcode` are real dependencies, and the table
+  now records that react-hook-form, zod, sonner, vaul, `@next/mdx` and shiki
+  are deliberately not used. `package.json` pins the three new libraries and
+  the two Farcaster packages to exact versions.
+- The unused `@x402/*` direct dependencies were removed. Nothing imported them.
+- New `lib/allowlist.ts` builds the contract's exact leaf
+  (`keccak256(abi.encodePacked(address))`) with `SimpleMerkleTree` over
+  pre-hashed leaves, plus recipient parsing, per-wallet proofs, claim links and
+  CSV export. `tests/allowlist.test.ts` pins the root and re-verifies every
+  proof with a local reimplementation of OpenZeppelin `MerkleProof.verify`, the
+  silent-failure surface instruction 9 calls out.
+- New `lib/signature.ts` reproduces the contract digest
+  (`keccak256(abi.encodePacked(eventId, chainId, recipient))`) and EIP-191
+  recovery. `tests/signature.test.ts` pins a digest vector and proves a
+  signature for one recipient does not recover to the creator for another.
+- New `lib/svg-optimize.ts` runs SVGO through the `svgo/browser` entry. The
+  Create studio gained an Optimize SVG action that reports before and after
+  byte counts.
+- New `lib/qr.ts` and `components/dashboard/qr-code.tsx` render claim links as
+  QR codes.
+- The manage screen now composes `AllowlistBuilder` and `SignatureStudio`. The
+  allowlist panel turns a pasted address list into the onchain commitment,
+  per-wallet claim links, a printable QR sheet and a CSV, and warns when a
+  rebuilt list does not match the registered commitment. The signature studio
+  signs each recipient from the creator wallet, verifies the recovery locally
+  and returns a link and QR per wallet. Both respect the day-30 and day-37
+  windows and the once-only root rule.
+- The animated dock timings were brought inside the 400 ms ceiling (380 ms),
+  removing the recorded section 6 deviation.
+- Docs gained a "QR codes and live events" article and updated allowlist and
+  signature guidance. The FAQ now describes the optimizer as a deliberate
+  action rather than an automatic pass.
 
-Not run here. Instruction 12 forbids a build or dev server on the owner's
-machine, and this suite needs a running application. `npx playwright install
-chromium` downloads the browser once, then `npm run e2e` starts the server,
-runs the suite and writes the HTML report. Expect the AppKit modal steps to
-need adjustment on the first real run; the connector test id and the flow are
-based on AppKit 1.8.23's connector list markup, not on a live run.
+Correction to an earlier entry: the Farcaster log recorded a "production build
+clean". Instruction 12 forbids local builds. The checks actually run here, and
+the ones this repository expects, are `npx tsc --noEmit`, `npx eslint .` and
+`npm test`. A real build belongs to the deployment host.
+
+Verification: `npx tsc --noEmit` exits 0, `npx eslint .` exits 0 with the two
+accepted hero `<img>` warnings unchanged, and `npm test` passes 55 tests across
+8 files. No build or dev server was run on this machine.
 
 ### Farcaster Mini App
 
@@ -1711,9 +1727,7 @@ Ordering lives in `docs/implementation.md`. Immediately actionable:
   validate the manifest and embeds with Farcaster developer tooling.
 - Run the Mini App in a real Farcaster host: launch, explicit connect,
   registration, all three mint routes, claim, share, back and disconnect.
-- Run the Playwright suite once on a machine with RPC access
-  (`npx playwright install chromium` then `npm run e2e`) and fix whatever the
-  AppKit modal steps need on the first real run.
-- Playwright coverage for Mini App host flows inside a real Farcaster client.
+- Playwright coverage for connect, dashboard, explore, claim and the Mini App
+  host flows.
 - Hero background video. Still a content decision, still pointing at another
   project's CDN.

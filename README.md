@@ -125,20 +125,7 @@ npm run start      # serve the production build
 npm run lint       # lint
 npm run typecheck  # types
 npm test           # unit tests
-npm run e2e        # browser end-to-end tests
 ```
-
-The end-to-end suite needs a Chromium download once and a machine with RPC
-access, because every assertion runs against the live Base Sepolia contract:
-
-```bash
-npx playwright install chromium
-npm run e2e
-```
-
-Playwright starts the development server itself. Set `PLAYWRIGHT_BASE_URL` to
-reuse an origin that is already running, and `PLAYWRIGHT_PORT` to move the
-default port.
 
 ## Deploying your own
 

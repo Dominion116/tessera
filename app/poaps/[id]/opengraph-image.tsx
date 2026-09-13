@@ -27,7 +27,7 @@ export default async function Image({
 
   let heading = "Onchain POAP";
   let subheading = "Proof you were there, stored entirely onchain.";
-  let footer = "Base Sepolia · ERC-1155";
+  let footer = "Base Sepolia, ERC-1155";
 
   if (eventId !== null) {
     try {
@@ -36,7 +36,7 @@ export default async function Image({
         heading = event.name;
         subheading =
           event.description || "An onchain proof-of-attendance token.";
-        footer = `POAP #${event.eventId.toString()} · ${event.collectors.toString()} collected`;
+        footer = `POAP #${event.eventId.toString()}, ${event.collectors.toString()} collected`;
       }
     } catch {
       // Keep the fallback card when the chain read fails.

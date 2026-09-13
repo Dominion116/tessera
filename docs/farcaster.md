@@ -6,18 +6,18 @@ wallet connection.
 
 ## Architecture
 
-- `lib/farcaster/config.ts` — canonical origin, asset paths, required chains and
+- `lib/farcaster/config.ts`: canonical origin, asset paths, required chains and
   capabilities. Every URL is derived from one origin with no trailing slash.
-- `lib/farcaster/runtime.ts` — host detection, one-shot `ready()`, back
+- `lib/farcaster/runtime.ts`: host detection, one-shot `ready()`, back
   navigation and wallet-transport selection. Pure and unit-tested; no-ops on the
   standalone website.
-- `lib/farcaster/manifest.ts` — builds `/.well-known/farcaster.json`.
-- `lib/farcaster/embeds.ts` — builds the `fc:miniapp` and `fc:frame` payloads.
-- `components/farcaster/farcaster-provider.tsx` — mounts host context near the
+- `lib/farcaster/manifest.ts`: builds `/.well-known/farcaster.json`.
+- `lib/farcaster/embeds.ts`: builds the `fc:miniapp` and `fc:frame` payloads.
+- `components/farcaster/farcaster-provider.tsx`: mounts host context near the
   root providers. It never opens a wallet and never changes the route.
-- `components/farcaster/share-cast-button.tsx` — an explicit share action with a
+- `components/farcaster/share-cast-button.tsx`: an explicit share action with a
   copy-link fallback.
-- `components/wallet/wallet-provider.tsx` — selects the native Farcaster
+- `components/wallet/wallet-provider.tsx`: selects the native Farcaster
   connector only from an explicit action inside a confirmed host; AppKit remains
   the fallback.
 

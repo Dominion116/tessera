@@ -554,14 +554,21 @@ Versions are pinned deliberately. Do not bump without checking peer ranges.
 | Merkle | @openzeppelin/merkle-tree | 1.0.8 |
 | SVG optimization | svgo, `svgo/browser` entry | 4.1.0 |
 | Animation | motion | 13.1.x |
-| Forms | react-hook-form + zod | 7.87 / 4.5 |
-| Toasts | sonner | 2.0.8 |
-| Drawers | vaul | 1.1.2 |
+| Forms | controlled inputs, validators in `lib/registration.ts` and `lib/allowlist.ts` | n/a |
+| Transaction feedback | inline `role="status"` and `role="alert"` regions | n/a |
+| Drawers | none, the dashboard uses the dock and inline cards | n/a |
 | Icons | lucide-react | 1.39.x |
 | Theme | next-themes | 0.4.6 |
-| Docs | MDX via @next/mdx + shiki | 16.3.4 / 4.4.x |
+| Docs | typed React article data in `components/docs/docs-data.tsx` | n/a |
 | QR | qrcode | 1.5.4 |
 | Hosting | Vercel | n/a |
+
+**The earlier plan named react-hook-form, zod, sonner, vaul, `@next/mdx` and
+shiki. They are not installed and must not be added unused.** The forms are
+small and already validated field by field with explicit messages, transaction
+progress renders inline in accessible live regions, and the documentation is
+typed React data rather than MDX. Adopt one of the named libraries only as part
+of a refactor that uses it, and update this table in the same change.
 
 **wagmi stays on 2.x.** wagmi 3 exists but the Reown AppKit wagmi adapter
 1.8.23 peer-requires `wagmi >=2.19.5` and `@wagmi/core >=2.21.2`, and

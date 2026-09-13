@@ -27,7 +27,7 @@ export default async function Image({
 
   let heading = "Claim a POAP";
   let subheading = "An invitation or recipient-specific claim on Base Sepolia.";
-  let footer = "Base Sepolia · ERC-1155";
+  let footer = "Base Sepolia, ERC-1155";
 
   if (eventId !== null) {
     try {

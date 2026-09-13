@@ -67,11 +67,11 @@ const PoapDetailPage = ({ event }: { event: PoapEvent }) => (
             <Link href={`/poaps/${event.eventId.toString()}/claim`} className="inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">Open claim page <ArrowUpRight aria-hidden="true" className="size-4" /></Link>
           </div>
           <ShareCastButton
-            text={`${event.name} — an onchain POAP on Base Sepolia.`}
+            text={`${event.name}, an onchain POAP on Base Sepolia.`}
             path={`/poaps/${event.eventId.toString()}`}
             className="w-full sm:w-auto"
           />
-          <p className="font-mono text-xs text-fg-tertiary">Base Sepolia · chain {CHAIN_ID} · contract {shortAddress(CONTRACT_ADDRESS)} · {event.allowlistRoot === ZERO_ROOT ? "no invitation list" : "invitation list enabled"}</p>
+          <p className="font-mono text-xs text-fg-tertiary">Base Sepolia, chain {CHAIN_ID}, contract {shortAddress(CONTRACT_ADDRESS)}, {event.allowlistRoot === ZERO_ROOT ? "no invitation list" : "invitation list enabled"}</p>
         </div>
       </div>
     </main>
