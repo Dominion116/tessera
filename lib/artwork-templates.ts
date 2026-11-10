@@ -75,7 +75,7 @@ export const bolt = (color: string, offsetX = 0, offsetY = 0, scale = 1): Shape 
   fill: color,
 });
 
-export const star5 = (cx: number, cy: number, outerR: number, innerR: number, color: string, widthStroke = 0, fill?: string): Shape => {
+export const star5 = (cx: number, cy: number, outerR: number, innerR: number, color: string, widthStroke = 0, fill?: string): Extract<Shape, { type: "polygon" }> => {
   const points: Point[] = [];
   for (let i = 0; i < 10; i++) {
     const r = i % 2 === 0 ? outerR : innerR;
@@ -94,7 +94,7 @@ export const star5 = (cx: number, cy: number, outerR: number, innerR: number, co
   };
 };
 
-export const hexagon = (cx: number, cy: number, radius: number, color: string, widthStroke = 4, fill?: string): Shape => {
+export const hexagon = (cx: number, cy: number, radius: number, color: string, widthStroke = 4, fill?: string): Extract<Shape, { type: "polygon" }> => {
   const points: Point[] = [];
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 - Math.PI / 6;

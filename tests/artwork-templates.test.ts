@@ -87,14 +87,18 @@ describe("Artwork Templates & Accents", () => {
   it("generates star, hexagon, and stamp vectors accurately with custom fills and strokes", () => {
     const star = star5(200, 200, 40, 18, "#2dd4bf", 2, "#2dd4bf");
     expect(star.type).toBe("polygon");
-    expect(star.points.length).toBe(10);
-    expect(star.fill).toBe("#2dd4bf");
-    expect(star.widthStroke).toBe(2);
+    if (star.type === "polygon") {
+      expect(star.points.length).toBe(10);
+      expect(star.fill).toBe("#2dd4bf");
+      expect(star.widthStroke).toBe(2);
+    }
 
     const hex = hexagon(200, 200, 50, "#0ea5e9", 4, "none");
     expect(hex.type).toBe("polygon");
-    expect(hex.points.length).toBe(6);
-    expect(hex.fill).toBe("none");
-    expect(hex.widthStroke).toBe(4);
+    if (hex.type === "polygon") {
+      expect(hex.points.length).toBe(6);
+      expect(hex.fill).toBe("none");
+      expect(hex.widthStroke).toBe(4);
+    }
   });
 });
