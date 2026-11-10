@@ -21,9 +21,18 @@ import {
   Redo2,
   Sparkles,
   Square,
+  Star,
   Type,
   Undo2,
   Upload,
+  Zap,
+  Gem,
+  Crosshair,
+  Crown,
+  Shield,
+  Copy,
+  Check,
+  Hexagon as HexagonIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,157 +53,51 @@ import { poapAbi, repairSvgNamespace } from "@/lib/poap-contract";
 import { frameImageAsSvg } from "@/lib/image-artwork";
 import { optimizeSvgArtwork } from "@/lib/svg-optimize";
 import { registerEventArgs } from "@/lib/transaction-args";
+import {
+  ACCENT_STAMPS,
+  ARTWORK_TEMPLATES,
+  ArtworkCategory,
+  ArtworkTemplate,
+  CANVAS_SIZE,
+  FONT_MONO,
+  FONT_SANS,
+  FONT_SERIF,
+  hexagon,
+  Point,
+  Shape,
+  star5,
+  TemplatePalette,
+} from "@/lib/artwork-templates";
 
-type Tool = "brush" | "rectangle" | "circle" | "line" | "text";
-type Point = { x: number; y: number };
-type Shape =
-  | { type: "path"; points: Point[]; color: string; width: number }
-  | { type: "rectangle"; x: number; y: number; width: number; height: number; color: string; widthStroke: number; fill?: string }
-  | { type: "circle"; cx: number; cy: number; radius: number; color: string; widthStroke: number; fill?: string }
-  | { type: "polygon"; points: Point[]; color: string; widthStroke: number; fill?: string }
-  | { type: "line"; x1: number; y1: number; x2: number; y2: number; color: string; widthStroke: number }
-  | { type: "text"; x: number; y: number; value: string; color: string; size?: number; anchor?: "start" | "middle" | "end" };
-
-const CANVAS_SIZE = 400;
-const FONT_STACK = "ui-sans-serif,system-ui,sans-serif";
-
-type TemplatePalette = {
-  id: string;
-  name: string;
-  accent: string;
-  base: string;
-  highlight: string;
-};
-
-type ArtworkTemplate = {
-  id: string;
-  name: string;
-  description: string;
-  palettes: TemplatePalette[];
-  build: (palette: TemplatePalette) => Shape[];
-};
-
-const sparkle = (cx: number, cy: number, radius: number, color: string): Shape => ({
-  type: "polygon",
-  points: [
-    { x: cx, y: cy - radius },
-    { x: cx + radius * 0.3, y: cy - radius * 0.3 },
-    { x: cx + radius, y: cy },
-    { x: cx + radius * 0.3, y: cy + radius * 0.3 },
-    { x: cx, y: cy + radius },
-    { x: cx - radius * 0.3, y: cy + radius * 0.3 },
-    { x: cx - radius, y: cy },
-    { x: cx - radius * 0.3, y: cy - radius * 0.3 },
-  ],
-  color,
-  widthStroke: 0,
-  fill: color,
-});
-
-const bolt = (color: string): Shape => ({
-  type: "polygon",
-  points: [
-    { x: 114, y: 46 },
-    { x: 97, y: 80 },
-    { x: 106, y: 80 },
-    { x: 86, y: 116 },
-    { x: 113, y: 82 },
-    { x: 104, y: 82 },
-    { x: 122, y: 46 },
-  ],
-  color,
-  widthStroke: 0,
-  fill: color,
-});
-
-const ARTWORK_TEMPLATES: ArtworkTemplate[] = [
-  {
-    id: "mosaic",
-    name: "Mosaic tile",
-    description: "Filled and framed tiles, a center diamond and stamped lettering",
-    palettes: [
-      { id: "tide", name: "Tide", accent: "#14b8a6", base: "#475569", highlight: "#f59e0b" },
-      { id: "violet", name: "Violet dusk", accent: "#8b5cf6", base: "#64748b", highlight: "#f43f5e" },
-      { id: "moss", name: "Moss", accent: "#4d7c0f", base: "#57534e", highlight: "#d97706" },
-    ],
-    build: (palette) => [
-      { type: "rectangle", x: 28, y: 28, width: 344, height: 344, color: palette.base, widthStroke: 6 },
-      { type: "rectangle", x: 44, y: 44, width: 148, height: 148, color: palette.accent, widthStroke: 0, fill: palette.accent },
-      { type: "rectangle", x: 208, y: 44, width: 148, height: 148, color: palette.base, widthStroke: 5 },
-      { type: "rectangle", x: 44, y: 208, width: 148, height: 148, color: palette.base, widthStroke: 5 },
-      { type: "rectangle", x: 208, y: 208, width: 148, height: 148, color: palette.accent, widthStroke: 0, fill: palette.accent },
-      { type: "rectangle", x: 96, y: 96, width: 44, height: 44, color: palette.highlight, widthStroke: 0, fill: palette.highlight },
-      { type: "rectangle", x: 260, y: 260, width: 44, height: 44, color: palette.highlight, widthStroke: 0, fill: palette.highlight },
-      { type: "polygon", points: [{ x: 200, y: 164 }, { x: 236, y: 200 }, { x: 200, y: 236 }, { x: 164, y: 200 }], color: palette.highlight, widthStroke: 0, fill: palette.highlight },
-      { type: "text", x: 282, y: 130, value: "POAP", color: palette.base, size: 36, anchor: "middle" },
-      { type: "line", x1: 246, y1: 146, x2: 318, y2: 146, color: palette.accent, widthStroke: 4 },
-      { type: "text", x: 118, y: 294, value: "2026", color: palette.base, size: 36, anchor: "middle" },
-      { type: "line", x1: 82, y1: 310, x2: 154, y2: 310, color: palette.accent, widthStroke: 4 },
-    ],
-  },
-  {
-    id: "orbit",
-    name: "Orbit seal",
-    description: "Rings, compass ticks, a satellite and a stamped year",
-    palettes: [
-      { id: "aurora", name: "Aurora", accent: "#2dd4bf", base: "#94a3b8", highlight: "#fbbf24" },
-      { id: "nebula", name: "Nebula", accent: "#a78bfa", base: "#94a3b8", highlight: "#38bdf8" },
-      { id: "ember", name: "Ember", accent: "#fb923c", base: "#a8a29e", highlight: "#facc15" },
-    ],
-    build: (palette) => [
-      { type: "circle", cx: 200, cy: 200, radius: 152, color: palette.base, widthStroke: 6 },
-      { type: "circle", cx: 200, cy: 200, radius: 112, color: palette.accent, widthStroke: 4 },
-      { type: "line", x1: 200, y1: 44, x2: 200, y2: 64, color: palette.base, widthStroke: 4 },
-      { type: "line", x1: 200, y1: 336, x2: 200, y2: 356, color: palette.base, widthStroke: 4 },
-      { type: "line", x1: 44, y1: 200, x2: 64, y2: 200, color: palette.base, widthStroke: 4 },
-      { type: "line", x1: 336, y1: 200, x2: 356, y2: 200, color: palette.base, widthStroke: 4 },
-      { type: "circle", cx: 200, cy: 200, radius: 40, color: palette.accent, widthStroke: 7 },
-      { type: "circle", cx: 200, cy: 200, radius: 12, color: palette.highlight, widthStroke: 0, fill: palette.highlight },
-      { type: "circle", cx: 279, cy: 121, radius: 11, color: palette.highlight, widthStroke: 0, fill: palette.highlight },
-      sparkle(318, 84, 13, palette.accent),
-      sparkle(80, 312, 11, palette.highlight),
-      { type: "text", x: 200, y: 116, value: "TESSERA", color: palette.base, size: 20, anchor: "middle" },
-      { type: "text", x: 200, y: 288, value: "IN ORBIT", color: palette.base, size: 26, anchor: "middle" },
-      { type: "text", x: 200, y: 314, value: "SINCE 2026", color: palette.accent, size: 14, anchor: "middle" },
-    ],
-  },
-  {
-    id: "signal",
-    name: "Signal badge",
-    description: "Rising bars, a broadcast mast, a bolt and a live stamp",
-    palettes: [
-      { id: "pulse", name: "Pulse", accent: "#06b6d4", base: "#64748b", highlight: "#f97316" },
-      { id: "matrix", name: "Matrix", accent: "#22c55e", base: "#475569", highlight: "#eab308" },
-      { id: "ruby", name: "Ruby", accent: "#ef4444", base: "#52525b", highlight: "#fb7185" },
-    ],
-    build: (palette) => [
-      { type: "rectangle", x: 32, y: 32, width: 336, height: 336, color: palette.base, widthStroke: 6 },
-      bolt(palette.highlight),
-      { type: "text", x: 200, y: 84, value: "ON AIR", color: palette.base, size: 24, anchor: "middle" },
-      { type: "line", x1: 296, y1: 58, x2: 296, y2: 92, color: palette.base, widthStroke: 4 },
-      { type: "circle", cx: 296, cy: 48, radius: 9, color: palette.accent, widthStroke: 0, fill: palette.accent },
-      { type: "line", x1: 314, y1: 66, x2: 296, y2: 82, color: palette.accent, widthStroke: 3 },
-      { type: "line", x1: 278, y1: 66, x2: 296, y2: 82, color: palette.accent, widthStroke: 3 },
-      { type: "rectangle", x: 84, y: 246, width: 40, height: 64, color: palette.accent, widthStroke: 5 },
-      { type: "rectangle", x: 146, y: 196, width: 40, height: 114, color: palette.accent, widthStroke: 5 },
-      { type: "rectangle", x: 208, y: 146, width: 40, height: 164, color: palette.accent, widthStroke: 5 },
-      { type: "rectangle", x: 270, y: 96, width: 40, height: 214, color: palette.accent, widthStroke: 0, fill: palette.accent },
-      { type: "line", x1: 64, y1: 318, x2: 336, y2: 318, color: palette.base, widthStroke: 5 },
-      { type: "line", x1: 120, y1: 310, x2: 120, y2: 326, color: palette.base, widthStroke: 3 },
-      { type: "line", x1: 200, y1: 310, x2: 200, y2: 326, color: palette.base, widthStroke: 3 },
-      { type: "line", x1: 280, y1: 310, x2: 280, y2: 326, color: palette.base, widthStroke: 3 },
-      { type: "text", x: 200, y: 352, value: "MEETUP 2026", color: palette.base, size: 18, anchor: "middle" },
-    ],
-  },
-];
+type Tool = "brush" | "rectangle" | "circle" | "line" | "star" | "hexagon" | "text";
 
 const toolItems: { id: Tool; label: string; icon: typeof Pencil }[] = [
   { id: "brush", label: "Brush", icon: Pencil },
   { id: "rectangle", label: "Rectangle", icon: Square },
   { id: "circle", label: "Circle", icon: Circle },
   { id: "line", label: "Line", icon: Minus },
+  { id: "star", label: "Star", icon: Star },
+  { id: "hexagon", label: "Hexagon", icon: HexagonIcon },
   { id: "text", label: "Text", icon: Type },
 ];
+
+const CATEGORY_TABS: { id: ArtworkCategory; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "heritage", label: "Heritage" },
+  { id: "ecosystem", label: "Ecosystem" },
+  { id: "builder", label: "Builder" },
+  { id: "achievement", label: "Achievement" },
+];
+
+const stampIconMap: Record<string, typeof Sparkles> = {
+  sparkle: Sparkles,
+  star: Star,
+  bolt: Zap,
+  diamond: Gem,
+  "shield-crest": Shield,
+  target: Crosshair,
+  crown: Crown,
+};
 
 const escapeXml = (value: string) =>
   value
@@ -221,7 +124,7 @@ const toSvg = (shapes: Shape[]) => {
       if (shape.type === "line") {
         return `<line x1="${shape.x1}" y1="${shape.y1}" x2="${shape.x2}" y2="${shape.y2}" stroke="${shape.color}" stroke-width="${shape.widthStroke}" stroke-linecap="round"/>`;
       }
-      return `<text x="${shape.x}" y="${shape.y}" fill="${shape.color}" font-family="${FONT_STACK}" font-size="${shape.size ?? 24}"${shape.anchor ? ` text-anchor="${shape.anchor}"` : ""}>${escapeXml(shape.value)}</text>`;
+      return `<text x="${shape.x}" y="${shape.y}" fill="${shape.color}" font-family="${shape.fontFamily ?? FONT_SANS}" font-size="${shape.size ?? 24}"${shape.fontWeight ? ` font-weight="${shape.fontWeight}"` : ""}${shape.anchor ? ` text-anchor="${shape.anchor}"` : ""}>${escapeXml(shape.value)}</text>`;
     })
     .join("");
 
@@ -254,7 +157,20 @@ const renderShape = (shape: Shape, index: number) => {
     case "line":
       return <line key={index} x1={shape.x1} y1={shape.y1} x2={shape.x2} y2={shape.y2} stroke={shape.color} strokeWidth={shape.widthStroke} strokeLinecap="round" />;
     case "text":
-      return <text key={index} x={shape.x} y={shape.y} fill={shape.color} fontFamily={FONT_STACK} fontSize={shape.size ?? 24} textAnchor={shape.anchor}>{shape.value}</text>;
+      return (
+        <text
+          key={index}
+          x={shape.x}
+          y={shape.y}
+          fill={shape.color}
+          fontFamily={shape.fontFamily ?? FONT_SANS}
+          fontSize={shape.size ?? 24}
+          fontWeight={shape.fontWeight}
+          textAnchor={shape.anchor}
+        >
+          {shape.value}
+        </text>
+      );
   }
 };
 
@@ -281,7 +197,12 @@ const CreatePoapView = () => {
   const [tool, setTool] = useState<Tool>("brush");
   const [color, setColor] = useState("#2dd4bf");
   const [strokeWidth, setStrokeWidth] = useState(4);
+  const [fillMode, setFillMode] = useState<"outline" | "solid">("outline");
   const [textValue, setTextValue] = useState("Tessera");
+  const [selectedFont, setSelectedFont] = useState<"sans" | "mono" | "serif">("sans");
+  const [fontSize, setFontSize] = useState(24);
+  const [activeCategory, setActiveCategory] = useState<ArtworkCategory>("all");
+  const [copiedSvg, setCopiedSvg] = useState(false);
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [history, setHistory] = useState<Shape[][]>([]);
   const [future, setFuture] = useState<Shape[][]>([]);
@@ -410,18 +331,82 @@ const CreatePoapView = () => {
       const y = Math.min(start.y, point.y);
       const width = Math.abs(point.x - start.x);
       const height = Math.abs(point.y - start.y);
-      const next =
-        tool === "rectangle"
-          ? { type: "rectangle" as const, x, y, width, height, color, widthStroke: strokeWidth }
-          : tool === "circle"
-            ? { type: "circle" as const, cx: start.x, cy: start.y, radius: Math.hypot(point.x - start.x, point.y - start.y), color, widthStroke: strokeWidth }
-            : tool === "line"
-              ? { type: "line" as const, x1: start.x, y1: start.y, x2: point.x, y2: point.y, color, widthStroke: strokeWidth }
-              : { type: "text" as const, x: start.x, y: start.y, value: textValue, color };
-      if (tool === "text" || width > 2 || height > 2) commit([...shapes, next]);
+      const radius = Math.hypot(point.x - start.x, point.y - start.y);
+      const fill = fillMode === "solid" ? color : "none";
+      const fontFamily = selectedFont === "mono" ? FONT_MONO : selectedFont === "serif" ? FONT_SERIF : FONT_SANS;
+      let next: Shape | null = null;
+
+      if (tool === "rectangle") {
+        next = { type: "rectangle", x, y, width, height, color, widthStroke: strokeWidth, fill };
+      } else if (tool === "circle") {
+        next = { type: "circle", cx: start.x, cy: start.y, radius, color, widthStroke: strokeWidth, fill };
+      } else if (tool === "star") {
+        next = star5(start.x, start.y, radius, radius * 0.45, color, strokeWidth, fill);
+      } else if (tool === "hexagon") {
+        next = hexagon(start.x, start.y, radius, color, strokeWidth, fill);
+      } else if (tool === "line") {
+        next = { type: "line", x1: start.x, y1: start.y, x2: point.x, y2: point.y, color, widthStroke: strokeWidth };
+      } else if (tool === "text") {
+        next = { type: "text", x: start.x, y: start.y, value: textValue, color, size: fontSize, fontFamily };
+      }
+
+      if (next && (tool === "text" || width > 2 || height > 2 || radius > 2)) {
+        commit([...shapes, next]);
+      }
     }
     setDraft(null);
     setStart(null);
+  };
+
+  const stampAccent = (stamp: (typeof ACCENT_STAMPS)[number]) => {
+    const stamped = stamp.create(200, 200, color);
+    commit([...shapes, ...stamped]);
+  };
+
+  const applyFramePreset = (frame: "circle" | "shield" | "hexagon") => {
+    if (frame === "circle") {
+      commit([
+        ...shapes,
+        { type: "circle", cx: 200, cy: 200, radius: 184, color, widthStroke: strokeWidth || 4, fill: "none" },
+        { type: "circle", cx: 200, cy: 200, radius: 174, color, widthStroke: 1, fill: "none" },
+      ]);
+    } else if (frame === "hexagon") {
+      commit([
+        ...shapes,
+        hexagon(200, 200, 186, color, strokeWidth || 4, "none"),
+        hexagon(200, 200, 176, color, 1, "none"),
+      ]);
+    } else if (frame === "shield") {
+      commit([
+        ...shapes,
+        {
+          type: "polygon",
+          points: [
+            { x: 200, y: 380 },
+            { x: 370, y: 280 },
+            { x: 370, y: 50 },
+            { x: 200, y: 20 },
+            { x: 30, y: 50 },
+            { x: 30, y: 280 },
+          ],
+          color,
+          widthStroke: strokeWidth || 4,
+          fill: "none",
+        },
+      ]);
+    }
+  };
+
+  const copySvgCode = async () => {
+    if (!hasArtwork) return;
+    try {
+      const source = uploadedSvg ?? toSvg(shapes);
+      await navigator.clipboard.writeText(source);
+      setCopiedSvg(true);
+      setTimeout(() => setCopiedSvg(false), 2000);
+    } catch {
+      // ignore clipboard error
+    }
   };
 
   const undo = () => {
@@ -601,6 +586,11 @@ const CreatePoapView = () => {
         ? "border-amber-400/30 bg-amber-400/[0.06] text-amber-700 dark:text-amber-300"
         : "border-border/70 bg-background/50 text-fg-secondary";
 
+  const filteredTemplates =
+    activeCategory === "all"
+      ? ARTWORK_TEMPLATES
+      : ARTWORK_TEMPLATES.filter((template) => template.category === activeCategory);
+
   return (
     <div className="dashboard-page mx-auto grid w-full max-w-7xl grid-cols-12 gap-6 p-6">
       <header className="col-span-12 flex flex-col gap-2 border-b border-border/60 pb-5">
@@ -636,8 +626,24 @@ const CreatePoapView = () => {
               </div>
               <Badge variant="outline">Editable SVG</Badge>
             </div>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {CATEGORY_TABS.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                    activeCategory === cat.id
+                      ? "bg-teal-500/20 text-teal-600 dark:text-teal-300 ring-1 ring-teal-500/50"
+                      : "bg-muted/60 text-fg-tertiary hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
             <div className="grid gap-2 sm:grid-cols-3">
-              {ARTWORK_TEMPLATES.map((template) => {
+              {filteredTemplates.map((template) => {
                 const templateActive = selectedTemplate === template.id;
                 return (
                   <div
@@ -680,17 +686,143 @@ const CreatePoapView = () => {
               })}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="flex flex-wrap gap-1 rounded-lg border border-border/70 bg-background/45 p-1">
-              {toolItems.map((item) => {
-                const Icon = item.icon;
-                return <button key={item.id} type="button" title={item.label} aria-label={item.label} onClick={() => setTool(item.id)} className={`flex size-9 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal-400 ${tool === item.id ? "bg-teal-400/15 text-teal-600 dark:text-teal-300" : "text-fg-tertiary hover:bg-muted hover:text-foreground"}`}><Icon aria-hidden="true" className="size-4" /></button>;
-              })}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap gap-1 rounded-lg border border-border/70 bg-background/45 p-1">
+                {toolItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      title={item.label}
+                      aria-label={item.label}
+                      onClick={() => setTool(item.id)}
+                      className={`flex size-9 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal-400 ${
+                        tool === item.id
+                          ? "bg-teal-400/15 text-teal-600 dark:text-teal-300"
+                          : "text-fg-tertiary hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <Icon aria-hidden="true" className="size-4" />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-0.5 rounded-lg border border-border/70 bg-background/45 p-1">
+                <button
+                  type="button"
+                  onClick={() => setFillMode("outline")}
+                  className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    fillMode === "outline"
+                      ? "bg-teal-400/20 text-teal-700 dark:text-teal-300"
+                      : "text-fg-tertiary hover:text-foreground"
+                  }`}
+                >
+                  Outline
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFillMode("solid")}
+                  className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    fillMode === "solid"
+                      ? "bg-teal-400/20 text-teal-700 dark:text-teal-300"
+                      : "text-fg-tertiary hover:text-foreground"
+                  }`}
+                >
+                  Solid
+                </button>
+              </div>
             </div>
             <div className="flex gap-1">
-              <button type="button" title="Undo" aria-label="Undo" disabled={!history.length} onClick={undo} className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-teal-400"><Undo2 className="size-4" /></button>
-              <button type="button" title="Redo" aria-label="Redo" disabled={!future.length} onClick={redo} className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-teal-400"><Redo2 className="size-4" /></button>
-              <button type="button" title="Clear canvas" aria-label="Clear canvas" onClick={clear} className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400"><Eraser className="size-4" /></button>
+              <button
+                type="button"
+                title="Undo"
+                aria-label="Undo"
+                disabled={!history.length}
+                onClick={undo}
+                className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-teal-400"
+              >
+                <Undo2 className="size-4" />
+              </button>
+              <button
+                type="button"
+                title="Redo"
+                aria-label="Redo"
+                disabled={!future.length}
+                onClick={redo}
+                className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-teal-400"
+              >
+                <Redo2 className="size-4" />
+              </button>
+              <button
+                type="button"
+                title="Clear canvas"
+                aria-label="Clear canvas"
+                onClick={clear}
+                className="flex size-9 items-center justify-center rounded-md border border-border/70 text-fg-tertiary transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-teal-400"
+              >
+                <Eraser className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 rounded-lg border border-border/70 bg-background/45 p-2.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-fg-tertiary">Accent stamps:</span>
+              {ACCENT_STAMPS.map((stamp) => {
+                const Icon = stampIconMap[stamp.id] ?? Sparkles;
+                return (
+                  <Button
+                    key={stamp.id}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    onClick={() => stampAccent(stamp)}
+                    title={`Stamp ${stamp.name}`}
+                  >
+                    <Icon className="size-3 text-teal-600 dark:text-teal-300" />
+                    <span>{stamp.name}</span>
+                  </Button>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-border/50 pt-2">
+              <span className="mr-1 text-xs font-medium text-fg-tertiary">Frame presets:</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs"
+                onClick={() => applyFramePreset("circle")}
+                title="Stamp Circular Coin frame"
+              >
+                <Circle className="size-3 text-teal-600 dark:text-teal-300" />
+                <span>Circular Coin</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs"
+                onClick={() => applyFramePreset("hexagon")}
+                title="Stamp Hexagon Token frame"
+              >
+                <HexagonIcon className="size-3 text-teal-600 dark:text-teal-300" />
+                <span>Hexagon Token</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2 text-xs"
+                onClick={() => applyFramePreset("shield")}
+                title="Stamp Shield Crest frame"
+              >
+                <Shield className="size-3 text-teal-600 dark:text-teal-300" />
+                <span>Shield Crest</span>
+              </Button>
             </div>
           </div>
 
@@ -700,11 +832,64 @@ const CreatePoapView = () => {
             </svg>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[auto_auto_1fr] sm:items-end">
+          <div className="grid gap-3 sm:grid-cols-[auto_auto_auto_1fr] sm:items-end">
             <label className="flex items-center gap-2 text-sm text-fg-secondary">Color <input type="color" value={color} onChange={(event) => setColor(event.target.value)} className="size-9 cursor-pointer rounded-md border border-border/70 bg-transparent p-1" /></label>
             <Button type="button" variant="outline" size="sm" disabled={!shapes.length} onClick={recolorArtwork}>Apply color</Button>
             <label className="flex items-center gap-2 text-sm text-fg-secondary">Stroke <input type="number" min="1" max="24" value={strokeWidth} onChange={(event) => setStrokeWidth(Number(event.target.value) || 1)} className="h-9 w-16 rounded-md border border-input bg-transparent px-2 text-sm tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-teal-400" /></label>
-            {tool === "text" ? <label className="flex min-w-0 flex-col gap-1 text-xs text-fg-tertiary">Text<input value={textValue} onChange={(event) => setTextValue(event.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-teal-400" /></label> : <span />}
+            {tool === "text" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="flex min-w-32 flex-1 flex-col gap-1 text-xs text-fg-tertiary">
+                  Text
+                  <input
+                    value={textValue}
+                    onChange={(event) => setTextValue(event.target.value)}
+                    className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                  />
+                </label>
+                <div className="flex items-center gap-0.5 rounded-lg border border-border/70 bg-background/45 p-1 self-end h-9">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFont("sans")}
+                    className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                      selectedFont === "sans" ? "bg-teal-400/20 text-teal-700 dark:text-teal-300" : "text-fg-tertiary hover:text-foreground"
+                    }`}
+                  >
+                    Sans
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFont("mono")}
+                    className={`rounded px-2 py-1 text-xs font-mono font-medium transition-colors ${
+                      selectedFont === "mono" ? "bg-teal-400/20 text-teal-700 dark:text-teal-300" : "text-fg-tertiary hover:text-foreground"
+                    }`}
+                  >
+                    Mono
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFont("serif")}
+                    className={`rounded px-2 py-1 text-xs font-serif font-medium transition-colors ${
+                      selectedFont === "serif" ? "bg-teal-400/20 text-teal-700 dark:text-teal-300" : "text-fg-tertiary hover:text-foreground"
+                    }`}
+                  >
+                    Serif
+                  </button>
+                </div>
+                <label className="flex items-center gap-1 self-end h-9 text-xs text-fg-secondary">
+                  Size
+                  <input
+                    type="number"
+                    min="12"
+                    max="64"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value) || 24)}
+                    className="h-9 w-16 rounded-md border border-input bg-transparent px-2 text-sm tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                  />
+                </label>
+              </div>
+            ) : (
+              <span />
+            )}
           </div>
 
           <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border p-4 text-sm leading-6 ${sizeTone}`} aria-live="polite">
@@ -722,6 +907,10 @@ const CreatePoapView = () => {
              <Button type="button" variant="outline" disabled={importPending} onClick={() => svgInputRef.current?.click()}><Upload aria-hidden="true" />Import SVG</Button>
              <Button type="button" variant="outline" disabled={importPending} onClick={() => imageInputRef.current?.click()}><FileImage aria-hidden="true" />Import image</Button>
              <Button type="button" variant="outline" disabled={!hasArtwork || importPending} onClick={exportSvg}><Download aria-hidden="true" />Export SVG</Button>
+             <Button type="button" variant="outline" disabled={!hasArtwork} onClick={copySvgCode}>
+               {copiedSvg ? <Check aria-hidden="true" className="size-4 text-teal-500" /> : <Copy aria-hidden="true" className="size-4" />}
+               {copiedSvg ? "Copied SVG" : "Copy SVG Code"}
+             </Button>
              <Button type="button" variant="outline" disabled={!uploadedSvg || importPending || optimizePending} aria-busy={optimizePending} onClick={optimizeArtwork}><Sparkles aria-hidden="true" />Optimize SVG</Button>
              {importPending ? <span className="text-xs text-fg-tertiary" role="status">Reading artwork...</span> : null}
              {hasArtwork && !uploadedSvg ? <span className="text-xs text-fg-tertiary">Drawn artwork is already minimal. Import an SVG or image to shrink it further.</span> : null}
