@@ -52,9 +52,7 @@ yarn-error.log*
 
 # Editors
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+.vscode/
 *.swp
 *.swo
 
