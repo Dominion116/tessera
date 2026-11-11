@@ -18,6 +18,8 @@ next-env.d.ts
 /dist
 
 # Environment. Never commit real values.
+.env
+.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -50,8 +52,7 @@ yarn-error.log*
 
 # Editors
 .idea/
-!.vscode/extensions.json
-!.vscode/settings.json
+.vscode/
 *.swp
 *.swo
 
@@ -80,4 +81,3 @@ contracts/lib/
 
 ROADMAP.md
 !/docs/ROADMAP.md
-config.bat
