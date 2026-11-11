@@ -275,6 +275,16 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Farcaster FID and Club Member Auto-Allowlist Resolver
+
+Added automated Farcaster identity and club channel resolution to the invitation list tooling on `/app/created/[id]`.
+
+- `lib/farcaster-resolver.ts`: token parsing for mixed Ethereum addresses, Farcaster usernames (`@handle` or ENS), and FIDs (`fid:123` or raw numeric strings). Normalizes channel keys.
+- `app/api/farcaster/resolve-allowlist/route.ts`: server-side route that resolves handles and channel followers to verified Ethereum addresses via Warpcast API with optional Neynar support, concurrency pooling, and request timeouts. Includes snapshot filtering by cutoff timestamp (`beforeTimestamp`) and option to include all verified addresses or primary address.
+- `lib/allowlist.ts`: updated `AllowlistEntry` and `buildAllowlist` to optionally attach Farcaster user metadata (username, FID, display name, source), and updated `allowlistCsv` to format rich CSV columns (`identifier,fid,address,claim_link`) when metadata exists, while preserving standard `address,claim_link` formatting when absent.
+- `components/dashboard/allowlist-builder.tsx`: updated with dual input modes: manual direct address entry and Farcaster/Club resolver mode. Features quick presets for Tessera Club (`/tessera`), NPC Nexus (`/npc`), Base (`/base`), custom channel inputs, snapshot cutoff selector, and resolved member list breakdown.
+- `tests/farcaster-resolver.test.ts`: test suite covering token parsing, channel sanitation, Merkle tree construction with user metadata, and CSV export formatting.
+
 ### Repository-wide rules audit and distribution tooling
 
 Audited the whole repository against the standing instructions in
