@@ -60,23 +60,48 @@ export function parseRecipientList(input: string): ParsedRecipients {
 export type AllowlistEntry = {
   address: Address;
   proof: Address[];
+  username?: string;
+  fid?: number;
+  displayName?: string;
+  source?: "verified" | "custody" | "direct";
 };
+
+export type AllowlistRecipientInput =
+  | Address
+  | {
+      address: Address;
+      username?: string;
+      fid?: number;
+      displayName?: string;
+      source?: "verified" | "custody" | "direct";
+    };
 
 export type Allowlist = {
   root: Address;
   entries: AllowlistEntry[];
 };
 
-/** Builds the root and a per-recipient proof from a finished address list. */
-export function buildAllowlist(addresses: Address[]): Allowlist {
-  if (addresses.length === 0) {
+/** Builds the root and a per-recipient proof from a finished address or recipient list. */
+export function buildAllowlist(items: AllowlistRecipientInput[]): Allowlist {
+  if (items.length === 0) {
     throw new Error("An invitation list needs at least one address.");
   }
 
-  const tree = SimpleMerkleTree.of(addresses.map(allowlistLeaf));
-  const entries = addresses.map((address) => {
-    const proof = tree.getProof(allowlistLeaf(address)) as Address[];
-    return { address, proof };
+  const normalized = items.map((item) =>
+    typeof item === "string" ? { address: item } : item
+  );
+
+  const tree = SimpleMerkleTree.of(normalized.map((n) => allowlistLeaf(n.address)));
+  const entries: AllowlistEntry[] = normalized.map((item) => {
+    const proof = tree.getProof(allowlistLeaf(item.address)) as Address[];
+    return {
+      address: item.address,
+      proof,
+      username: item.username,
+      fid: item.fid,
+      displayName: item.displayName,
+      source: item.source,
+    };
   });
 
   return { root: tree.root as Address, entries };
@@ -111,8 +136,24 @@ export function allowlistCsv(
   eventId: bigint,
   entries: AllowlistEntry[]
 ): string {
-  const rows = [["address", "claim_link"]].concat(
-    entries.map((entry) => [entry.address, allowlistClaimLink(origin, eventId, entry.proof)])
+  const hasMetadata = entries.some((entry) => entry.username || entry.fid);
+  const rows = (
+    hasMetadata
+      ? [["identifier", "fid", "address", "claim_link"]]
+      : [["address", "claim_link"]]
+  ).concat(
+    entries.map((entry) => {
+      const link = allowlistClaimLink(origin, eventId, entry.proof);
+      if (hasMetadata) {
+        return [
+          entry.username ? `@${entry.username}` : "",
+          entry.fid ? entry.fid.toString() : "",
+          entry.address,
+          link,
+        ];
+      }
+      return [entry.address, link];
+    })
   );
   return rows.map((row) => row.map(csvCell).join(",")).join("\n");
 }
