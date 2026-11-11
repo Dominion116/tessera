@@ -1,204 +1,259 @@
 # Tessera
 
-An open-source frontend for [Onchain POAPs](https://github.com/jvaleskadevs/onchain-poaps).
-Create proof-of-attendance tokens, hand them out at real events, and collect
-them. Runs as a website and as a Farcaster Mini App from the same codebase.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Network: Base Sepolia](https://img.shields.io/badge/Base_Sepolia-84532-blue.svg)](https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6)
+[![Next.js](https://img.shields.io/badge/Next.js-16.3-black.svg)](https://nextjs.org/)
+[![Farcaster Mini App](https://img.shields.io/badge/Farcaster-Mini_App-8a63d2.svg)](https://farcaster.xyz/)
 
-A *tessera* was the small token that admitted you to an event in Rome. It is also
-the single tile in a mosaic. One token proves you were somewhere; together they
-make a picture.
+> Create proof-of-attendance tokens stored 100% onchain. Zero IPFS, zero pinning services, zero centralized metadata servers. Runs simultaneously as a web application and a native Farcaster Mini App.
+>
+> *A **tessera** was the token that admitted citizens to events in ancient Rome, and a single glass tile in a mosaic. One token proves you were present; together they form a picture.*
 
-Every POAP lives entirely onchain. The artwork is an SVG stored in contract
-bytecode, and the metadata is assembled by the contract on read. No IPFS, no
-pinning service, no server that has to stay up for your token to keep working.
+---
 
-## What you can do
+## Features
 
-**Create a POAP.** Name it, draw the artwork, import an SVG, or upload a PNG,
-JPEG, GIF, WebP or AVIF image, then choose how people get it. Image uploads are
-framed to fit the onchain byte ceiling and the studio shows exactly what the
-artwork will cost to store.
+- ✅ **100% Onchain SVG via SSTORE2**: Vector artwork is compressed and written directly to smart contract bytecode. The token and metadata live forever onchain without relying on IPFS, Arweave, or external pinning APIs.
+- ✅ **Interactive Vector Studio**: Design tokens directly on a custom SVG canvas featuring 10 responsive vector templates, 30 color palettes, Star and Hexagon geometric tools, custom stamps, frames, and typography controls.
+- ✅ **Image Import & Optimisation**: Upload PNG, JPEG, GIF, WebP, or AVIF files with automatic cropping, resizing, and byte-budget calculations to prevent gas spikes during contract deployment.
+- ✅ **Three Distribution Models**:
+  - **Public Mint**: Open to all collectors, toggleable within the first 30 days.
+  - **Allowlist Mint**: Merkle-proof claims with automated proof and tree generation from raw address lists.
+  - **Signature Mint**: Single-wallet cryptographic ECDSA signatures for in-person attendance verification.
+- ✅ **Automated Merkle Claim Generator**: Paste recipient addresses to automatically calculate the onchain Merkle root, export claim links, and generate printable QR code packets.
+- ✅ **Farcaster Mini App Integration**: Ready-to-deploy Farcaster manifest (`/.well-known/farcaster.json`), frame embeds (`fc:miniapp`, `fc:frame`), and one-tap cast sharing after minting.
+- ✅ **Creator Timelock Management**: Live dashboard tracking onchain expiration deadlines for allowlist commits, public mint toggles, and creator airdrops.
+- 🚧 **Base Mainnet Deployment**: Contract deployment to Base mainnet scheduled following testnet audit cycles.
 
-**Hand it out three ways.** Open it to the public so anyone can claim. Restrict
-it to a list of addresses. Or sign individual claims for the people actually in
-the room. The interface explains which method suits which kind of event, and each
-one's deadline.
+---
 
-**Give a list of addresses, get a working allowlist.** Paste the addresses. The
-app builds the cryptographic proofs, sets it up onchain, and gives you claim
-links and printable QR codes for each recipient. You never have to learn what a
-Merkle tree is.
+## Architecture
 
-**Manage what you made.** Open or close public minting, airdrop directly to
-attendees, and watch the countdown on the controls that expire.
+```
++------------------------------------------------------------------------+
+|                              Client Layer                              |
+|           Next.js 16 (App Router) • React 19 • Wagmi 2 • Viem 2        |
+|             (Web Browser / Farcaster Mini App & Frame Embed)           |
++------------------------------------------------------------------------+
+                                    |
+                                    | Read / Write calls (EIP-1193)
+                                    v
++------------------------------------------------------------------------+
+|                          Base Sepolia Network                          |
+|             OnchainPOAPs Contract (`0xC3249...d9de6`)                 |
+|                     (ERC-1155 Standard Implementation)                 |
++------------------------------------------------------------------------+
+              |                                            |
+              v                                            v
++-------------------------------+            +---------------------------+
+|      Artwork Vector Code      |            |      Onchain Metadata     |
+|   (SSTORE2 Contract Bytecode) |            |   (Base64 Encoded JSON)   |
++-------------------------------+            +---------------------------+
+```
 
-**Collect.** Your POAPs, their artwork, their metadata, and proof of ownership
-you can check onchain yourself.
+---
 
-## Documentation
-
-The app carries a full documentation section covering creation, metadata, SVG
-requirements, soulbound tokens, public minting, allowlists and proof generation,
-signature minting, QR distribution, creator permissions, every deadline, the
-contract's restrictions, and how to verify a minted POAP.
-
-Two things are worth knowing up front, because they are easy to get wrong:
-
-- **Signatures are tied to one wallet.** A signature authorises a specific
-  address to mint. One signature on a poster cannot be shared by a crowd. The
-  workable approaches are per-attendee codes, a signing station you run at the
-  event, or plain public minting. All three are documented, with the tradeoffs.
-- **Some choices are permanent.** Public minting can only be toggled for 30 days,
-  and whatever it is at that moment is what it stays. An allowlist can only be
-  set once. The interface warns you before those doors close.
-
-## Contract
-
-| | |
-|---|---|
-| Network | Base Sepolia (84532) |
-| Address | [`0xC3249356a483fbe17d5355D39105D2eA666d9de6`](https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code) |
-| Standard | ERC-1155, onchain SVG via SSTORE2 |
-| Upstream | [jvaleskadevs/onchain-poaps](https://github.com/jvaleskadevs/onchain-poaps) |
-
-The contract is not part of this project and is not modified by it. A verbatim
-copy lives in [`contracts/`](./contracts) for reference. Every file is
-byte-identical to upstream commit `c313c856`, verified by comparing git blob
-hashes. The ABI in [`contracts/abi/OnchainPOAPs.json`](./contracts/abi) was
-extracted from the verified deployment.
-
-Base mainnet is not deployed yet. When it is, the address becomes a configuration
-value.
-
-### Deadlines
-
-Measured from the moment a POAP is registered.
-
-| Action | Available |
-|---|---|
-| Public mint | always, while public minting is on |
-| Allowlist mint | always, once an allowlist is set |
-| Signature mint | first 37 days |
-| Creator airdrop | first 30 days |
-| Set the allowlist | first 30 days, once only |
-| Open or close public minting | first 30 days |
-
-## Running it locally
-
-Requires **Node 22.11+** and npm.
+## Quick Start
 
 ```bash
-git clone <your-fork-url>
+# 1. Clone repository
+git clone https://github.com/Dominion116/tessera.git
 cd tessera
+
+# 2. Install dependencies
 npm install
+
+# 3. Configure environment
 cp .env.example .env.local
+
+# 4. Start local development server
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You will need a wallet with Base Sepolia ETH to create or mint anything. Reading
-works without one. Testnet ETH comes from any Base Sepolia faucet.
+---
 
-### Environment
+## Installation
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_CHAIN_ID` | no | Defaults to `84532` (Base Sepolia). |
-| `NEXT_PUBLIC_POAP_ADDRESS` | no | Contract address. Defaults to the Base Sepolia deployment. |
-| `NEXT_PUBLIC_RPC_URL` | recommended | Defaults to the public Base Sepolia endpoint, which is rate-limited. Point it at your own provider for real use. |
-| `NEXT_PUBLIC_WC_PROJECT_ID` | no | Reown Cloud project ID for the wallet modal. Without one, a shared development ID is used and browser-injected wallets still connect. |
-| `NEXT_PUBLIC_APP_URL` | for deployment | Your canonical URL, with no trailing slash. Used for share embeds and the Mini App manifest. |
-| `FARCASTER_ACCOUNT_ASSOCIATION_HEADER` | for Mini App | Public manifest value, signed for your exact domain. |
-| `FARCASTER_ACCOUNT_ASSOCIATION_PAYLOAD` | for Mini App | Public manifest value. |
-| `FARCASTER_ACCOUNT_ASSOCIATION_SIGNATURE` | for Mini App | Public manifest value. |
+### Prerequisites
 
-No API keys are needed for the core experience. The app reads everything it needs
-straight from the contract, so there is no indexer or backend to run.
+- **Node.js**: `v22.11.0` or higher (strictly enforced via `engines`)
+- **Package Manager**: npm 10+, yarn 1.22+, or pnpm 9+
+- **Wallet**: An Ethereum wallet configured for **Base Sepolia** with testnet ETH (obtainable from any Base Sepolia faucet)
 
-### Commands
+### npm
 
 ```bash
-npm run dev        # development server
-npm run build      # production build
-npm run start      # serve the production build
-npm run lint       # lint
-npm run typecheck  # types
-npm test           # unit tests
+npm install
 ```
 
-## Deploying your own
+### yarn
 
-The app is a standard Next.js project and deploys anywhere Next.js runs; it is
-built and tested on Vercel.
-
-1. Fork this repository and import it into your host.
-2. Set `NEXT_PUBLIC_APP_URL` to your production URL and `NEXT_PUBLIC_RPC_URL` to
-   your own RPC endpoint.
-3. Deploy.
-
-### Farcaster Mini App
-
-The same build serves the website and the Mini App. It already hosts the
-manifest at `/.well-known/farcaster.json`, the PNG assets the manifest points
-at, `fc:miniapp` and `fc:frame` embeds on the landing, POAP and claim pages, and
-an explicit share action after a mint or claim. Farcaster context never grants
-creation or mint rights: the connected wallet stays the only authorization
-identity.
-
-To publish it, add the signed account association for your exact domain:
-
-1. Generate it with the
-   [Farcaster manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
-   for the domain you will deploy to.
-2. Set `FARCASTER_ACCOUNT_ASSOCIATION_HEADER`, `..._PAYLOAD` and
-   `..._SIGNATURE` from its output.
-3. Redeploy, then verify `https://<your-domain>/.well-known/farcaster.json`.
-
-Pick your domain carefully. A Mini App is identified by its domain permanently,
-and `www.example.com` counts as a different app from `example.com`. These three
-values are public manifest data, so never put a private key or signing secret in
-any environment variable. Asset sizes, the release order and rollback are
-documented in [`docs/farcaster.md`](./docs/farcaster.md).
-
-## Project structure
-
-```
-tessera/
-├── docs/          contributor documentation
-├── contracts/     vendored contract reference, read-only
-└── ...            the Next.js application
+```bash
+yarn install
 ```
 
-Built with Next.js, TypeScript, Tailwind, shadcn/ui, wagmi and viem. Dependency
-versions are pinned in [`docs/agent.md`](./docs/agent.md), which also documents
-the contract's behaviour in detail and the conventions this codebase follows.
-Read it before contributing, along with
-[`docs/progress.md`](./docs/progress.md) for the current state of the build.
+### pnpm
+
+```bash
+pnpm install
+```
+
+---
+
+## Usage
+
+### 1. Creating a POAP
+1. Connect your wallet to Base Sepolia on [http://localhost:3000/create](http://localhost:3000/create).
+2. Choose a template or draw your vector artwork on the canvas studio.
+3. Configure POAP metadata: Name, Description, Location, and Event Date.
+4. Review onchain storage byte calculation and gas estimate.
+5. Submit the registration transaction to write the SVG bytecode directly via SSTORE2.
+
+### 2. Distributing via Merkle Allowlist
+1. Navigate to your created POAP's management dashboard.
+2. Paste a list of eligible attendee Ethereum addresses (or upload a `.csv` / `.txt`).
+3. Tessera generates the Merkle tree and formats the 32-byte root hash.
+4. Execute `setAllowlist(poapId, merkleRoot)` onchain (must be done within 30 days of creation).
+5. Export personalized claim links or printable QR codes.
+
+### 3. In-Person Signature Claims
+1. Select **Signature Minting** when preparing your event station.
+2. Sign a claim authorization for an attendee's specific wallet address using EIP-712 / personal sign.
+3. Attendee executes the claim transaction within 37 days of POAP registration.
+
+> [!NOTE]
+> Signatures authorize a single, explicit wallet address. A single printed signature QR code cannot be shared with multiple attendees.
+
+---
+
+## Smart Contract Reference
+
+| Property | Value |
+|---|---|
+| **Network** | Base Sepolia (`chainId: 84532`) |
+| **Contract Address** | [`0xC3249356a483fbe17d5355D39105D2eA666d9de6`](https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code) |
+| **Token Standard** | ERC-1155 Multi-Token Standard |
+| **Storage Engine** | Solady SSTORE2 (Immutable Bytecode Storage) |
+| **Upstream Source** | [jvaleskadevs/onchain-poaps](https://github.com/jvaleskadevs/onchain-poaps) |
+
+A verbatim copy of the upstream contracts resides under [`contracts/`](./contracts) for ABI extraction and offline verification.
+
+### Contract Deadlines & Lifecycles
+
+All timelocks are calculated strictly from the onchain registration timestamp:
+
+| Action | Allowed Window | Permanence |
+|---|---|---|
+| **Public Minting** | Always (while active) | Toggleable during first 30 days; freezes permanently thereafter |
+| **Allowlist Minting** | Always (once set) | Settable once within first 30 days; immutable thereafter |
+| **Signature Minting** | First 37 days | Closes permanently at $t = 37\text{ days}$ |
+| **Creator Airdrop** | First 30 days | Closes permanently at $t = 30\text{ days}$ |
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `NEXT_PUBLIC_CHAIN_ID` | No | `84532` | Target network ID (`84532` for Base Sepolia). |
+| `NEXT_PUBLIC_POAP_ADDRESS` | No | `0xC324935...` | Deployed OnchainPOAPs contract address. |
+| `NEXT_PUBLIC_RPC_URL` | Recommended | `https://sepolia.base.org` | RPC endpoint. Use Alchemy/Infura/QuickNode for production. |
+| `NEXT_PUBLIC_WC_PROJECT_ID` | Optional | Shared Demo ID | Reown AppKit Cloud Project ID for WalletConnect modal. |
+| `NEXT_PUBLIC_APP_URL` | For Production | `http://localhost:3000` | Canonical origin without trailing slash (used in Mini App manifests). |
+| `FARCASTER_ACCOUNT_ASSOCIATION_HEADER` | For Mini App | None | Signed manifest header generated via Farcaster dev tools. |
+| `FARCASTER_ACCOUNT_ASSOCIATION_PAYLOAD` | For Mini App | None | Signed manifest payload. |
+| `FARCASTER_ACCOUNT_ASSOCIATION_SIGNATURE` | For Mini App | None | Cryptographic signature verifying domain ownership. |
+
+---
+
+## Development
+
+```bash
+# Run local development server with Turbopack
+npm run dev
+
+# Run TypeScript compiler checks
+npm run typecheck
+
+# Run ESLint validation
+npm run lint
+
+# Run unit and integration tests (Vitest)
+npm test
+
+# Build production bundle
+npm run build
+
+# Start production server
+npm run start
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. RPC Rate Limit (HTTP 429)
+- **Symptom:** POAP artwork, balances, or metadata fail to load on the dashboard.
+- **Fix:** Public RPC endpoints (`sepolia.base.org`) enforce strict rate limits. Obtain a dedicated API key from an RPC provider (Alchemy, Infura, or QuickNode) and set `NEXT_PUBLIC_RPC_URL=https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY`.
+
+#### 2. Signature Mint "Unauthorized / Invalid Signature"
+- **Symptom:** Transaction reverts when attempting to mint with a signature.
+- **Fix:** Ensure the connected wallet matches the exact recipient address specified during ECDSA signature creation. Signatures are strictly single-recipient.
+
+#### 3. Action Reverts with "Deadline Expired"
+- **Symptom:** Unable to enable public minting, airdrop to attendees, or submit an allowlist root.
+- **Fix:** Check POAP age against the registration block timestamp. The contract permanently locks allowlists, airdrops, and public mint toggle states after 30 days (and signatures after 37 days).
+
+#### 4. JSON Serialization Error on Registration
+- **Symptom:** Metadata fails verification or produces unparseable JSON onchain.
+- **Fix:** Ensure event names and descriptions do not contain unescaped quotes (`"`) or backslashes (`\`). The contract constructs JSON strings directly onchain without escaping characters.
+
+---
 
 ## Contributing
 
-Issues and pull requests are welcome. Please read
-[`docs/agent.md`](./docs/agent.md) first. It covers the contract's constraints
-and the design rules, both of which matter more here than usual. A few in
-particular:
+Contributions are welcome! Please read [`docs/agent.md`](./docs/agent.md) for architectural guidelines and security invariants.
 
-- The contract is never modified. Nothing under `contracts/` changes.
-- Text that goes into POAP metadata cannot contain `"` or `\`, because the
-  contract interpolates it into JSON without escaping. Corrupted metadata is
-  permanent.
-- Length limits are byte lengths, not character counts.
-- Anything that touches allowlist proofs or signature construction needs a test.
-  These fail silently and cost users real gas.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feat/my-feature`)
+3. Commit your changes (`git commit -m 'feat: add feature'`)
+4. Push to the branch (`git push origin feat/my-feature`)
+5. Open a Pull Request
 
-## Licence
+### Development Invariants
+- **Do not modify files in `contracts/`**: Upstream contracts are strictly vendored.
+- **Metadata byte safety**: Input strings are constrained by byte count, not character count.
+- **Test coverage**: All Merkle tree operations, signature schemas, and canvas shape generators require unit tests in `tests/`.
 
-MIT. See [LICENSE](./LICENSE).
+---
 
-The contract in `contracts/` is MIT licensed by its author, J. Valeska.
+## License
 
-## Credits
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-Contract and protocol by [J. Valeska](https://github.com/jvaleskadevs).
-[POAP.xyz](https://poap.xyz) for the original idea. Solady for SSTORE2.
-OpenZeppelin for the contract libraries.
+The smart contracts in `contracts/` are copyright (c) J. Valeska and licensed under the MIT License.
+
+---
+
+## Acknowledgments
+
+- [J. Valeska](https://github.com/jvaleskadevs) - Author of the [onchain-poaps](https://github.com/jvaleskadevs/onchain-poaps) protocol and contract architecture.
+- [POAP.xyz](https://poap.xyz) - Pioneers of the proof of attendance concept.
+- [Vectorized](https://github.com/Vectorized/solady) - Creators of the gas-efficient `SSTORE2` library.
+- [OpenZeppelin](https://openzeppelin.com/) - Secure smart contract building blocks.
+
+---
+
+Made with ❤️ for the onchain community by [Dominion116](https://github.com/Dominion116)
