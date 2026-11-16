@@ -99,6 +99,17 @@ const AllowlistBuilder = ({ event }: { event: PoapEvent }) => {
       ? built.root.toLowerCase() === event.allowlistRoot.toLowerCase()
       : null;
 
+  const syncAllowlist = (list: Allowlist) => {
+    fetch(`/api/poaps/${event.eventId.toString()}/allowlist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        root: list.root,
+        entries: list.entries,
+      }),
+    }).catch(() => {});
+  };
+
   const buildFromManual = () => {
     setBuildError(null);
     const next = parseRecipientList(input);
@@ -109,7 +120,9 @@ const AllowlistBuilder = ({ event }: { event: PoapEvent }) => {
       return;
     }
     try {
-      setBuilt(buildAllowlist(next.addresses));
+      const b = buildAllowlist(next.addresses);
+      setBuilt(b);
+      syncAllowlist(b);
     } catch {
       setBuilt(null);
       setBuildError("The invitation list could not be built from that input.");
@@ -162,7 +175,9 @@ const AllowlistBuilder = ({ event }: { event: PoapEvent }) => {
         source: item.source,
       }));
 
-      setBuilt(buildAllowlist(inputs));
+      const b = buildAllowlist(inputs);
+      setBuilt(b);
+      syncAllowlist(b);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error resolving members";
       setResolveError(msg);
