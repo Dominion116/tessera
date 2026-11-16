@@ -98,18 +98,21 @@ async function fetchUserFromWarpcast(
 
 async function fetchChannelFollowers(
   channelId: string
-): Promise<{ fid: number; followedAt: number }[]> {
+): Promise<{ followers: { fid: number; followedAt: number }[]; error?: string }> {
   try {
     const res = await fetchWithTimeout(
       `https://api.warpcast.com/v1/channel-followers?channelId=${encodeURIComponent(
         channelId
       )}`
     );
-    if (!res.ok) return [];
-    const data = (await res.json()) as WarpcastFollowersResponse;
-    return data.result?.users || [];
+    const data = (await res.json().catch(() => ({}))) as WarpcastFollowersResponse;
+    if (!res.ok || (data.errors && data.errors.length > 0)) {
+      const msg = data.errors?.[0]?.message || `Channel "${channelId}" not found on Farcaster`;
+      return { followers: [], error: msg };
+    }
+    return { followers: data.result?.users || [] };
   } catch {
-    return [];
+    return { followers: [], error: "Network timeout querying channel" };
   }
 }
 
@@ -155,9 +158,21 @@ export async function POST(req: NextRequest) {
     const usernamesToResolve = new Set<string>(usernames);
     const followerTimestamps = new Map<number, number>();
 
+    const resolved: ResolvedRecipient[] = [];
+    const unresolved: { identifier: string; reason: string }[] = [];
+    const seenAddresses = new Set<string>();
+    const finalAddresses: Address[] = [];
+    let duplicatesCount = 0;
+
     if (channelId && channelId.trim()) {
       const cleanChannel = sanitizeChannelId(channelId);
-      const followers = await fetchChannelFollowers(cleanChannel);
+      const { followers, error: channelErr } = await fetchChannelFollowers(cleanChannel);
+      if (channelErr) {
+        unresolved.push({
+          identifier: `/${cleanChannel}`,
+          reason: channelErr,
+        });
+      }
       for (const follower of followers) {
         if (
           beforeTimestamp !== undefined &&
@@ -170,12 +185,6 @@ export async function POST(req: NextRequest) {
         followerTimestamps.set(follower.fid, follower.followedAt);
       }
     }
-
-    const resolved: ResolvedRecipient[] = [];
-    const unresolved: { identifier: string; reason: string }[] = [];
-    const seenAddresses = new Set<string>();
-    const finalAddresses: Address[] = [];
-    let duplicatesCount = 0;
 
     for (const addr of directAddresses) {
       const lower = addr.toLowerCase();

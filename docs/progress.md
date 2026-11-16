@@ -275,6 +275,13 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Farcaster Channel Error Diagnostics and Preset Cleanup
+
+Improved feedback when querying channel followers and refined dashboard presets.
+
+- `app/api/farcaster/resolve-allowlist/route.ts`: added error reporting for non-existent or rate-limited channels so failures surface explicitly in the unresolved list rather than returning an empty follower array.
+- `components/dashboard/allowlist-builder.tsx`: updated error messaging to guide creators when no addresses are resolved, and removed the unused `/tessera` channel preset in favor of active ecosystem channels (`/npc`, `/base`) and direct handle input.
+
 ### Serverless Cast Action and In-Feed Auto-Proof Claiming
 
 Added serverless endpoints and client-side proof resolution to enable direct 1-tap claiming from Farcaster casts and cast actions.
