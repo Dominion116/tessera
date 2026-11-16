@@ -48,7 +48,6 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;");
 
 const PRESET_CHANNELS = [
-  { id: "tessera", label: "Tessera Club", hint: "/tessera" },
   { id: "npc", label: "NPC Nexus", hint: "/npc" },
   { id: "base", label: "Base", hint: "/base" },
 ];
@@ -163,7 +162,11 @@ const AllowlistBuilder = ({ event }: { event: PoapEvent }) => {
       setUnresolvedItems(data.unresolved);
 
       if (data.addresses.length === 0) {
-        setResolveError("No valid verified addresses were found for the requested members.");
+        const detail =
+          data.unresolved && data.unresolved.length > 0
+            ? `: ${data.unresolved.map((u) => `${u.identifier} (${u.reason})`).join(", ")}`
+            : ". Enter attendee Farcaster handles (@username) or use an active channel key like npc.";
+        setResolveError(`No valid verified addresses were found${detail}`);
         return;
       }
 
