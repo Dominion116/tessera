@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="tessera-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0d1f22" />
+      <stop offset="65%" stop-color="#050b0d" />
+      <stop offset="100%" stop-color="#010304" />
+    </radialGradient>
+
+    <!-- Neon Teal Gradients -->
+    <linearGradient id="teal-neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5eead4" />
+      <stop offset="50%" stop-color="#14b8a6" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+
+    <linearGradient id="cyan-neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+
+    <linearGradient id="tile-grad-a" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2dd4bf" />
+      <stop offset="100%" stop-color="#0d9488" />
+    </linearGradient>
+
+    <linearGradient id="tile-grad-b" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#0e7490" />
+    </linearGradient>
+
+    <linearGradient id="gold-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#a16207" />
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glow-heavy" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="glow-subtle" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Mosaic Tessera Grid Pattern -->
+    <pattern id="mosaic-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#134e4a" stroke-width="0.75" stroke-opacity="0.35" />
+    </pattern>
+
+    <!-- Circular Text Paths -->
+    <path id="top-arc" d="M 76,256 A 180,180 0 0,1 436,256" fill="none" />
+    <path id="bottom-arc" d="M 436,256 A 180,180 0 0,1 76,256" fill="none" />
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="512" height="512" fill="url(#tessera-bg)" />
+  <circle cx="256" cy="256" r="250" fill="url(#mosaic-grid)" />
+
+  <!-- Outer Medallion Bevel Rings -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="#134e4a" stroke-width="1.5" stroke-opacity="0.6" />
+  <circle cx="256" cy="256" r="228" fill="none" stroke="url(#teal-neon)" stroke-width="2" filter="url(#glow-subtle)" />
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#042f2e" stroke-width="6" />
+  <circle cx="256" cy="256" r="216" fill="none" stroke="url(#cyan-neon)" stroke-width="1" stroke-dasharray="4 6" opacity="0.8" />
+
+  <!-- Decorative Astrolabe Notches -->
+  <g stroke="url(#teal-neon)" stroke-width="2" opacity="0.7" stroke-linecap="round">
+    <line x1="256" y1="22" x2="256" y2="34" />
+    <line x1="256" y1="478" x2="256" y2="490" />
+    <line x1="22" y1="256" x2="34" y2="256" />
+    <line x1="478" y1="256" x2="490" y2="256" />
+    <line x1="90" y1="90" x2="100" y2="100" />
+    <line x1="422" y1="90" x2="412" y2="100" />
+    <line x1="90" y1="422" x2="100" y2="412" />
+    <line x1="422" y1="422" x2="412" y2="412" />
+  </g>
+
+  <!-- Inner Textured Band -->
+  <circle cx="256" cy="256" r="190" fill="#041517" stroke="#115e59" stroke-width="1.5" />
+
+  <!-- Rim Arc Typography: TESSERA CLUB & NPC SEASON ONE -->
+  <text fill="#5eead4" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="800" letter-spacing="0.22em" filter="url(#glow-subtle)">
+    <textPath href="#top-arc" startOffset="50%" text-anchor="middle">
+      TESSERA CLUB
+    </textPath>
+  </text>
+
+  <text fill="#38bdf8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="700" letter-spacing="0.26em" filter="url(#glow-subtle)">
+    <textPath href="#bottom-arc" startOffset="50%" text-anchor="middle">
+      • NPC SEASON ONE •
+    </textPath>
+  </text>
+
+  <!-- Inner Neon Ring Border -->
+  <circle cx="256" cy="256" r="148" fill="none" stroke="url(#teal-neon)" stroke-width="2.5" filter="url(#glow-heavy)" />
+  <circle cx="256" cy="256" r="142" fill="#02080a" stroke="#134e4a" stroke-width="1" />
+
+  <!-- Centerpiece: Roman Mosaic 4-Tile Emblem (Tessera Quad-Tile Mark) -->
+  <g transform="translate(256, 256)">
+    <!-- Backing Glow Flare -->
+    <circle cx="0" cy="0" r="85" fill="#14b8a6" opacity="0.12" filter="url(#glow-heavy)" />
+
+    <!-- Tile 1: Top Right (Teal Gradient) -->
+    <polygon points="6,-6 65,-28 82,-78 28,-65" fill="url(#tile-grad-a)" stroke="#5eead4" stroke-width="1.5" filter="url(#glow-subtle)" />
+
+    <!-- Tile 2: Bottom Right (Cyan Gradient) -->
+    <polygon points="6,6 28,65 78,82 65,28" fill="url(#tile-grad-b)" stroke="#38bdf8" stroke-width="1.5" filter="url(#glow-subtle)" />
+
+    <!-- Tile 3: Bottom Left (Teal Gradient) -->
+    <polygon points="-6,6 -65,28 -82,78 -28,65" fill="url(#tile-grad-a)" stroke="#5eead4" stroke-width="1.5" filter="url(#glow-subtle)" />
+
+    <!-- Tile 4: Top Left (Cyan Gradient) -->
+    <polygon points="-6,-6 -28,-65 -78,-82 -65,-28" fill="url(#tile-grad-b)" stroke="#38bdf8" stroke-width="1.5" filter="url(#glow-subtle)" />
+
+    <!-- Central Diamond Gem Core -->
+    <polygon points="0,-16 16,0 0,16 -16,0" fill="#ccfbf1" stroke="#5eead4" stroke-width="2" filter="url(#glow-heavy)" />
+    <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
+
+    <!-- Corner Constellation Pips -->
+    <circle cx="0" cy="-115" r="3" fill="#5eead4" filter="url(#glow-subtle)" />
+    <circle cx="115" cy="0" r="3" fill="#38bdf8" filter="url(#glow-subtle)" />
+    <circle cx="0" cy="115" r="3" fill="#5eead4" filter="url(#glow-subtle)" />
+    <circle cx="-115" cy="0" r="3" fill="#38bdf8" filter="url(#glow-subtle)" />
+  </g>
+
+  <!-- Bottom Arch Pill: ONCHAIN ATTENDANCE -->
+  <g transform="translate(256, 362)">
+    <rect x="-95" y="-12" width="190" height="24" rx="12" fill="#042f2e" stroke="url(#teal-neon)" stroke-width="1" />
+    <text x="0" y="4.5" text-anchor="middle" fill="#a7f3d0" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="0.16em">
+      ONCHAIN ATTENDANCE
+    </text>
+  </g>
+
+  <!-- Base Sepolia Tag -->
+  <text x="256" y="440" text-anchor="middle" fill="#64748b" font-family="ui-monospace, monospace" font-size="9" font-weight="600" letter-spacing="0.2em">
+    BASE SEPOLIA • SSTORE2
+  </text>
+</svg>
