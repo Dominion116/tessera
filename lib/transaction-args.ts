@@ -30,6 +30,8 @@ export function mintArgs(eventId: bigint): readonly [bigint] {
   return [eventId];
 }
 
+export const publicMintArgs = mintArgs;
+
 export function allowlistMintArgs(eventId: bigint, proof: readonly `0x${string}`[]): readonly [bigint, readonly `0x${string}`[]] {
   return [eventId, proof];
 }
