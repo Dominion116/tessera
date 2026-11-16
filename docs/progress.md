@@ -275,6 +275,17 @@ composes the page. The block's own `index.tsx` keeps rendering the hero alone so
 
 ## Log
 
+### Serverless Cast Action and In-Feed Auto-Proof Claiming
+
+Added serverless endpoints and client-side proof resolution to enable direct 1-tap claiming from Farcaster casts and cast actions.
+
+- `app/api/poaps/[id]/allowlist/route.ts`: serverless route to store and retrieve event allowlist mappings and proofs.
+- `app/api/poaps/[id]/proof/route.ts`: serverless route returning the cryptographic Merkle proof for any connected address in the allowlist snapshot.
+- `app/api/cast-actions/claim/route.ts`: Farcaster Cast Action manifest (GET) and invocation handler (POST) opening the Mini App claim flow directly inside Warpcast.
+- `components/explore/claim-page.tsx`: updated to automatically query the proof endpoint when a user connects their wallet from a generic cast link without URL proof parameters. Supports auto-resolution and public mint fallback.
+- `components/dashboard/allowlist-builder.tsx`: auto-syncs generated allowlist snapshots to the serverless allowlist endpoint upon list creation.
+- `public/tessera-club-badge.svg` and `public/tessera-club-badge.jpg`: added production-ready vector badge and high-resolution medallion artwork for Tessera Club.
+
 ### Farcaster FID and Club Member Auto-Allowlist Resolver
 
 Added automated Farcaster identity and club channel resolution to the invitation list tooling on `/app/created/[id]`.
